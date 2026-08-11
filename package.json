@@ -1,13 +1,15 @@
 {
-  "name": "moore-foundation-tests",
+  "name": "moore-tests",
   "version": "0.0.0",
   "private": true,
-  "description": "Seam-2 verification harness for SC-foundation@1.0.0 (ticket #19)",
+  "description": "Seam-2 verification harness for Moore contracts (#19 foundation, #20 exercises, #21 routines)",
   "type": "module",
   "scripts": {
-    "verify:migrations": "node Tests/MooreFoundationTests/VerifyMigrations.mjs"
+    "verify:migrations": "node Tests/MooreFoundationTests/VerifyMigrations.mjs",
+    "verify:exercises": "node Tests/MooreExercisesTests/VerifyExerciseLibrary.mjs",
+    "verify:routines": "node Tests/MooreRoutinesTests/VerifyRoutines.mjs"
   },
   "dependencies": {
-    "better-sqlite3": "^11.0.0"
+    "better-sqlite3": "^12.6.2"
   }
 }
