@@ -1,0 +1,8 @@
+{
+  "name": "moore-exercises",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "better-sqlite3": "^12.6.2"
+  }
+}

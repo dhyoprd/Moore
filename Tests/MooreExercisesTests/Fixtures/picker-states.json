@@ -1,0 +1,42 @@
+{
+  "fixture": "picker-states",
+  "contract": "SC-exercises@1.0.0",
+  "cites": ["INV-P1", "INV-P2", "BR-010", "V6"],
+  "cases": [
+    {
+      "id": "V6-empty-library",
+      "library": [],
+      "query": "press",
+      "expectedState": "noResults",
+      "expectedCopyKeys": ["picker.noMatches", "picker.createCustom"]
+    },
+    {
+      "id": "no-substring-match",
+      "library": [
+        { "id": "squat", "name": "Squat", "category": "quads", "defaultMetric": "reps", "equipment": "barbell" }
+      ],
+      "query": "zzz",
+      "expectedState": "noResults",
+      "expectedCopyKeys": ["picker.noMatches", "picker.createCustom"]
+    },
+    {
+      "id": "whitespace-query-is-idle",
+      "library": [
+        { "id": "squat", "name": "Squat", "category": "quads", "defaultMetric": "reps", "equipment": "barbell" }
+      ],
+      "query": "   ",
+      "expectedState": "idle"
+    },
+    {
+      "id": "excludeIds-filter",
+      "library": [
+        { "id": "squat", "name": "Squat", "category": "quads", "defaultMetric": "reps", "equipment": "barbell" },
+        { "id": "deadlift", "name": "Deadlift", "category": "back", "defaultMetric": "reps", "equipment": "barbell" }
+      ],
+      "query": "squat",
+      "excludeIds": ["squat"],
+      "expectedState": "noResults",
+      "note": "After exclusion the result set is empty -> noResults, NOT idle"
+    }
+  ]
+}

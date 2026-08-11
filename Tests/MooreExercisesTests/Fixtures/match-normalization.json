@@ -1,0 +1,64 @@
+{
+  "fixture": "match-normalization",
+  "contract": "SC-exercises@1.0.0",
+  "cites": ["BR-001", "BR-003", "V1"],
+  "library": [
+    { "id": "barbell-bench-press", "name": "Barbell Bench Press" },
+    { "id": "squat",               "name": "Squat" },
+    { "id": "custom-tibialis-raise", "name": "Tibialis Raise", "isCustom": true },
+    { "id": "face-pull",           "name": "Face Pull" },
+    { "id": "french-press",        "name": "French Press" },
+    { "id": "close-grip-bench-press", "name": "Close-Grip Bench Press" }
+  ],
+  "cases": [
+    {
+      "id": "V1-exact-with-caps",
+      "query": "Barbell Bench Press",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIds": ["barbell-bench-press"]
+    },
+    {
+      "id": "V1-exact-lowercase",
+      "query": "barbell bench press",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIds": ["barbell-bench-press"]
+    },
+    {
+      "id": "V1-leading-trailing-whitespace",
+      "query": "  barbell bench press  ",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIds": ["barbell-bench-press"]
+    },
+    {
+      "id": "V1-interior-whitespace-runs",
+      "query": "barbell    bench   press",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIds": ["barbell-bench-press"]
+    },
+    {
+      "id": "V1-mixed-case-and-whitespace",
+      "query": "  BaRbElL   BeNcH   PrEsS ",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIds": ["barbell-bench-press"]
+    },
+    {
+      "id": "V3-substring",
+      "query": "bench",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIdsContains": ["barbell-bench-press", "close-grip-bench-press"]
+    },
+    {
+      "id": "V3-substring-partial",
+      "query": "pre",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIdsContains": ["french-press", "barbell-bench-press", "close-grip-bench-press"],
+      "note": "Sort: built-ins first (not custom), then alphabetical. 'Barbell Bench Press' < 'French Press'."
+    },
+    {
+      "id": "V10-empty-query-browse-sort",
+      "query": "",
+      "expectedTopHitFirstBuiltin": "barbell-bench-press",
+      "expectedMatchIdsContains": ["barbell-bench-press", "squat", "custom-tibialis-raise", "face-pull", "french-press", "close-grip-bench-press"]
+    }
+  ]
+}
