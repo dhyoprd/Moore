@@ -1,0 +1,46 @@
+{
+  "label": "V1–V5 — routine create / edit / duplicate / delete flows with expected states",
+  "create": {
+    "name": "Push Day A",
+    "folderId": null,
+    "sets": [
+      { "exerciseId": "ex-bench", "plannedWeight": 80.0, "plannedReps": 8, "plannedDuration": null, "setClass": "work" },
+      { "exerciseId": "ex-bench", "plannedWeight": 80.0, "plannedReps": 8, "plannedDuration": null, "setClass": "work" },
+      { "exerciseId": "ex-ohp",   "plannedWeight": 50.0, "plannedReps": 10, "plannedDuration": null, "setClass": "work" }
+    ],
+    "expected": {
+      "setCount": 3,
+      "exerciseCount": 2,
+      "startEnabled": true,
+      "lifecycle": "draft"
+    }
+  },
+  "edit": {
+    "reorderSets": true,
+    "addExercise": "ex-dip",
+    "changedPlannedWeight": { "setIndex": 0, "plannedWeight": 82.5 },
+    "expected": {
+      "exerciseCount": 3,
+      "firstSetPlannedWeight": 82.5,
+      "nameUnchanged": true,
+      "createdAtIntact": true
+    }
+  },
+  "duplicate": {
+    "expectedNamePrefix": "Copy of ",
+    "expectedNamePrefixOf": "Push Day A",
+    "expectedLifecycle": "draft",
+    "expectedSetCount": 4,
+    "expectedFolderIdCopied": true,
+    "idMustDiffer": true,
+    "setIdsMustDiffer": true
+  },
+  "delete": {
+    "confirmFirst": true,
+    "expectedAfter": {
+      "absentFromRoutines": true,
+      "presentIncludingTombstoned": true,
+      "deletedAtSet": true
+    }
+  }
+}
