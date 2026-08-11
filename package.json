@@ -1,0 +1,13 @@
+{
+  "name": "moore-foundation-tests",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Seam-2 verification harness for SC-foundation@1.0.0 (ticket #19)",
+  "type": "module",
+  "scripts": {
+    "verify:migrations": "node Tests/MooreFoundationTests/VerifyMigrations.mjs"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0"
+  }
+}

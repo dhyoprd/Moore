@@ -1,0 +1,13 @@
+{
+  "vector": 1,
+  "label": "fresh migrations + round-trip Folder + tombstone fetch (V1, V2, V3, V14)",
+  "entities": {
+    "Folder": {
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Push Days",
+      "createdAt": "2026-08-11T10:00:00Z",
+      "updatedAt": "2026-08-11T10:00:00Z",
+      "deletedAt": null
+    }
+  }
+}
