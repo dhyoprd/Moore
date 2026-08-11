@@ -1,0 +1,32 @@
+{
+  "fixture": "duration-clamp",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "BR-001 + INV-S3 (resolution clamps to [0, 600]; storage untouched)",
+  "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+  "vectors": [
+    {
+      "id": "V14",
+      "name": "a per-set override above the clamp resolves clamped, storage untouched",
+      "cite": "BR-001, INV-S3",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": 900, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "resolution": { "durationSec": 600, "source": "perSet" },
+                      "state": "restRunning", "durationSec": 600, "startedAt": 0, "adjustmentSec": 0 } }
+      ],
+      "finalExpect": { "cues": [] }
+    },
+    {
+      "id": "E9",
+      "name": "a per-set override at zero resolves to a zero-length run",
+      "cite": "BR-001 lower clamp bound",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": 0, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": false },
+          "expect": { "resolution": { "durationSec": 0, "source": "perSet" },
+                      "state": "restRunning", "durationSec": 0, "startedAt": 0, "adjustmentSec": 0 } }
+      ],
+      "finalExpect": { "cues": [] }
+    }
+  ]
+}

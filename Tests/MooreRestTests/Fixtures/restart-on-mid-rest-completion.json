@@ -1,0 +1,55 @@
+{
+  "fixture": "restart-on-mid-rest-completion",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "BR-004 (restart with the NEW set's resolved duration), INV-T1 (log-moment resolution)",
+  "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+  "vectors": [
+    {
+      "id": "V8",
+      "name": "completing another set mid-rest restarts with the new set's duration",
+      "cite": "BR-004",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "resolution": { "durationSec": 180, "source": "globalCompound" },
+                      "state": "restRunning", "durationSec": 180, "startedAt": 0, "adjustmentSec": 0 } },
+        { "do": "setCompleted", "at": 30, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": false },
+          "expect": { "resolution": { "durationSec": 90, "source": "globalIsolation" },
+                      "state": "restRunning", "durationSec": 90, "startedAt": 30, "adjustmentSec": 0 } }
+      ],
+      "finalExpect": { "cues": [], "state": "restRunning", "durationSec": 90, "startedAt": 30, "adjustmentSec": 0 }
+    },
+    {
+      "id": "E3",
+      "name": "a failed set also restarts the timer",
+      "cite": "BR-004 via §2a matrix (completed and failed start rest)",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "state": "restRunning", "durationSec": 180, "startedAt": 0 } },
+        { "do": "setFailed", "at": 10, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": 240, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "resolution": { "durationSec": 240, "source": "perSet" },
+                      "state": "restRunning", "durationSec": 240, "startedAt": 10, "adjustmentSec": 0 } }
+      ],
+      "finalExpect": { "cues": [] }
+    },
+    {
+      "id": "E5",
+      "name": "logging a set after expiry starts a fresh run with no cue debt",
+      "cite": "BR-004 from restExpired, INV-T3",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": false },
+          "expect": { "state": "restRunning", "durationSec": 90, "startedAt": 0 } },
+        { "do": "expireNaturally", "at": 90,
+          "expect": { "state": "restExpired", "cue": "cue.rest.end" } },
+        { "do": "setCompleted", "at": 100, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "state": "restRunning", "durationSec": 180, "startedAt": 100, "adjustmentSec": 0 } }
+      ],
+      "finalExpect": { "cues": ["cue.rest.end"] }
+    }
+  ]
+}
