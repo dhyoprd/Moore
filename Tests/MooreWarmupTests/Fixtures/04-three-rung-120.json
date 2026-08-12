@@ -1,0 +1,19 @@
+{
+  "label": "V4 — three-rung 120 kg ticket vector: 48→45, 78→77.5, 102→100 (BR-005/BR-006).",
+  "session": {
+    "routineId": "rt-a",
+    "scheme": {"routineId": "rt-a", "exerciseId": "ex-squat", "warmupEnabled": 1},
+    "exercises": [
+      { "id": "ex-squat", "work": [ {"weight": 120, "reps": 5} ] }
+    ],
+    "bar": 20,
+    "unit": "kg"
+  },
+  "expectSession": [
+    ["ex-squat","warmup",20,10],
+    ["ex-squat","warmup",47.5,5],
+    ["ex-squat","warmup",77.5,3],
+    ["ex-squat","warmup",100,2],
+    ["ex-squat","work",120,5]
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "label": "V3 — two-rung 82.5 kg ticket vector: ramp rows carry setClass='warmup', plannedX set, actuals NULL, status planned, ordered before the work sets (BR-004/BR-006/BR-008). Session total 6.",
+  "session": {
+    "routineId": "rt-a",
+    "scheme": {"routineId": "rt-a", "exerciseId": "ex-bench", "warmupEnabled": 1},
+    "exercises": [
+      { "id": "ex-bench", "work": [
+        {"weight": 82.5, "reps": 5},
+        {"weight": 82.5, "reps": 5},
+        {"weight": 82.5, "reps": 5}
+      ] }
+    ],
+    "bar": 20,
+    "unit": "kg"
+  },
+  "expectSession": [
+    ["ex-bench","warmup",20,10],
+    ["ex-bench","warmup",40,5],
+    ["ex-bench","warmup",60,3],
+    ["ex-bench","work",82.5,5],
+    ["ex-bench","work",82.5,5],
+    ["ex-bench","work",82.5,5]
+  ]
+}

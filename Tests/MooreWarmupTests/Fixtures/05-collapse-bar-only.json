@@ -1,0 +1,16 @@
+{
+  "label": "V5 — collapse to bar-only when the two-rung 50% rung rounds to ≤ bar (BR-007.2). W = 25 kg.",
+  "session": {
+    "routineId": "rt-a",
+    "scheme": {"routineId": "rt-a", "exerciseId": "ex-curl", "warmupEnabled": 1},
+    "exercises": [
+      { "id": "ex-curl", "work": [ {"weight": 25, "reps": 10} ] }
+    ],
+    "bar": 20,
+    "unit": "kg"
+  },
+  "expectSession": [
+    ["ex-curl","warmup",20,10],
+    ["ex-curl","work",25,10]
+  ]
+}

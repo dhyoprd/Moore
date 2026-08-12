@@ -1,0 +1,23 @@
+{
+  "label": "V1 — pure-run tables: two-rung and three-rung across multiple bodies of weights (BR-003..BR-007). Inventories: kg plates [25,20,15,10,5,2.5,1.25] per side, lb plates [45,35,25,10,5,2.5] per side. Expected values are the executable nearestDown outputs over these inventories; #16/ticket commentary numbers were illustrative, not plate-exact.",
+  "pureUnits": [
+    { "id": "kg-99-last-two-rung", "in": { "w": 99, "bar": 20, "unit": "kg" },
+      "expect": [[20,10],[47.5,5],[72.5,3]] },
+    { "id": "kg-100-first-three-rung", "in": { "w": 100, "bar": 20, "unit": "kg" },
+      "expect": [[20,10],[40,5],[65,3],[85,2]] },
+    { "id": "kg-30-collapse-via-below-bar", "in": { "w": 30, "bar": 20, "unit": "kg" },
+      "expect": [[20,10]] },
+    { "id": "kg-41.25-collapse-at-bar", "in": { "w": 41.25, "bar": 20, "unit": "kg" },
+      "expect": [[20,10]] },
+    { "id": "kg-50-clean", "in": { "w": 50, "bar": 20, "unit": "kg" },
+      "expect": [[20,10],[25,5],[37.5,3]] },
+    { "id": "kg-82.5-ticket", "in": { "w": 82.5, "bar": 20, "unit": "kg" },
+      "expect": [[20,10],[40,5],[60,3]] },
+    { "id": "kg-120-ticket", "in": { "w": 120, "bar": 20, "unit": "kg" },
+      "expect": [[20,10],[47.5,5],[77.5,3],[100,2]] },
+    { "id": "lb-100-discipline-crossing", "in": { "w": 100, "bar": 45, "unit": "lb" },
+      "expect": [[45,10],[50,5],[75,3]] },
+    { "id": "lb-450-three-rung-ezbar35", "in": { "w": 450, "bar": 35, "unit": "lb" },
+      "expect": [[35,10],[180,5],[290,3],[380,2]] }
+  ]
+}
