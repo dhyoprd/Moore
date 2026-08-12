@@ -1,0 +1,55 @@
+{
+  "label": "V2: unit detection — weight_kg, weight_lbs, dual-column conflict (AC-2)",
+  "cites": ["BR-010"],
+  "vectors": [
+    {
+      "id": "kg-detected",
+      "csvFile": "02a-kg.csv",
+      "expect": {
+        "unit": "kg",
+        "warnings": [],
+        "counts": { "sessionsFound": 1, "setsImported": 2, "quarantinedCount": 0 },
+        "summary": { "sessionsImported": 1, "setsImported": 2, "exercisesCreated": 0 },
+        "db": {
+          "sessions": 1,
+          "sets": 2,
+          "setRows": [
+            { "sessionImportKey": "push day|2025-01-10T08:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 60, "actualReps": 8, "plannedNull": true, "status": "completed" },
+            { "sessionImportKey": "push day|2025-01-10T08:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 1, "actualWeight": 62.5, "actualReps": 6, "plannedNull": true, "status": "completed" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "lb-detected-converted-to-kg-target",
+      "csvFile": "02b-lb.csv",
+      "options": { "targetUnit": "kg" },
+      "expect": {
+        "unit": "lb",
+        "warnings": [],
+        "counts": { "sessionsFound": 1, "setsImported": 2 },
+        "db": {
+          "setRows": [
+            { "sessionImportKey": "push day|2025-01-10T08:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 61.235042773811365, "actualReps": 8 },
+            { "sessionImportKey": "push day|2025-01-10T08:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 1, "actualWeight": 63.50300732098956, "actualReps": 6 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dual-columns-kg-wins-with-warning",
+      "csvFile": "02c-dual.csv",
+      "expect": {
+        "unit": "kg",
+        "warnings": ["both weight_kg and weight_lbs present — kg wins"],
+        "counts": { "sessionsFound": 1, "setsImported": 2 },
+        "db": {
+          "setRows": [
+            { "sessionImportKey": "push day|2025-01-10T08:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 60, "actualReps": 8 },
+            { "sessionImportKey": "push day|2025-01-10T08:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 1, "actualWeight": 62.5, "actualReps": 6 }
+          ]
+        }
+      }
+    }
+  ]
+}

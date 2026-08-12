@@ -1,0 +1,31 @@
+{
+  "scenario": "V8 edit-after-complete never re-triggers rest",
+  "ac": "Post-completion edit overwrites values; does not re-trigger rest",
+  "exercises": [{ "id": "ex-bench", "name": "Barbell Bench Press" }],
+  "routine": {
+    "id": "rt-a",
+    "name": "Push A",
+    "sets": [
+      { "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "plannedDuration": null, "setClass": "work" },
+      { "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "plannedDuration": null, "setClass": "work" }
+    ]
+  },
+  "actions": [
+    { "type": "materialize" },
+    { "type": "accept", "setIndex": 0 },
+    { "type": "editCompleted", "setIndex": 0, "actualWeight": 60, "actualReps": 10 }
+  ],
+  "expect": {
+    "setCount": 2,
+    "sets": [
+      { "status": "completed", "actualWeight": 60, "actualReps": 10, "plannedWeight": 60, "plannedReps": 8 },
+      { "status": "planned" }
+    ],
+    "snapshot": {
+      "restRequested": true,
+      "lastCompletedSetIsSet0": true
+    },
+    "cues": ["cue.set.completed"],
+    "cuesNotReemitted": true
+  }
+}

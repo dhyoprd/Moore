@@ -1,0 +1,74 @@
+{
+  "fixture": "match-search",
+  "contract": "SC-exercises@1.0.0",
+  "cites": ["BR-001", "BR-003", "V1"],
+  "library": [
+    { "id": "barbell-bench-press",       "name": "Barbell Bench Press",       "category": "chest",    "defaultMetric": "reps", "equipment": "barbell" },
+    { "id": "incline-barbell-bench-press","name": "Incline Barbell Bench Press","category": "chest",   "defaultMetric": "reps", "equipment": "barbell" },
+    { "id": "squat",                     "name": "Squat",                     "category": "quads",    "defaultMetric": "reps", "equipment": "barbell" },
+    { "id": "custom-tibialis-raise",     "name": "Tibialis Raise",            "category": "calves",   "isCustom": true,  "defaultMetric": "reps", "equipment": "other" },
+    { "id": "face-pull",                 "name": "Face Pull",                 "category": "back",     "defaultMetric": "reps", "equipment": "cable" },
+    { "id": "close-grip-bench-press",    "name": "Close-Grip Bench Press",    "category": "triceps",  "defaultMetric": "reps", "equipment": "barbell" }
+  ],
+  "cases": [
+    {
+      "id": "V1-exact-with-caps",
+      "query": "Barbell Bench Press",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIds": ["barbell-bench-press"]
+    },
+    {
+      "id": "V1-exact-lowercase",
+      "query": "barbell bench press",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIds": ["barbell-bench-press"]
+    },
+    {
+      "id": "V1-leading-trailing-whitespace",
+      "query": "  barbell bench press  ",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIds": ["barbell-bench-press"]
+    },
+    {
+      "id": "V1-interior-whitespace-runs",
+      "query": "barbell    bench   press",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIds": ["barbell-bench-press"]
+    },
+    {
+      "id": "V3-substring-bench",
+      "query": "bench",
+      "expectedTopHit": "barbell-bench-press",
+      "expectedMatchIdsContains": ["barbell-bench-press", "incline-barbell-bench-press", "close-grip-bench-press"]
+    },
+    {
+      "id": "builtin-first-sort",
+      "query": "raise",
+      "expectedTopHit": "custom-tibialis-raise",
+      "expectedMatchIds": ["custom-tibialis-raise"],
+      "note": "Only one match; sort irrelevant"
+    },
+    {
+      "id": "category-filter-with-query",
+      "query": "bench",
+      "categoryFilter": "chest",
+      "expectedMatchIds": ["barbell-bench-press", "incline-barbell-bench-press"],
+      "note": "BR-004: chest filter removes the triceps close-grip bench"
+    },
+    {
+      "id": "V8-category-filter-with-exclusion",
+      "query": "face",
+      "categoryFilter": "back",
+      "expectedMatchIds": ["face-pull"],
+      "note": "BR-004 + BR-003"
+    },
+    {
+      "id": "empty-query-is-idle-browse",
+      "query": "   ",
+      "expectedState": "idle",
+      "expectedSortFirst": "barbell-bench-press",
+      "expectedSortLast": "squat",
+      "note": "Whitespace-only collapses to empty; results sorted built-ins first then alphabetical"
+    }
+  ]
+}

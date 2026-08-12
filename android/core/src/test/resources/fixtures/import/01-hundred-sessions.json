@@ -1,0 +1,82 @@
+{
+  "label": "V1: 100-session generated sample — grouping, scale, idempotent re-import, PR seeding (AC-1, AC-4, AC-5, AC-7)",
+  "cites": ["BR-005", "BR-006", "BR-013", "BR-015", "BR-016"],
+  "vectors": [
+    {
+      "id": "hundred-sessions",
+      "generate": "hundredSessions",
+      "expect": {
+        "unit": "kg",
+        "warnings": [],
+        "counts": {
+          "dataRows": 900,
+          "emptyRowsSkipped": 0,
+          "duplicatesCollapsed": 0,
+          "sessionsFound": 100,
+          "setsImported": 900,
+          "exercisesMatched": 600,
+          "sessionsAlreadyImported": 0,
+          "cardioRowsSkipped": 0,
+          "foldedSetTypes": 0,
+          "quarantinedCount": 0,
+          "metadataDropped": { "rpe": 0, "exerciseNotes": 0, "supersetId": 0 }
+        },
+        "quarantined": [],
+        "newExercises": [
+          { "name": "Mystery Gizmo Lift", "normalizedName": "mystery gizmo lift", "metric": "reps" }
+        ],
+        "sessionsHead": [
+          {
+            "importKey": "push day|2025-01-01T08:00:00Z",
+            "name": "Push Day",
+            "startedAt": "2025-01-01T08:00:00Z",
+            "endedAt": "2025-01-01T08:55:00Z",
+            "setCount": 9
+          },
+          {
+            "importKey": "pull day|2025-01-02T08:00:00Z",
+            "name": "Pull Day",
+            "startedAt": "2025-01-02T08:00:00Z",
+            "endedAt": "2025-01-02T08:55:00Z",
+            "setCount": 9
+          }
+        ],
+        "summary": {
+          "sessionsImported": 100,
+          "sessionsSkippedAlreadyImported": 0,
+          "setsImported": 900,
+          "exercisesCreated": 1
+        },
+        "db": {
+          "sessions": 100,
+          "sets": 900,
+          "customExercises": 1,
+          "allSessionsImported": true,
+          "allSetsImportedShape": true,
+          "prKindsByExercise": {
+            "Barbell Bench Press": ["max_1rm", "max_reps", "max_volume"],
+            "Squat": ["max_1rm", "max_reps", "max_volume"],
+            "Mystery Gizmo Lift": ["max_1rm", "max_reps", "max_volume"]
+          },
+          "prLiveTotal": 9
+        }
+      },
+      "reimport": {
+        "expect": {
+          "counts": {
+            "sessionsFound": 100,
+            "sessionsAlreadyImported": 100,
+            "setsImported": 0
+          },
+          "summary": {
+            "sessionsImported": 0,
+            "sessionsSkippedAlreadyImported": 100,
+            "setsImported": 0,
+            "exercisesCreated": 0
+          }
+        },
+        "dbUnchanged": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+# Android build artifacts (ticket #31)
+.gradle/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/

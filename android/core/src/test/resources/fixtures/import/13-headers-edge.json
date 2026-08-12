@@ -1,0 +1,43 @@
+{
+  "label": "V13: header edge cases — duplicate header (first wins + warning), Title-Case headers normalize",
+  "cites": ["BR-002"],
+  "vectors": [
+    {
+      "id": "duplicate-header-first-wins",
+      "csvFile": "13a-dup-headers.csv",
+      "expect": {
+        "unit": "kg",
+        "warnings": ["duplicate header 'weight_kg' — first occurrence wins"],
+        "counts": { "sessionsFound": 1, "setsImported": 1, "quarantinedCount": 0 },
+        "db": {
+          "setRows": [
+            { "sessionImportKey": "dup day|2025-11-03T19:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 55, "actualReps": 7 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "title-case-headers",
+      "csvFile": "13b-titlecase.csv",
+      "expect": {
+        "unit": "kg",
+        "warnings": [],
+        "counts": { "sessionsFound": 1, "setsImported": 1, "quarantinedCount": 0 },
+        "sessions": [
+          {
+            "importKey": "case day|2025-11-04T07:00:00Z",
+            "name": "Case Day",
+            "startedAt": "2025-11-04T07:00:00Z",
+            "endedAt": "2025-11-04T07:30:00Z",
+            "setCount": 1
+          }
+        ],
+        "db": {
+          "setRows": [
+            { "sessionImportKey": "case day|2025-11-04T07:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 57.5, "actualReps": 6 }
+          ]
+        }
+      }
+    }
+  ]
+}

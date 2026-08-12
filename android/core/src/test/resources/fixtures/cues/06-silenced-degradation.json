@@ -1,0 +1,31 @@
+{
+  "fixture": "06-silenced-degradation",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-004 — silenced kills the audio channel only; haptic + visual fire unchanged; no cue is sound-dependent (#9 point 2)",
+  "vectors": [
+    {
+      "id": "V6a",
+      "name": "silenced device: rest-end loses audio, keeps alert haptic + visual",
+      "cite": "BR-004, #9 point 2",
+      "context": { "appState": "foreground", "silenced": true },
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 0 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.rest.end", "haptic": "alert", "audio": false, "visual": "rest.over", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 1, "setId": "s1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } }
+      ],
+      "finalExpect": { "firedCues": ["cue.rest.end", "cue.set.completed"] }
+    },
+    {
+      "id": "V6b",
+      "name": "unsilenced counter-vector: rest-end carries the short tone",
+      "cite": "BR-004",
+      "context": { "appState": "foreground", "silenced": false },
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 0 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.rest.end", "haptic": "alert", "audio": true, "visual": "rest.over", "blocking": false, "delivery": "inProcess", "headlineKind": null } } }
+      ],
+      "finalExpect": { "firedCues": ["cue.rest.end"] }
+    }
+  ]
+}

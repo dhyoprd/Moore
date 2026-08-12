@@ -1,0 +1,33 @@
+{
+  "fixture": "rest-defaults-persist",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "BR-005 (rest defaults edit SC-rest's two level-4 keys), BR-014 (read totality), SC-rest INV-S1/INV-S2 (additive keys; re-seed never resets user values)",
+  "vectors": [
+    {
+      "id": "V4",
+      "name": "editing compound persists; isolation untouched; updatedAt bumps; no duplicate rows",
+      "cite": "BR-005, SC-foundation INV-2",
+      "steps": [
+        { "do": "fetchSettings", "expect": { "weightUnit": "kg", "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 } },
+        { "do": "updateRestDefaults", "compoundSec": 150, "at": "2026-08-13T09:10:00Z",
+          "expect": { "weightUnit": "kg", "defaultRestCompoundSec": 150, "defaultRestIsolationSec": 90 } },
+        { "do": "assertSettingUpdatedAtBumped", "key": "defaultRestCompoundSec" },
+        { "do": "assertSettingsRowCountForKeys", "keys": ["defaultRestCompoundSec", "defaultRestIsolationSec"], "expect": 2 },
+        { "do": "updateRestDefaults", "isolationSec": 60, "at": "2026-08-13T09:12:00Z",
+          "expect": { "weightUnit": "kg", "defaultRestCompoundSec": 150, "defaultRestIsolationSec": 60 } }
+      ]
+    },
+    {
+      "id": "V5",
+      "name": "re-applying 0007's INSERT OR IGNORE seed never resets the user's 150",
+      "cite": "BR-005, SC-rest INV-S2",
+      "steps": [
+        { "do": "updateRestDefaults", "compoundSec": 150, "at": "2026-08-13T09:10:00Z",
+          "expect": { "weightUnit": "kg", "defaultRestCompoundSec": 150, "defaultRestIsolationSec": 90 } },
+        { "do": "reapplyRestSeed" },
+        { "do": "fetchSettings", "expect": { "weightUnit": "kg", "defaultRestCompoundSec": 150, "defaultRestIsolationSec": 90 } },
+        { "do": "assertSettingsRowCountForKeys", "keys": ["defaultRestCompoundSec", "defaultRestIsolationSec"], "expect": 2 }
+      ]
+    }
+  ]
+}

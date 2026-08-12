@@ -1,0 +1,57 @@
+{
+  "label": "V5: idempotent re-import — importKey UNIQUE + INSERT-OR-IGNORE no-op (AC-5)",
+  "cites": ["BR-013", "BR-016", "INV-IM4"],
+  "vectors": [
+    {
+      "id": "second-import-noop",
+      "csvFile": "05-small.csv",
+      "expect": {
+        "unit": "kg",
+        "counts": {
+          "sessionsFound": 1,
+          "setsImported": 2,
+          "sessionsAlreadyImported": 0,
+          "quarantinedCount": 0
+        },
+        "sessions": [
+          {
+            "importKey": "retry day|2025-04-12T10:00:00Z",
+            "name": "Retry Day",
+            "startedAt": "2025-04-12T10:00:00Z",
+            "endedAt": "2025-04-12T10:45:00Z",
+            "setCount": 2
+          }
+        ],
+        "summary": { "sessionsImported": 1, "setsImported": 2, "exercisesCreated": 0 },
+        "db": {
+          "sessions": 1,
+          "sets": 2,
+          "prKindsByExercise": {
+            "Barbell Bench Press": ["max_1rm", "max_reps", "max_volume"]
+          },
+          "prRows": [
+            { "exerciseName": "Barbell Bench Press", "kind": "max_1rm", "value": 87.5 },
+            { "exerciseName": "Barbell Bench Press", "kind": "max_volume", "value": 375 },
+            { "exerciseName": "Barbell Bench Press", "kind": "max_reps", "value": 5 }
+          ]
+        }
+      },
+      "reimport": {
+        "expect": {
+          "counts": {
+            "sessionsFound": 1,
+            "sessionsAlreadyImported": 1,
+            "setsImported": 0
+          },
+          "summary": {
+            "sessionsImported": 0,
+            "sessionsSkippedAlreadyImported": 1,
+            "setsImported": 0,
+            "exercisesCreated": 0
+          }
+        },
+        "dbUnchanged": true
+      }
+    }
+  ]
+}

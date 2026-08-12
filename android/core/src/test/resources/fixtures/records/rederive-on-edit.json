@@ -1,0 +1,35 @@
+{
+  "label": "BR-007 — editing a completed set re-derives the exercise bookmark",
+  "seed": {
+    "exercises": [ { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength" } ],
+    "sessions": [
+      { "id": "s-a", "startedAt": "2026-07-01T10:00:00Z", "endedAt": "2026-07-01T11:00:00Z" },
+      { "id": "s-b", "startedAt": "2026-07-08T10:00:00Z", "endedAt": "2026-07-08T11:00:00Z" },
+      { "id": "s-c", "startedAt": "2026-07-15T10:00:00Z", "endedAt": "2026-07-15T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "set-a", "sessionId": "s-a", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 80, "actualReps": 5, "completedAt": "2026-07-01T10:10:00Z" },
+      { "id": "set-b", "sessionId": "s-b", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 90, "actualReps": 6, "completedAt": "2026-07-08T10:10:00Z" },
+      { "id": "set-c", "sessionId": "s-c", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-07-15T10:10:00Z" }
+    ],
+    "personalRecords": [
+      { "exerciseId": "ex-bench", "kind": "max_1rm", "value": 116.66666666666667, "setId": "set-c", "sessionId": "s-c", "achievedAt": "2026-07-15T10:10:00Z" },
+      { "exerciseId": "ex-bench", "kind": "max_volume", "value": 540, "setId": "set-b", "sessionId": "s-b", "achievedAt": "2026-07-08T10:10:00Z" },
+      { "exerciseId": "ex-bench", "kind": "max_reps", "value": 6, "setId": "set-b", "sessionId": "s-b", "achievedAt": "2026-07-08T10:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V6a-edit-upward-holds-row-on-edited-set",
+      "editSet": { "setId": "set-b", "actualWeight": 105, "actualReps": 5 },
+      "rederive": { "exerciseId": "ex-bench" },
+      "expect": {
+        "rows": [
+          { "exerciseId": "ex-bench", "kind": "max_1rm", "value": 122.50000000000001, "setId": "set-b", "sessionId": "s-b", "achievedAt": "2026-07-08T10:10:00Z" },
+          { "exerciseId": "ex-bench", "kind": "max_volume", "value": 525, "setId": "set-b", "sessionId": "s-b" },
+          { "exerciseId": "ex-bench", "kind": "max_reps", "value": 5, "setId": "set-a", "sessionId": "s-a" }
+        ]
+      }
+    }
+  ]
+}

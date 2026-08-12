@@ -1,0 +1,29 @@
+{
+  "fixture": "09-drop-no-haptic",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-009 — a drop has NO haptic: visual-only (row greys + persistent undo toolbar); undo within-drop fires nothing; the next set's tick is unaffected",
+  "vectors": [
+    {
+      "id": "V9a",
+      "name": "drop dispatches visual-only; exactly one dispatch, zero haptics",
+      "cite": "BR-009, #10 table row",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.set.dropped", "at": 0, "setId": "d1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.dropped", "haptic": null, "audio": false, "visual": "set.dropUndo", "blocking": false, "delivery": "inProcess", "headlineKind": null } } }
+      ],
+      "finalExpect": { "firedCues": ["cue.set.dropped"], "dispatchCount": 1 }
+    },
+    {
+      "id": "V9b",
+      "name": "drop neither consumes nor blocks the next set's tick (budget keys per setId)",
+      "cite": "BR-009, BR-008",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.set.dropped", "at": 0, "setId": "d1" },
+          "expect": { "outcome": "fired" } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 1, "setId": "s-next" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } }
+      ],
+      "finalExpect": { "firedCues": ["cue.set.dropped", "cue.set.completed"], "dispatchCount": 2 }
+    }
+  ]
+}

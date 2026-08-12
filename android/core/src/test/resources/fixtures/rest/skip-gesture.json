@@ -1,0 +1,37 @@
+{
+  "fixture": "skip-gesture",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "BR-003 (skip semantics: instant cancel, no write, no cue)",
+  "database": { "needsAppSettingsTable": true, "snapshotTable": "app_setting" },
+  "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+  "vectors": [
+    {
+      "id": "V7",
+      "name": "skip cancels a running rest instantly with no cue and no write",
+      "cite": "BR-003",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "state": "restRunning", "durationSec": 180, "startedAt": 0, "adjustmentSec": 0 } },
+        { "do": "skip", "at": 45,
+          "expect": { "state": "noRest" } }
+      ],
+      "finalExpect": { "cues": [], "persistenceUnchanged": true }
+    },
+    {
+      "id": "E2",
+      "name": "skip from restExpired dismisses the rest-over state",
+      "cite": "BR-003 (dismiss), BR-008 (cue already fired at expiry)",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": false },
+          "expect": { "state": "restRunning", "durationSec": 90, "startedAt": 0, "adjustmentSec": 0 } },
+        { "do": "expireNaturally", "at": 90,
+          "expect": { "state": "restExpired", "cue": "cue.rest.end" } },
+        { "do": "skip", "at": 95,
+          "expect": { "state": "noRest" } }
+      ],
+      "finalExpect": { "cues": ["cue.rest.end"] }
+    }
+  ]
+}

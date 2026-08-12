@@ -1,0 +1,49 @@
+{
+  "label": "BR-001 — warmup rows never write and never feed baselines",
+  "seed": {
+    "exercises": [ { "id": "ex-squat", "name": "Squat", "exerciseType": "strength" } ],
+    "sessions": [
+      { "id": "s-hist", "startedAt": "2026-07-01T10:00:00Z", "endedAt": "2026-07-01T11:00:00Z" },
+      { "id": "s-now", "startedAt": "2026-08-12T10:00:00Z" }
+    ],
+    "sets": [
+      { "id": "set-h1", "sessionId": "s-hist", "exerciseId": "ex-squat", "status": "completed", "setClass": "work", "actualWeight": 60, "actualReps": 5, "completedAt": "2026-07-01T10:10:00Z" },
+      { "id": "set-h2", "sessionId": "s-hist", "exerciseId": "ex-squat", "status": "completed", "setClass": "work", "actualWeight": 70, "actualReps": 5, "completedAt": "2026-07-01T10:20:00Z" },
+      { "id": "set-wu", "sessionId": "s-now", "exerciseId": "ex-squat", "status": "completed", "setClass": "warmup", "actualWeight": 20, "actualReps": 15, "completedAt": "2026-08-12T10:00:00Z" },
+      { "id": "set-work", "sessionId": "s-now", "exerciseId": "ex-squat", "status": "completed", "setClass": "work", "actualWeight": 75, "actualReps": 5, "completedAt": "2026-08-12T10:10:00Z" }
+    ],
+    "personalRecords": [
+      { "exerciseId": "ex-squat", "kind": "max_1rm", "value": 81.66666666666667, "setId": "set-h2", "sessionId": "s-hist", "achievedAt": "2026-07-01T10:20:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V9a-warmup-bar-x15-never-writes-max-reps",
+      "writeFromSet": { "setId": "set-wu" },
+      "expect": { "write": null, "fired": null }
+    },
+    {
+      "id": "V9b-work-set-beats-1rm-warmup-invisible",
+      "writeFromSet": { "setId": "set-work" },
+      "expect": {
+        "written": ["max_1rm"],
+        "beaten": ["max_1rm"],
+        "fired": { "headlineKind": "max_1rm", "value": 87.5, "exerciseId": "ex-squat" },
+        "rows": [
+          { "exerciseId": "ex-squat", "kind": "max_1rm", "value": 87.5, "setId": "set-work", "sessionId": "s-now" }
+        ]
+      }
+    },
+    {
+      "id": "V9c-rederive-warmup-15reps-excluded-from-bookmark",
+      "rederive": { "exerciseId": "ex-squat" },
+      "expect": {
+        "rows": [
+          { "exerciseId": "ex-squat", "kind": "max_1rm", "value": 87.5, "setId": "set-work", "sessionId": "s-now" },
+          { "exerciseId": "ex-squat", "kind": "max_reps", "value": 5, "setId": "set-h1", "sessionId": "s-hist" },
+          { "exerciseId": "ex-squat", "kind": "max_volume", "value": 375, "setId": "set-work", "sessionId": "s-now" }
+        ]
+      }
+    }
+  ]
+}

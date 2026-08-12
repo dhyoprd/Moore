@@ -1,0 +1,50 @@
+{
+  "label": "V6 — tonnage excludes warmup rows (ticket ruling over SC-foundation BR-006's generic volume), failed/dropped/planned/tombstoned never count; NULL setClass coalesces to work (INV-6)",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "category": "chest" }
+    ],
+    "sessions": [
+      { "id": "s1", "startedAt": "2026-08-10T10:00:00Z", "endedAt": "2026-08-10T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "t-warm", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "warmup", "actualWeight": 20, "actualReps": 15, "completedAt": "2026-08-10T10:05:00Z" },
+      { "id": "t-w1", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-10T10:10:00Z" },
+      { "id": "t-w2", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 100, "actualReps": 3, "completedAt": "2026-08-10T10:15:00Z" },
+      { "id": "t-f", "sessionId": "s1", "exerciseId": "ex-bench", "status": "failed", "setClass": "work", "actualWeight": 100, "actualReps": 4, "completedAt": "2026-08-10T10:20:00Z" },
+      { "id": "t-d", "sessionId": "s1", "exerciseId": "ex-bench", "status": "dropped", "plannedWeight": 100, "plannedReps": 5 },
+      { "id": "t-p", "sessionId": "s1", "exerciseId": "ex-bench", "status": "planned", "plannedWeight": 100, "plannedReps": 6 },
+      { "id": "t-tomb", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-10T10:25:00Z", "deleted": true }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V6a-tonnage-800-only-work-sets",
+      "query": { "op": "tonnage", "rangeDays": 30 },
+      "expect": { "weeks": [ { "week": "2026-W33", "tonnage": 800 } ] }
+    },
+    {
+      "id": "V6b-split-100pct-upper",
+      "query": { "op": "split", "rangeDays": 30 },
+      "expect": {
+        "sumTolerance": 0.1,
+        "buckets": [ { "bucket": "upper", "tonnage": 800, "pct": 100 } ]
+      }
+    },
+    {
+      "id": "V6c-history-row-tonnage-and-completed-count",
+      "query": { "op": "history" },
+      "expect": {
+        "months": [
+          {
+            "month": "2026-08",
+            "rows": [
+              { "sessionId": "s1", "completedCount": 3, "tonnage": 800, "prCount": 0, "badge": false }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

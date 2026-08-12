@@ -1,0 +1,25 @@
+{
+  "fixture": "11-one-tap-accept-never-blocks",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-011 — cues are post-commit witnesses: nothing on the one-tap accept path carries blocking=true and nothing interposes between tap and log",
+  "vectors": [
+    {
+      "id": "V11",
+      "name": "accept path: set tick, rest-end, next set tick — every dispatch non-blocking",
+      "cite": "BR-011, INV-C5, SC-rest INV-T5",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 0, "setId": "s1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 90 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.rest.end", "haptic": "alert", "audio": true, "visual": "rest.over", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 100, "setId": "s2" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } }
+      ],
+      "finalExpect": {
+        "dispatchCount": 3,
+        "firedCues": ["cue.set.completed", "cue.rest.end", "cue.set.completed"],
+        "noBlockingEver": true
+      }
+    }
+  ]
+}

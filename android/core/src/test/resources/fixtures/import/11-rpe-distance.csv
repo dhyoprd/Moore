@@ -1,0 +1,5 @@
+title,start_time,end_time,exercise_title,set_index,set_type,weight_kg,reps,distance_km,distance_miles,duration_seconds,rpe
+"Cardio Mix","20 Sep 2025, 08:00","20 Sep 2025, 08:50",Barbell Bench Press,0,normal,70,6,,,,8.5
+"Cardio Mix","20 Sep 2025, 08:00","20 Sep 2025, 08:50",Treadmill Run,0,normal,,,5.02,,
+"Cardio Mix","20 Sep 2025, 08:00","20 Sep 2025, 08:50",Plank Hold,0,normal,,,,,45,
+"Cardio Mix","20 Sep 2025, 08:00","20 Sep 2025, 08:50",Weighted Plank,0,normal,20,,,,60,7
