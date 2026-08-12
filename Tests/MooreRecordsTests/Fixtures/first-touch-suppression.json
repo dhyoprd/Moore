@@ -1,0 +1,49 @@
+{
+  "label": "BR-002 — live path never seeds: first-touch writes no row, fires no cue; re-derivation seeds baselines silently",
+  "seed": {
+    "exercises": [ { "id": "ex-ohp", "name": "Overhead Press", "exerciseType": "strength" } ],
+    "sessions": [ { "id": "s-first", "startedAt": "2026-08-12T09:00:00Z" } ],
+    "sets": [
+      { "id": "set-f1", "sessionId": "s-first", "exerciseId": "ex-ohp", "status": "completed", "setClass": "work", "actualWeight": 40, "actualReps": 10, "completedAt": "2026-08-12T09:05:00Z" },
+      { "id": "set-f2", "sessionId": "s-first", "exerciseId": "ex-ohp", "status": "completed", "setClass": "work", "actualWeight": 50, "actualReps": 9, "completedAt": "2026-08-12T09:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V3a-first-ever-set-no-row-no-cue",
+      "writeFromSet": { "setId": "set-f1" },
+      "expect": { "write": null, "fired": null, "rows": [] }
+    },
+    {
+      "id": "V3b-second-set-same-first-session-still-no-row-no-cue",
+      "writeFromSet": { "setId": "set-f2" },
+      "expect": { "write": null, "fired": null, "rows": [] }
+    },
+    {
+      "id": "V3c-rederive-seeds-baseline-silently",
+      "rederive": { "exerciseId": "ex-ohp" },
+      "expect": {
+        "rows": [
+          { "exerciseId": "ex-ohp", "kind": "max_1rm", "value": 65, "setId": "set-f2", "sessionId": "s-first", "achievedAt": "2026-08-12T09:10:00Z" },
+          { "exerciseId": "ex-ohp", "kind": "max_volume", "value": 450, "setId": "set-f2", "sessionId": "s-first" },
+          { "exerciseId": "ex-ohp", "kind": "max_reps", "value": 10, "setId": "set-f1", "sessionId": "s-first" }
+        ]
+      }
+    },
+    {
+      "id": "V3d-after-seed-live-exceed-fires",
+      "insertSet": { "id": "set-f3", "sessionId": "s-first", "exerciseId": "ex-ohp", "status": "completed", "setClass": "work", "actualWeight": 55, "actualReps": 6, "completedAt": "2026-08-12T09:15:00Z" },
+      "writeFromSet": { "setId": "set-f3" },
+      "expect": {
+        "written": ["max_1rm"],
+        "beaten": ["max_1rm"],
+        "fired": { "headlineKind": "max_1rm", "value": 66, "exerciseId": "ex-ohp" },
+        "rows": [
+          { "exerciseId": "ex-ohp", "kind": "max_1rm", "value": 66, "setId": "set-f3", "sessionId": "s-first" },
+          { "exerciseId": "ex-ohp", "kind": "max_volume", "value": 450, "setId": "set-f2", "sessionId": "s-first" },
+          { "exerciseId": "ex-ohp", "kind": "max_reps", "value": 10, "setId": "set-f1", "sessionId": "s-first" }
+        ]
+      }
+    }
+  ]
+}

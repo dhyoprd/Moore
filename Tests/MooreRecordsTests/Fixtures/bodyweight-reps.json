@@ -1,0 +1,31 @@
+{
+  "label": "BR-004 — bodyweight max_reps writes/fires; weight-gated kinds stay silent",
+  "seed": {
+    "exercises": [ { "id": "ex-pullup", "name": "Pull-up", "exerciseType": "strength" } ],
+    "sessions": [
+      { "id": "s-hist", "startedAt": "2026-07-01T10:00:00Z", "endedAt": "2026-07-01T11:00:00Z" },
+      { "id": "s-now", "startedAt": "2026-08-12T10:00:00Z" }
+    ],
+    "sets": [
+      { "id": "set-p1", "sessionId": "s-hist", "exerciseId": "ex-pullup", "status": "completed", "setClass": "work", "actualWeight": null, "actualReps": 12, "completedAt": "2026-07-01T10:10:00Z" },
+      { "id": "set-p2", "sessionId": "s-now", "exerciseId": "ex-pullup", "status": "completed", "setClass": "work", "actualWeight": null, "actualReps": 15, "completedAt": "2026-08-12T10:10:00Z" }
+    ],
+    "personalRecords": [
+      { "exerciseId": "ex-pullup", "kind": "max_reps", "value": 12, "setId": "set-p1", "sessionId": "s-hist", "achievedAt": "2026-07-01T10:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V13-bodyweight-max-reps-beats-row-fires",
+      "writeFromSet": { "setId": "set-p2" },
+      "expect": {
+        "written": ["max_reps"],
+        "beaten": ["max_reps"],
+        "fired": { "headlineKind": "max_reps", "value": 15, "exerciseId": "ex-pullup" },
+        "rows": [
+          { "exerciseId": "ex-pullup", "kind": "max_reps", "value": 15, "setId": "set-p2", "sessionId": "s-now" }
+        ]
+      }
+    }
+  ]
+}

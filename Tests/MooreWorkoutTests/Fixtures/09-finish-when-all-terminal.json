@@ -1,0 +1,33 @@
+{
+  "scenario": "V10 finish-morph when all sets terminal",
+  "ac": "Drop A, accept B → finishReady, finishRequested, cue.finish.morph exactly once; dropped never requests rest",
+  "exercises": [{ "id": "ex-bench", "name": "Barbell Bench Press" }],
+  "routine": {
+    "id": "rt-a",
+    "name": "Push A",
+    "sets": [
+      { "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "plannedDuration": null, "setClass": "work" },
+      { "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "plannedDuration": null, "setClass": "work" }
+    ]
+  },
+  "actions": [
+    { "type": "materialize" },
+    { "type": "drop", "setIndex": 0 },
+    { "type": "accept", "setIndex": 1 },
+    { "type": "finishSession" }
+  ],
+  "expect": {
+    "setCount": 2,
+    "sets": [
+      { "status": "dropped", "actualWeight": null },
+      { "status": "completed", "actualWeight": 60, "actualReps": 8 }
+    ],
+    "snapshot": {
+      "overlayState": "finishRequested",
+      "finishReady": true,
+      "restRequested": false
+    },
+    "sessionEndedNonNull": true,
+    "cues": ["cue.set.dropped", "cue.set.completed", "cue.finish.morph"]
+  }
+}
