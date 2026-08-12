@@ -1,0 +1,28 @@
+{
+  "fixture": "05-rest-end-backgrounded",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-005, INV-C6 — rest-end is the ONLY cue delivered while backgrounded/locked (delivery class localNotification); every other cue suppresses",
+  "vectors": [
+    {
+      "id": "V5",
+      "name": "backgrounded: rest-end fires as localNotification; set/PR cues suppress; foreground restores normal delivery",
+      "cite": "BR-005, INV-C6, #9 point 3",
+      "context": { "appState": "backgroundedOrLocked", "silenced": false },
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 0 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.rest.end", "haptic": "alert", "audio": true, "visual": "rest.over", "blocking": false, "delivery": "localNotification", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 1, "setId": "s1" },
+          "expect": { "outcome": "suppressed", "reason": "backgrounded" } },
+        { "do": "evaluate", "event": { "cue": "cue.pr.achieved", "at": 2, "setId": "s1", "beatenKinds": ["max_1rm"] },
+          "expect": { "outcome": "suppressed", "reason": "backgrounded" } },
+        { "do": "setContext", "context": { "appState": "foreground", "silenced": false } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 3, "setId": "s2" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } }
+      ],
+      "finalExpect": {
+        "firedCues": ["cue.rest.end", "cue.set.completed"],
+        "logLength": 4
+      }
+    }
+  ]
+}

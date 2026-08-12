@@ -1,0 +1,44 @@
+{
+  "fixture": "12-ring-buffer-sequence",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-013, INV-C1 — every evaluation (fired, suppressed, deduped) is recorded in order; capacity 64, FIFO eviction, in-memory only",
+  "vectors": [
+    {
+      "id": "V12a",
+      "name": "mixed sequence records fired AND non-fired outcomes with exact reasons",
+      "cite": "BR-013, BR-014",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 0, "setId": "s1" }, "expect": { "outcome": "fired" } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 0.2, "setId": "s1" }, "expect": { "outcome": "deduped" } },
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 1 }, "expect": { "outcome": "fired" } },
+        { "do": "evaluate", "event": { "cue": "cue.finish.morph", "at": 2 }, "expect": { "outcome": "fired" } },
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 3 }, "expect": { "outcome": "suppressed" } }
+      ],
+      "finalExpect": {
+        "logLength": 5,
+        "log": [
+          { "cue": "cue.set.completed", "at": 0, "outcome": "fired", "reason": null },
+          { "cue": "cue.set.completed", "at": 0.2, "outcome": "deduped", "reason": "dedupe500ms" },
+          { "cue": "cue.rest.end", "at": 1, "outcome": "fired", "reason": null },
+          { "cue": "cue.finish.morph", "at": 2, "outcome": "fired", "reason": null },
+          { "cue": "cue.rest.end", "at": 3, "outcome": "suppressed", "reason": "morphedToFinish" }
+        ]
+      }
+    },
+    {
+      "id": "V12b",
+      "name": "70 fired entries wrap the 64-capacity ring; oldest six evicted",
+      "cite": "BR-013, INV-C1",
+      "steps": [
+        { "do": "evaluate", "repeat": 70, "atStep": 0.5,
+          "event": { "cue": "cue.set.completed", "at": 0, "setId": "wrap" },
+          "expect": { "outcome": "fired" } }
+      ],
+      "finalExpect": {
+        "logLength": 64,
+        "logHead": { "cue": "cue.set.completed", "outcome": "fired", "at": 3.0 },
+        "logTail": { "cue": "cue.set.completed", "outcome": "fired", "at": 34.5 }
+      }
+    }
+  ]
+}

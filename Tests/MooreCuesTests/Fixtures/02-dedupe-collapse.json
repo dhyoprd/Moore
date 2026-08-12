@@ -1,0 +1,27 @@
+{
+  "fixture": "02-dedupe-collapse",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-012 — same cue within 500ms of its last fired dispatch collapses to one",
+  "vectors": [
+    {
+      "id": "V2",
+      "name": "double-tap misfire collapses; window advances only on fired dispatches",
+      "cite": "BR-012",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 0, "setId": "s1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 0.3, "setId": "s1" },
+          "expect": { "outcome": "deduped", "reason": "dedupe500ms" } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 0.79, "setId": "s1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 1.0, "setId": "s1" },
+          "expect": { "outcome": "deduped", "reason": "dedupe500ms" } }
+      ],
+      "finalExpect": {
+        "dispatchCount": 2,
+        "firedCues": ["cue.set.completed", "cue.set.completed"],
+        "logLength": 4
+      }
+    }
+  ]
+}
