@@ -1,0 +1,29 @@
+{
+  "label": "V1 — zero data: analytics renders but-empty, no unlock threshold (BR-008)",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "category": "chest" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V1-header-all-zero",
+      "query": { "op": "header" },
+      "expect": { "last7": 0, "last30": 0, "streak": 0 }
+    },
+    {
+      "id": "V1-empty-state-copy",
+      "query": { "op": "emptyState", "rangeDays": 30 },
+      "expect": {
+        "copyKey": "analytics.empty.trends",
+        "copy": "Log 3 sessions to see trends"
+      }
+    },
+    {
+      "id": "V1-detail-unknown-session-empty",
+      "query": { "op": "detail", "sessionId": "s-none", "sparklineExerciseId": "ex-bench" },
+      "expect": { "rows": [], "sparkline": [] }
+    }
+  ]
+}

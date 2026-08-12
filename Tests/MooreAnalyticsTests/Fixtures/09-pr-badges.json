@@ -1,0 +1,66 @@
+{
+  "label": "V10 — PR list reverse-chronological with deterministic tie-break; tombstoned exercise names still resolve (INV-L3); History PR badge counts per session (BR-005, BR-006)",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "category": "chest" },
+      { "id": "ex-curl", "name": "Curl", "exerciseType": "strength", "category": "biceps" },
+      { "id": "ex-ohp", "name": "Overhead Press", "exerciseType": "strength", "category": "shoulders", "deleted": true }
+    ],
+    "sessions": [
+      { "id": "s1", "startedAt": "2026-07-20T10:00:00Z", "endedAt": "2026-07-20T11:00:00Z" },
+      { "id": "s2", "startedAt": "2026-08-01T10:00:00Z", "endedAt": "2026-08-01T11:00:00Z" },
+      { "id": "s3", "startedAt": "2026-08-10T10:00:00Z", "endedAt": "2026-08-10T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "pb-1", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-07-20T10:10:00Z" },
+      { "id": "pb-2", "sessionId": "s2", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-01T10:10:00Z" },
+      { "id": "pb-3", "sessionId": "s3", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 90, "actualReps": 10, "completedAt": "2026-08-10T10:10:00Z" },
+      { "id": "pc-3", "sessionId": "s3", "exerciseId": "ex-curl", "status": "completed", "setClass": "work", "actualReps": 12, "completedAt": "2026-08-10T10:15:00Z" }
+    ],
+    "personalRecords": [
+      { "exerciseId": "ex-bench", "sessionId": "s1", "setId": "pb-1", "kind": "max_1rm", "value": 120, "achievedAt": "2026-07-20T10:10:00Z" },
+      { "exerciseId": "ex-bench", "sessionId": "s2", "setId": "pb-2", "kind": "max_volume", "value": 500, "achievedAt": "2026-08-01T10:10:00Z" },
+      { "exerciseId": "ex-ohp", "sessionId": "s2", "kind": "max_1rm", "value": 55, "achievedAt": "2026-08-01T09:00:00Z" },
+      { "exerciseId": "ex-curl", "sessionId": "s3", "setId": "pc-3", "kind": "max_reps", "value": 12, "achievedAt": "2026-08-10T10:10:00Z" },
+      { "exerciseId": "ex-bench", "sessionId": "s3", "setId": "pb-3", "kind": "max_reps", "value": 10, "achievedAt": "2026-08-10T10:10:00Z" },
+      { "exerciseId": "ex-bench", "sessionId": "s1", "kind": "max_1rm", "value": 999, "achievedAt": "2026-08-11T10:10:00Z", "deleted": true }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V10a-prlist-reverse-chron-tie-break-tombstone-name",
+      "query": { "op": "prList" },
+      "expect": {
+        "items": [
+          { "exerciseId": "ex-bench", "exerciseName": "Bench Press", "kind": "max_reps", "value": 10, "day": "2026-08-10", "sessionId": "s3" },
+          { "exerciseId": "ex-curl", "exerciseName": "Curl", "kind": "max_reps", "value": 12, "day": "2026-08-10", "sessionId": "s3" },
+          { "exerciseId": "ex-bench", "exerciseName": "Bench Press", "kind": "max_volume", "value": 500, "day": "2026-08-01", "sessionId": "s2" },
+          { "exerciseId": "ex-ohp", "exerciseName": "Overhead Press", "kind": "max_1rm", "value": 55, "day": "2026-08-01", "sessionId": "s2" },
+          { "exerciseId": "ex-bench", "exerciseName": "Bench Press", "kind": "max_1rm", "value": 120, "day": "2026-07-20", "sessionId": "s1" }
+        ]
+      }
+    },
+    {
+      "id": "V10b-history-badge-counts",
+      "query": { "op": "history" },
+      "expect": {
+        "months": [
+          {
+            "month": "2026-08",
+            "rows": [
+              { "sessionId": "s3", "day": "2026-08-10", "completedCount": 2, "tonnage": 900, "prCount": 2, "badge": true },
+              { "sessionId": "s2", "day": "2026-08-01", "completedCount": 1, "tonnage": 500, "prCount": 2, "badge": true }
+            ]
+          },
+          {
+            "month": "2026-07",
+            "rows": [
+              { "sessionId": "s1", "day": "2026-07-20", "completedCount": 1, "tonnage": 500, "prCount": 1, "badge": true }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

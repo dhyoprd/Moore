@@ -1,0 +1,52 @@
+{
+  "label": "V4 — 7-day gap keeps the line, gap > 7 days breaks it; no phantom zero points (BR-002, INV-A3)",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "category": "chest" }
+    ],
+    "sessions": [
+      { "id": "s-a", "startedAt": "2026-07-01T10:00:00Z", "endedAt": "2026-07-01T11:00:00Z" },
+      { "id": "s-b", "startedAt": "2026-07-08T10:00:00Z", "endedAt": "2026-07-08T11:00:00Z" },
+      { "id": "s-c", "startedAt": "2026-07-17T10:00:00Z", "endedAt": "2026-07-17T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "set-a1", "sessionId": "s-a", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 60, "actualReps": 5, "completedAt": "2026-07-01T10:10:00Z" },
+      { "id": "set-b1", "sessionId": "s-b", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 62, "actualReps": 5, "completedAt": "2026-07-08T10:10:00Z" },
+      { "id": "set-c1", "sessionId": "s-c", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 65, "actualReps": 5, "completedAt": "2026-07-17T10:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V4a-range60-gap7-connects-gap9-breaks",
+      "query": { "op": "trend", "exerciseId": "ex-bench", "rangeDays": 60 },
+      "expect": {
+        "points": [
+          { "day": "2026-07-01", "value": 70, "segment": 0 },
+          { "day": "2026-07-08", "value": 72.33333333333334, "segment": 0 },
+          { "day": "2026-07-17", "value": 75.83333333333334, "segment": 1 }
+        ]
+      }
+    },
+    {
+      "id": "V4b-range30-only-latest-segment-restarts-at-0",
+      "query": { "op": "trend", "exerciseId": "ex-bench", "rangeDays": 30 },
+      "expect": {
+        "points": [
+          { "day": "2026-07-17", "value": 75.83333333333334, "segment": 0 }
+        ]
+      }
+    },
+    {
+      "id": "V4c-tonnage-three-iso-weeks-ascending",
+      "query": { "op": "tonnage", "rangeDays": 60 },
+      "expect": {
+        "weeks": [
+          { "week": "2026-W27", "tonnage": 300 },
+          { "week": "2026-W28", "tonnage": 310 },
+          { "week": "2026-W29", "tonnage": 325 }
+        ]
+      }
+    }
+  ]
+}

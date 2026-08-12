@@ -1,0 +1,62 @@
+{
+  "label": "V12/V3 — range windows: last-30-days scopes sessions (or-less renders fine), empty weeks never zero-filled, gaps break segments (BR-009, INV-A3)",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "category": "chest" }
+    ],
+    "sessions": [
+      { "id": "s-old", "startedAt": "2026-06-01T10:00:00Z", "endedAt": "2026-06-01T11:00:00Z" },
+      { "id": "s1", "startedAt": "2026-07-20T10:00:00Z", "endedAt": "2026-07-20T11:00:00Z" },
+      { "id": "s2", "startedAt": "2026-08-01T10:00:00Z", "endedAt": "2026-08-01T11:00:00Z" },
+      { "id": "s3", "startedAt": "2026-08-10T10:00:00Z", "endedAt": "2026-08-10T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "r-old", "sessionId": "s-old", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 50, "actualReps": 5, "completedAt": "2026-06-01T10:10:00Z" },
+      { "id": "r-1", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 55, "actualReps": 5, "completedAt": "2026-07-20T10:10:00Z" },
+      { "id": "r-2", "sessionId": "s2", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 57.5, "actualReps": 5, "completedAt": "2026-08-01T10:10:00Z" },
+      { "id": "r-3", "sessionId": "s3", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 60, "actualReps": 5, "completedAt": "2026-08-10T10:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V12a-trend-30d-window-excludes-june",
+      "query": { "op": "trend", "exerciseId": "ex-bench", "rangeDays": 30 },
+      "expect": {
+        "points": [
+          { "day": "2026-07-20", "value": 64.16666666666667, "segment": 0 },
+          { "day": "2026-08-01", "value": 67.08333333333334, "segment": 1 },
+          { "day": "2026-08-10", "value": 70, "segment": 2 }
+        ]
+      }
+    },
+    {
+      "id": "V12b-tonnage-30d-no-zero-fill-w32-absent",
+      "query": { "op": "tonnage", "rangeDays": 30 },
+      "expect": {
+        "weeks": [
+          { "week": "2026-W30", "tonnage": 275 },
+          { "week": "2026-W31", "tonnage": 287.5 },
+          { "week": "2026-W33", "tonnage": 300 }
+        ]
+      }
+    },
+    {
+      "id": "V12c-range7-or-less-renders",
+      "query": { "op": "trend", "exerciseId": "ex-bench", "rangeDays": 7 },
+      "expect": {
+        "points": [ { "day": "2026-08-10", "value": 70, "segment": 0 } ]
+      }
+    },
+    {
+      "id": "V12d-tonnage-range7",
+      "query": { "op": "tonnage", "rangeDays": 7 },
+      "expect": { "weeks": [ { "week": "2026-W33", "tonnage": 300 } ] }
+    },
+    {
+      "id": "V12e-header-window-counts",
+      "query": { "op": "header" },
+      "expect": { "last7": 1, "last30": 3, "streak": 0 }
+    }
+  ]
+}
