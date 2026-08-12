@@ -1,0 +1,21 @@
+{
+  "label": "V8/V9 — warm-up rows never write PRs (BR-013) and are excluded from session tonnage (BR-014, superseding SC-foundation INV-6). All rows completed at planned values.",
+  "session": {
+    "routineId": "rt-a",
+    "scheme": {"routineId": "rt-a", "exerciseId": "ex-bench", "warmupEnabled": 1},
+    "exercises": [
+      { "id": "ex-bench", "work": [ {"weight": 82.5, "reps": 5}, {"weight": 82.5, "reps": 5} ] }
+    ],
+    "bar": 20,
+    "unit": "kg",
+    "completeAllAtPlanned": true
+  },
+  "preExistingPRs": [
+    {"exerciseId": "ex-bench", "kind": "rep", "value": 8}
+  ],
+  "expect": {
+    "prRowsAfter": 1,
+    "workOnlyVolume": 825.0,
+    "allRowsVolume": 1405.0
+  }
+}

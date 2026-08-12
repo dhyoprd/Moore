@@ -1,0 +1,40 @@
+{
+  "label": "V10/V11 — stall immunity (BR-011), clean predicate with mixed classes (BR-012), snapshot immutability under double-apply (BR-009).",
+  "stall": [
+    { "id": "v10-warmup-fail-work-clean-chain-untouched",
+      "previousWeight": 82.5,
+      "stallCountBefore": 2,
+      "session": [
+        {"exerciseId": "ex-bench", "setClass": "warmup", "status": "failed",  "plannedWeight": 60, "plannedReps": 3, "actualWeight": 60, "actualReps": 2},
+        {"exerciseId": "ex-bench", "setClass": "warmup", "status": "completed", "plannedWeight": 20, "plannedReps": 10, "actualWeight": 20, "actualReps": 10},
+        {"exerciseId": "ex-bench", "setClass": "work",   "status": "completed", "plannedWeight": 82.5, "plannedReps": 5, "actualWeight": 82.5, "actualReps": 5}
+      ],
+      "expect": {"clean": true, "stallCountAfter": 0, "banner": false} },
+    { "id": "v10-three-warmup-fail-sessions-never-stall",
+      "previousWeight": 82.5,
+      "stallCountBefore": 0,
+      "session": [
+        {"exerciseId": "ex-bench", "setClass": "warmup", "status": "failed", "plannedWeight": 41.25, "plannedReps": 5, "actualWeight": 41.25, "actualReps": 3},
+        {"exerciseId": "ex-bench", "setClass": "work",   "status": "completed", "plannedWeight": 82.5, "plannedReps": 5, "actualWeight": 82.5, "actualReps": 5}
+      ],
+      "repeat": 3,
+      "expect": {"clean": true, "stallCountAfter": 0, "banner": false} },
+    { "id": "v11-work-fail-still-counts",
+      "previousWeight": 82.5,
+      "stallCountBefore": 2,
+      "session": [
+        {"exerciseId": "ex-bench", "setClass": "warmup", "status": "completed", "plannedWeight": 20, "plannedReps": 10, "actualWeight": 20, "actualReps": 10},
+        {"exerciseId": "ex-bench", "setClass": "work",   "status": "failed", "plannedWeight": 82.5, "plannedReps": 5, "actualWeight": 82.5, "actualReps": 3}
+      ],
+      "expect": {"clean": false, "stallCountAfter": 3, "banner": true} }
+  ],
+  "doubleApply": {
+    "session": {
+      "routineId": "rt-a",
+      "scheme": {"routineId": "rt-a", "exerciseId": "ex-bench", "warmupEnabled": 1},
+      "exercises": [ { "id": "ex-bench", "work": [ {"weight": 82.5, "reps": 5} ] } ],
+      "bar": 20, "unit": "kg"
+    },
+    "expectRowCountAfterSecondApply": 4
+  }
+}

@@ -53,6 +53,22 @@ let package = Package(
             ],
             path: "Sources/MooreWorkout"
         ),
+        .target(
+            name: "MooreProgression",
+            dependencies: [
+                .product(name: "GRDB", package: "GRDB.swift"),
+            ],
+            path: "Sources/MooreProgression",
+            resources: [.process("Migrations")]
+        ),
+        .target(
+            name: "MooreWarmup",
+            dependencies: [
+                .product(name: "GRDB", package: "GRDB.swift"),
+            ],
+            path: "Sources/MooreWarmup",
+            resources: [.process("Migrations")]
+        ),
         .testTarget(
             name: "MooreFoundationTests",
             dependencies: ["MooreFoundation"],
@@ -76,6 +92,17 @@ let package = Package(
             path: "Tests/MooreWorkoutTests",
             exclude: ["Fixtures", "VerifyWorkoutFsm.mjs"]
         ),
-    ]
+        .testTarget(
+            name: "MooreProgressionTests",
+            dependencies: ["MooreProgression"],
+            path: "Tests/MooreProgressionTests",
+            exclude: ["Fixtures", "VerifyProgression.mjs"]
+        ),
+        .testTarget(
+            name: "MooreWarmupTests",
+            dependencies: ["MooreWarmup"],
+            path: "Tests/MooreWarmupTests",
+            exclude: ["Fixtures", "VerifyWarmup.mjs"]
+        ),
     ]
 )
