@@ -1,0 +1,30 @@
+{
+  "fixture": "hevy-import-stub",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "BR-012 (entry stub; real import = #30), INV-ST5 (stub writes nothing)",
+  "seed": {
+    "sessions": [
+      { "id": "s-1", "startedAt": "2026-08-12T08:00:00Z", "endedAt": "2026-08-12T09:00:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V13",
+      "name": "Hevy entry renders blocked-by-#30; invoking it writes no session/setting rows",
+      "cite": "BR-012, INV-ST5",
+      "steps": [
+        { "do": "snapshotTable", "table": "workout_session" },
+        { "do": "hevyImportEntry",
+          "expect": {
+            "enabled": false,
+            "blockedByTicket": "#30",
+            "copyKey": "settings.dataSync.importHevy"
+          } },
+        { "do": "assertCopyValue", "table": "settingsCopy", "key": "settings.dataSync.importHevy", "expect": "Import from Hevy" },
+        { "do": "assertCopyValue", "table": "settingsCopy", "key": "settings.dataSync.importHevyBlocked", "expect": "Available after import ships" },
+        { "do": "assertTableUnchanged", "table": "workout_session" },
+        { "do": "assertSessionCount", "expect": 1 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "fixture": "unit-conversion-math",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "BR-002 (2.20462 ratio, 1dp display / 2dp storage, half-away-from-zero), BR-003 (entry respect)",
+  "vectors": [
+    {
+      "id": "V1",
+      "name": "kg↔lb conversion math at the frozen ratio",
+      "cite": "BR-002",
+      "steps": [
+        { "do": "kgToLb", "kg": 100, "expect": 220.462 },
+        { "do": "lbToKg", "lb": 220.462, "expect": 100 },
+        { "do": "kgToLb", "kg": 0, "expect": 0 },
+        { "do": "kgToLb", "kg": 2.5, "expect": 5.51155 },
+        { "do": "displayString", "rawKg": 100, "unit": "kg", "expect": "100.0 kg" },
+        { "do": "displayString", "rawKg": 100, "unit": "lb", "expect": "220.5 lb" },
+        { "do": "displayString", "rawKg": 2.5, "unit": "lb", "expect": "5.5 lb" },
+        { "do": "roundDisplay", "value": 220.462, "expect": 220.5 },
+        { "do": "roundDisplay", "value": 0.25, "expect": 0.3 },
+        { "do": "roundStorage", "value": 81.6466, "expect": 81.65 }
+      ]
+    },
+    {
+      "id": "V2",
+      "name": "entry respect: lb entry stores canonical kg at 2dp; display round-trips",
+      "cite": "BR-003, BR-002",
+      "steps": [
+        { "do": "entryToStorage", "entered": 180, "unit": "lb", "expectKg": 81.65 },
+        { "do": "entryToStorage", "entered": 81.65, "unit": "kg", "expectKg": 81.65 },
+        { "do": "entryToStorage", "entered": 135, "unit": "lb", "expectKg": 61.24 },
+        { "do": "displayString", "rawKg": 81.65, "unit": "lb", "expect": "180.0 lb" },
+        { "do": "displayString", "rawKg": 81.65, "unit": "kg", "expect": "81.7 kg" },
+        { "do": "displayString", "rawKg": 61.24, "unit": "lb", "expect": "135.0 lb" }
+      ]
+    }
+  ]
+}
