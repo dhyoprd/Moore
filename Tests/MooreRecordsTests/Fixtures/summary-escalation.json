@@ -1,0 +1,73 @@
+{
+  "label": "BR-010 — Summary: 0 rows = no section; 1 row = card only; ≥2 = banner + precedence-ordered cards",
+  "seed": {
+    "exercises": [
+      { "id": "ex-a", "name": "Bench Press", "exerciseType": "strength" },
+      { "id": "ex-b", "name": "Squat", "exerciseType": "strength" },
+      { "id": "ex-c", "name": "Plank", "exerciseType": "cardio" }
+    ],
+    "sessions": [
+      { "id": "s-hist", "startedAt": "2026-07-01T10:00:00Z", "endedAt": "2026-07-01T11:00:00Z" },
+      { "id": "s-single", "startedAt": "2026-08-12T10:00:00Z", "endedAt": "2026-08-12T11:00:00Z" },
+      { "id": "s-multi", "startedAt": "2026-08-13T10:00:00Z", "endedAt": "2026-08-13T11:00:00Z" },
+      { "id": "s-multi-2", "startedAt": "2026-08-13T11:00:00Z", "endedAt": "2026-08-13T12:00:00Z" },
+      { "id": "s-empty", "startedAt": "2026-08-14T10:00:00Z", "endedAt": "2026-08-14T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "set-ah", "sessionId": "s-hist", "exerciseId": "ex-a", "status": "completed", "setClass": "work", "actualWeight": 90, "actualReps": 5, "completedAt": "2026-07-01T10:10:00Z" },
+      { "id": "set-bh", "sessionId": "s-hist", "exerciseId": "ex-b", "status": "completed", "setClass": "work", "actualWeight": 130, "actualReps": 5, "completedAt": "2026-07-01T10:20:00Z" },
+      { "id": "set-ch", "sessionId": "s-hist", "exerciseId": "ex-c", "status": "completed", "setClass": "work", "actualDuration": 60, "completedAt": "2026-07-01T10:30:00Z" },
+      { "id": "set-an", "sessionId": "s-single", "exerciseId": "ex-a", "status": "completed", "setClass": "work", "actualWeight": 95, "actualReps": 5, "completedAt": "2026-08-12T10:10:00Z" },
+      { "id": "set-bn", "sessionId": "s-multi", "exerciseId": "ex-b", "status": "completed", "setClass": "work", "actualWeight": 135, "actualReps": 5, "completedAt": "2026-08-13T10:10:00Z" },
+      { "id": "set-bn2", "sessionId": "s-multi", "exerciseId": "ex-b", "status": "completed", "setClass": "work", "actualWeight": 140, "actualReps": 5, "completedAt": "2026-08-13T10:15:00Z" },
+      { "id": "set-cn", "sessionId": "s-multi-2", "exerciseId": "ex-c", "status": "completed", "setClass": "work", "actualDuration": 90, "completedAt": "2026-08-13T11:10:00Z" }
+    ],
+    "personalRecords": [
+      { "exerciseId": "ex-a", "kind": "max_1rm", "value": 104.99999999999999, "setId": "set-ah", "sessionId": "s-hist", "achievedAt": "2026-07-01T10:10:00Z" },
+      { "exerciseId": "ex-b", "kind": "max_1rm", "value": 151.66666666666666, "setId": "set-bh", "sessionId": "s-hist", "achievedAt": "2026-07-01T10:20:00Z" },
+      { "exerciseId": "ex-b", "kind": "max_volume", "value": 650, "setId": "set-bh", "sessionId": "s-hist", "achievedAt": "2026-07-01T10:20:00Z" },
+      { "exerciseId": "ex-c", "kind": "max_duration", "value": 60, "setId": "set-ch", "sessionId": "s-hist", "achievedAt": "2026-07-01T10:30:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V10-zero-pr-session-no-section",
+      "summary": { "sessionId": "s-empty", "showBanner": false, "cards": [] }
+    },
+    {
+      "id": "V11-single-pr-session-card-only",
+      "writeFromSet": { "setId": "set-an" },
+      "summary": {
+        "sessionId": "s-single",
+        "showBanner": false,
+        "cards": [ { "exerciseId": "ex-a", "kind": "max_1rm", "value": 110.83333333333333 } ]
+      }
+    },
+    {
+      "id": "V12-multi-pr-session-banner-and-precedence-order",
+      "writeFromSet": [
+        { "setId": "set-bn" },
+        { "setId": "set-bn2" },
+        { "setId": "set-cn" }
+      ],
+      "summary": {
+        "sessionId": "s-multi",
+        "showBanner": true,
+        "cards": [
+          { "exerciseId": "ex-b", "kind": "max_1rm", "value": 163.33333333333334 },
+          { "exerciseId": "ex-b", "kind": "max_volume", "value": 700 }
+        ]
+      }
+    },
+    {
+      "id": "V12b-duration-session-single-card-kind",
+      "summary": {
+        "sessionId": "s-multi-2",
+        "showBanner": false,
+        "cards": [
+          { "exerciseId": "ex-c", "kind": "max_duration", "value": 90 }
+        ]
+      }
+    }
+  ]
+}

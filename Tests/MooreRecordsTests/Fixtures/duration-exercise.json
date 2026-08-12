@@ -1,0 +1,31 @@
+{
+  "label": "BR-004 — duration-metric exercises hold max_duration only",
+  "seed": {
+    "exercises": [ { "id": "ex-plank", "name": "Plank", "exerciseType": "cardio" } ],
+    "sessions": [
+      { "id": "s-hist", "startedAt": "2026-07-01T10:00:00Z", "endedAt": "2026-07-01T11:00:00Z" },
+      { "id": "s-now", "startedAt": "2026-08-12T10:00:00Z" }
+    ],
+    "sets": [
+      { "id": "set-p1", "sessionId": "s-hist", "exerciseId": "ex-plank", "status": "completed", "setClass": "work", "actualDuration": 60, "completedAt": "2026-07-01T10:05:00Z" },
+      { "id": "set-p2", "sessionId": "s-now", "exerciseId": "ex-plank", "status": "completed", "setClass": "work", "actualDuration": 75, "completedAt": "2026-08-12T10:05:00Z" }
+    ],
+    "personalRecords": [
+      { "exerciseId": "ex-plank", "kind": "max_duration", "value": 60, "setId": "set-p1", "sessionId": "s-hist", "achievedAt": "2026-07-01T10:05:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V5-duration-exceeds-fires-max-duration-only",
+      "writeFromSet": { "setId": "set-p2" },
+      "expect": {
+        "written": ["max_duration"],
+        "beaten": ["max_duration"],
+        "fired": { "headlineKind": "max_duration", "value": 75, "exerciseId": "ex-plank" },
+        "rows": [
+          { "exerciseId": "ex-plank", "kind": "max_duration", "value": 75, "setId": "set-p2", "sessionId": "s-now" }
+        ]
+      }
+    }
+  ]
+}
