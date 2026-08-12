@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Moore</string>
+
+    <!-- SC-settings BR-013 keyed copy (SettingsEngine.settingsCopy), verbatim. -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_units_title">Units</string>
+    <string name="settings_units_weight">Weight unit</string>
+    <string name="settings_restDefaults_title">Rest defaults</string>
+    <string name="settings_restDefaults_compound">Compound lifts</string>
+    <string name="settings_restDefaults_isolation">Isolation</string>
+    <string name="settings_bodyMetrics_title">Body metrics</string>
+    <string name="settings_dataSync_title">Data &amp; sync</string>
+    <string name="settings_dataSync_exportCta">Export backup</string>
+    <string name="settings_dataSync_importHevy">Import from Hevy</string>
+    <string name="settings_cloudSync_title">Cloud sync</string>
+    <string name="settings_cloudSync_coming">Coming after self-validation gate</string>
+    <string name="settings_tombstones_title">Deleted custom exercises</string>
+
+    <!-- #14 empty-state keys, verbatim. -->
+    <string name="home_empty_title">No routines yet</string>
+    <string name="home_empty_sub">Routines are your gym days. Create one and your next workout is one tap to start.</string>
+    <string name="home_empty_cta">Create your first routine</string>
+    <string name="home_startEmpty_cta">Start empty</string>
+    <string name="history_empty_title">No sessions yet</string>
+    <string name="history_empty_sub">Your gym visits will live here.</string>
+    <string name="history_empty_cta">Start a workout</string>
+    <string name="analytics_empty_title">Nothing to graph yet</string>
+    <string name="analytics_empty_sub">Log 3 sessions to start seeing trends.</string>
+    <string name="analytics_empty_cta">Log your first session</string>
+    <string name="activeWorkout_emptyList_line">No sets yet</string>
+    <string name="activeWorkout_addExercise_cta">+ Add exercise</string>
+
+    <!-- Tab titles. -->
+    <string name="tab_home">Home</string>
+    <string name="tab_history">History</string>
+    <string name="tab_analytics">Analytics</string>
+    <string name="tab_settings">Settings</string>
+    <string name="activeWorkout_title">Active workout</string>
+</resources>
