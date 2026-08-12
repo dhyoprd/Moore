@@ -1,0 +1,128 @@
+{
+  "label": "V1-V16 — progression schemes + stalls + deload/hold/ignore",
+  "vectors": [
+    {
+      "id": "V1-linear-upper-clean",
+      "rec": { "id":"r1","routineId":"rA","exerciseId":"ex-ohp","scheme":"linear","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0 },
+      "reference": [
+        { "sessionId":"s1","routineId":"rA","status":"completed","exerciseId":"ex-ohp","setOrdinal":1,"plannedWeight":50,"plannedReps":10,"actualWeight":50,"actualReps":10 },
+        { "sessionId":"s1","routineId":"rA","status":"completed","exerciseId":"ex-ohp","setOrdinal":2,"plannedWeight":50,"plannedReps":10,"actualWeight":50,"actualReps":10 }
+      ],
+      "metric": "reps",
+      "category": "Shoulders",
+      "expect": { "weight": 52.5, "reps": 10, "touched": ["linear"] }
+    },
+    {
+      "id": "V2-linear-lower-clean",
+      "rec": { "id":"r2","routineId":"rA","exerciseId":"ex-squat","scheme":"linear","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0 },
+      "reference": [
+        { "sessionId":"s2","routineId":"rA","status":"completed","exerciseId":"ex-squat","setOrdinal":1,"plannedWeight":100,"plannedReps":5,"actualWeight":100,"actualReps":5 }
+      ],
+      "metric": "reps",
+      "category": "Legs",
+      "expect": { "weight": 105.0, "reps": 5, "touched": ["linear"] }
+    },
+    {
+      "id": "V3-linear-ambiguous-category-upper-biased",
+      "rec": { "id":"r3","routineId":"rA","exerciseId":"ex-ambig","scheme":"linear","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0 },
+      "reference": [
+        { "sessionId":"s3","routineId":"rA","status":"completed","exerciseId":"ex-ambig","setOrdinal":1,"plannedWeight":30,"plannedReps":10,"actualWeight":30,"actualReps":10 }
+      ],
+      "metric": "reps",
+      "category": "Core",
+      "expect": { "weight": 32.5, "reps": 10, "touched": ["linear"] }
+    },
+    {
+      "id": "V4-double-ceiling-weight-bump",
+      "rec": { "id":"r4","routineId":"rA","exerciseId":"ex-curl","scheme":"double","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0 },
+      "reference": [
+        { "sessionId":"s4","routineId":"rA","status":"completed","exerciseId":"ex-curl","setOrdinal":1,"plannedWeight":40,"plannedReps":12,"actualWeight":40,"actualReps":12 },
+        { "sessionId":"s4","routineId":"rA","status":"completed","exerciseId":"ex-curl","setOrdinal":2,"plannedWeight":40,"plannedReps":12,"actualWeight":40,"actualReps":12 }
+      ],
+      "metric": "reps",
+      "category": "Arms",
+      "expect": { "weight": 42.5, "reps": 8, "touched": ["double-ceiling"] }
+    },
+    {
+      "id": "V5-double-middle-reps-plus-one",
+      "rec": { "id":"r5","routineId":"rA","exerciseId":"ex-curl","scheme":"double","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0 },
+      "reference": [
+        { "sessionId":"s5","routineId":"rA","status":"completed","exerciseId":"ex-curl","setOrdinal":1,"plannedWeight":40,"plannedReps":10,"actualWeight":40,"actualReps":10 }
+      ],
+      "metric": "reps",
+      "category": "Arms",
+      "expect": { "weight": 40, "reps": 11, "touched": ["double-reps"] }
+    },
+    {
+      "id": "V6-hold-duration-first-tick",
+      "rec": { "id":"r6","routineId":"rA","exerciseId":"ex-plank","scheme":"hold-duration","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0, "baselineDurationSec": 60 },
+      "reference": [
+        { "sessionId":"s6","routineId":"rA","status":"completed","exerciseId":"ex-plank","setOrdinal":1,"plannedDuration":60,"actualDuration":60 }
+      ],
+      "metric": "duration",
+      "category": "Core",
+      "expect": { "durationSec": 65, "touched": ["hold-duration"] }
+    },
+    {
+      "id": "V7-hold-duration-cap",
+      "rec": { "id":"r7","routineId":"rA","exerciseId":"ex-plank","scheme":"hold-duration","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0, "baselineDurationSec": 60 },
+      "reference": [
+        { "sessionId":"s7","routineId":"rA","status":"completed","exerciseId":"ex-plank","setOrdinal":1,"plannedDuration":120,"actualDuration":120 }
+      ],
+      "metric": "duration",
+      "category": "Core",
+      "expect": { "durationSec": 120, "touched": ["hold-duration"] }
+    },
+    {
+      "id": "V8-first-session-blueprint-verbatim",
+      "rec": { "id":"r8","routineId":"rA","exerciseId":"ex-new","scheme":"linear","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0 },
+      "reference": [],
+      "blueprint": { "weight": 40, "reps": 10 },
+      "metric": "reps",
+      "expect": { "weight": 40, "reps": 10, "touched": ["blueprint-verbatim"] }
+    },
+    {
+      "id": "V10-failed-donation-max-actual",
+      "rec": { "id":"r10","routineId":"rA","exerciseId":"ex-bench","scheme":"linear","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0 },
+      "reference": [
+        { "sessionId":"s10","routineId":"rA","status":"completed","exerciseId":"ex-bench","setOrdinal":1,"plannedWeight":80,"plannedReps":8,"actualWeight":80,"actualReps":8 },
+        { "sessionId":"s10","routineId":"rA","status":"failed","exerciseId":"ex-bench","setOrdinal":2,"plannedWeight":80,"plannedReps":8,"actualWeight":80,"actualReps":4 },
+        { "sessionId":"s10","routineId":"rA","status":"failed","exerciseId":"ex-bench","setOrdinal":3,"plannedWeight":80,"plannedReps":8,"actualWeight":80,"actualReps":6 },
+        { "sessionId":"s10","routineId":"rA","status":"failed","exerciseId":"ex-bench","setOrdinal":4,"plannedWeight":80,"plannedReps":8,"actualWeight":80,"actualReps":5 }
+      ],
+      "metric": "reps",
+      "category": "Chest",
+      "expect": { "weight": 80, "reps": 6, "touched": ["hold-weight-from-fail"] }
+    },
+    {
+      "id": "V11-bodyweight-linear-degenerate-none",
+      "rec": { "id":"r11","routineId":"rA","exerciseId":"ex-pullup","scheme":"linear","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0 },
+      "reference": [
+        { "sessionId":"s11","routineId":"rA","status":"completed","exerciseId":"ex-pullup","setOrdinal":1,"plannedWeight":null,"plannedReps":15,"actualWeight":null,"actualReps":15 }
+      ],
+      "metric": "reps",
+      "category": "Back",
+      "expect": { "weight": null, "reps": 15, "touched": ["linear-degenerate-none"] }
+    },
+    {
+      "id": "V13a-deload-applies-next-session",
+      "rec": { "id":"r13a","routineId":"rA","exerciseId":"ex-bench","scheme":"linear","stallCount":3,"stallMuted":0,"nextBannerAt":3,"deloadPending":1,"stalledWeight":80,"stalledReps":8 },
+      "reference": [
+        { "sessionId":"s-prev","routineId":"rA","status":"failed","exerciseId":"ex-bench","setOrdinal":1,"plannedWeight":80,"plannedReps":8,"actualWeight":80,"actualReps":5 }
+      ],
+      "metric": "reps",
+      "category": "Chest",
+      "expect": { "weight": 72.5, "reps": 8, "touched": ["deload-applied"] }
+    },
+    {
+      "id": "V13b-reentry-after-deload",
+      "rec": { "id":"r13b","routineId":"rA","exerciseId":"ex-bench","scheme":"linear","stallCount":0,"stallMuted":0,"nextBannerAt":3,"deloadPending":0,"stalledWeight":80,"stalledReps":8,"lastDeloadSessionId":"s-deload" },
+      "reference": [
+        { "sessionId":"s-deload","routineId":"rA","status":"completed","exerciseId":"ex-bench","setOrdinal":1,"plannedWeight":72.5,"plannedReps":8,"actualWeight":72.5,"actualReps":8 }
+      ],
+      "metric": "reps",
+      "category": "Chest",
+      "expect": { "weight": 80, "reps": 8, "touched": ["deload-reentry"] }
+    }
+  ]
+}
