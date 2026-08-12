@@ -1,0 +1,39 @@
+{
+  "fixture": "bodymetric-update-delete",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "BR-006 (update bumps updatedAt; delete = tombstone; validation rejects with no partial write), SC-foundation BR-003/INV-3",
+  "vectors": [
+    {
+      "id": "V8a",
+      "name": "update bumps updatedAt; tombstone hides from list but survives in raw scan",
+      "cite": "BR-006, SC-foundation INV-2/INV-3",
+      "steps": [
+        { "do": "addBodyMetric", "id": "bm-edit", "kind": "bodyWeight", "value": 82.4, "unit": "kg", "recordedAt": "2026-08-10T07:00:00Z", "at": "2026-08-10T07:00:01Z" },
+        { "do": "updateBodyMetric", "id": "bm-edit", "value": 82.1, "unit": "kg", "recordedAt": "2026-08-10T07:00:00Z", "at": "2026-08-13T08:00:00Z" },
+        { "do": "listBodyMetrics",
+          "expect": [ { "kind": "bodyWeight", "value": 82.1, "unit": "kg", "recordedAt": "2026-08-10T07:00:00Z" } ] },
+        { "do": "assertBodyMetricUpdatedAt", "id": "bm-edit", "expect": "2026-08-13T08:00:00Z" },
+        { "do": "softDeleteBodyMetric", "id": "bm-edit", "at": "2026-08-13T08:30:00Z" },
+        { "do": "listBodyMetrics", "expect": [] },
+        { "do": "assertBodyMetricRawRow", "id": "bm-edit", "expectDeletedAt": "2026-08-13T08:30:00Z" }
+      ]
+    },
+    {
+      "id": "V8b",
+      "name": "validation gate: every invalid entry rejected, table stays empty (no partial write)",
+      "cite": "BR-006, INV-ST6",
+      "steps": [
+        { "do": "addBodyMetric", "kind": "boneDensity", "value": 1.2, "unit": "gcm2", "recordedAt": "2026-08-13T07:00:00Z", "at": "2026-08-13T07:00:01Z", "expectError": "invalidKind" },
+        { "do": "addBodyMetric", "kind": "measurement", "value": 84, "unit": "cm", "recordedAt": "2026-08-13T07:00:00Z", "at": "2026-08-13T07:00:01Z", "expectError": "measurementRequiresLabel" },
+        { "do": "addBodyMetric", "kind": "measurement", "label": "   ", "value": 84, "unit": "cm", "recordedAt": "2026-08-13T07:00:00Z", "at": "2026-08-13T07:00:01Z", "expectError": "measurementRequiresLabel" },
+        { "do": "addBodyMetric", "kind": "bodyFat", "value": 15, "unit": "kg", "recordedAt": "2026-08-13T07:00:00Z", "at": "2026-08-13T07:00:01Z", "expectError": "invalidUnit" },
+        { "do": "addBodyMetric", "kind": "bodyWeight", "value": 82, "unit": "pct", "recordedAt": "2026-08-13T07:00:00Z", "at": "2026-08-13T07:00:01Z", "expectError": "invalidUnit" },
+        { "do": "addBodyMetric", "kind": "measurement", "label": "Waist", "value": 84, "unit": "", "recordedAt": "2026-08-13T07:00:00Z", "at": "2026-08-13T07:00:01Z", "expectError": "invalidUnit" },
+        { "do": "addBodyMetric", "kind": "bodyWeight", "value": 0, "unit": "kg", "recordedAt": "2026-08-13T07:00:00Z", "at": "2026-08-13T07:00:01Z", "expectError": "invalidValue" },
+        { "do": "addBodyMetric", "kind": "bodyFat", "value": 101, "unit": "pct", "recordedAt": "2026-08-13T07:00:00Z", "at": "2026-08-13T07:00:01Z", "expectError": "invalidValue" },
+        { "do": "listBodyMetrics", "expect": [] },
+        { "do": "assertBodyMetricRawCount", "expect": 0 }
+      ]
+    }
+  ]
+}

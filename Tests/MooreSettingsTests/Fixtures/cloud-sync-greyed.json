@@ -1,0 +1,25 @@
+{
+  "fixture": "cloud-sync-greyed",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "BR-011 (cloud sync permanently greyed, copy fixed, info → #4), INV-ST5 (no write path)",
+  "vectors": [
+    {
+      "id": "V12",
+      "name": "sync toggle reads disabled + greyed with the gate copy; invoking it writes no row anywhere",
+      "cite": "BR-011, INV-ST5, #4",
+      "steps": [
+        { "do": "snapshotTable", "table": "app_setting" },
+        { "do": "cloudSyncStatus",
+          "expect": {
+            "enabled": false,
+            "greyed": true,
+            "copyKey": "settings.cloudSync.coming",
+            "infoIssue": "#4"
+          } },
+        { "do": "assertCopyValue", "table": "settingsCopy", "key": "settings.cloudSync.coming", "expect": "Coming after self-validation gate" },
+        { "do": "assertCopyValue", "table": "settingsCopy", "key": "settings.cloudSync.title", "expect": "Cloud sync" },
+        { "do": "assertTableUnchanged", "table": "app_setting" }
+      ]
+    }
+  ]
+}

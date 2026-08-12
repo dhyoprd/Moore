@@ -1,0 +1,40 @@
+{
+  "fixture": "tombstone-list-restore",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "BR-010 (list deletedAt custom exercises, deletedAt DESC; restore clears deletedAt + bumps updatedAt), INV-ST4",
+  "seed": {
+    "exercises": [
+      { "id": "ex-builtin", "name": "Bench Press", "exerciseType": "strength", "isCustom": 0 },
+      { "id": "ex-builtin-del", "name": "Legacy Built-in", "exerciseType": "strength", "isCustom": 0, "deletedAt": "2026-08-12T09:00:00Z" },
+      { "id": "ex-custom-live", "name": "My Press Variant", "exerciseType": "custom", "isCustom": 1 },
+      { "id": "ex-custom-del-1", "name": "Old Custom A", "exerciseType": "custom", "isCustom": 1, "deletedAt": "2026-08-10T10:00:00Z" },
+      { "id": "ex-custom-del-2", "name": "Old Custom B", "exerciseType": "custom", "isCustom": 1, "deletedAt": "2026-08-12T11:00:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V11",
+      "name": "only tombstoned CUSTOM exercises listed, deletedAt-desc; restore clears deletedAt and bumps updatedAt; live fetch sees restored rows",
+      "cite": "BR-010, INV-ST4",
+      "steps": [
+        { "do": "listTombstonedExercises",
+          "expect": [
+            { "id": "ex-custom-del-2", "name": "Old Custom B", "deletedAt": "2026-08-12T11:00:00Z" },
+            { "id": "ex-custom-del-1", "name": "Old Custom A", "deletedAt": "2026-08-10T10:00:00Z" }
+          ] },
+        { "do": "restoreExercise", "id": "ex-custom-del-2", "at": "2026-08-13T09:40:00Z" },
+        { "do": "assertExerciseLive", "id": "ex-custom-del-2", "expectUpdatedAt": "2026-08-13T09:40:00Z" },
+        { "do": "listTombstonedExercises",
+          "expect": [
+            { "id": "ex-custom-del-1", "name": "Old Custom A", "deletedAt": "2026-08-10T10:00:00Z" }
+          ] },
+        { "do": "restoreExercise", "id": "ex-custom-del-1", "at": "2026-08-13T09:41:00Z" },
+        { "do": "listTombstonedExercises", "expect": [] },
+        { "do": "assertExerciseLive", "id": "ex-custom-del-1", "expectUpdatedAt": "2026-08-13T09:41:00Z" },
+        { "do": "assertExerciseStillTombstoned", "id": "ex-builtin-del" },
+        { "do": "restoreExercise", "id": "ex-custom-live", "at": "2026-08-13T09:42:00Z" },
+        { "do": "assertExerciseUntouched", "id": "ex-custom-live" }
+      ]
+    }
+  ]
+}

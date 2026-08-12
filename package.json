@@ -2,14 +2,22 @@
   "name": "moore-tests",
   "version": "0.0.0",
   "private": true,
-  "description": "Seam-2 verification harness for Moore contracts (#19 foundation, #20 exercises, #21 routines)",
+  "description": "Seam-2 verification harness for Moore contracts (#19 foundation, #20 exercises, #21 routines, #22 workout, #23 rest, #24 progression, #26 prs, #28 settings)",
   "type": "module",
   "scripts": {
     "verify:migrations": "node Tests/MooreFoundationTests/VerifyMigrations.mjs",
     "verify:exercises": "node Tests/MooreExercisesTests/VerifyExerciseLibrary.mjs",
     "verify:routines": "node Tests/MooreRoutinesTests/VerifyRoutines.mjs",
+<<<<<<< HEAD
     "verify:rest": "node Tests/MooreRestTests/VerifyRest.mjs",
     "verify:cues": "node Tests/MooreCuesTests/VerifyCues.mjs"
+=======
+    "verify:workout": "node Tests/MooreWorkoutTests/VerifyWorkoutFsm.mjs",
+    "verify:rest": "node Tests/MooreRestTests/VerifyRest.mjs",
+    "verify:progression": "node Tests/MooreProgressionTests/VerifyProgression.mjs",
+    "verify:records": "node Tests/MooreRecordsTests/VerifyRecords.mjs",
+    "verify:settings": "node Tests/MooreSettingsTests/VerifySettings.mjs"
+>>>>>>> feat/28-settings-data
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2"

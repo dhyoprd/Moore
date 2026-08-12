@@ -1,0 +1,44 @@
+{
+  "fixture": "unit-toggle-display-only",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "BR-001 (units are display-only), BR-004 (body-metric display), INV-ST1 (toggle writes one settings row, never data)",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "isCustom": 0 }
+    ],
+    "sessions": [
+      { "id": "s-1", "startedAt": "2026-08-12T08:00:00Z", "endedAt": "2026-08-12T09:00:00Z" }
+    ],
+    "completedSets": [
+      { "id": "cs-1", "sessionId": "s-1", "exerciseId": "ex-bench", "plannedWeight": 95, "plannedReps": 5, "actualWeight": 100, "actualReps": 5, "status": "completed", "completedAt": "2026-08-12T08:30:00Z" }
+    ],
+    "bodyMetrics": [
+      { "id": "bm-1", "kind": "bodyWeight", "value": 82.4, "unit": "kg", "recordedAt": "2026-08-12T07:00:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V3",
+      "name": "toggling kg→lb→kg flips displays only; completed_set and body_metric stay byte-identical",
+      "cite": "BR-001, BR-004, INV-ST1",
+      "steps": [
+        { "do": "snapshotTable", "table": "completed_set" },
+        { "do": "snapshotTable", "table": "body_metric" },
+        { "do": "fetchSettings", "expect": { "weightUnit": "kg", "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 } },
+        { "do": "displayStoredWeight", "setId": "cs-1", "column": "actualWeight", "expect": "100.0 kg" },
+        { "do": "setWeightUnit", "unit": "lb", "at": "2026-08-13T09:00:00Z" },
+        { "do": "fetchSettings", "expect": { "weightUnit": "lb", "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 } },
+        { "do": "displayStoredWeight", "setId": "cs-1", "column": "actualWeight", "expect": "220.5 lb" },
+        { "do": "displayBodyMetricRow", "metricId": "bm-1", "expect": "181.7 lb" },
+        { "do": "assertTableUnchanged", "table": "completed_set" },
+        { "do": "assertTableUnchanged", "table": "body_metric" },
+        { "do": "setWeightUnit", "unit": "kg", "at": "2026-08-13T09:05:00Z" },
+        { "do": "displayStoredWeight", "setId": "cs-1", "column": "actualWeight", "expect": "100.0 kg" },
+        { "do": "displayBodyMetricRow", "metricId": "bm-1", "expect": "82.4 kg" },
+        { "do": "assertTableUnchanged", "table": "completed_set" },
+        { "do": "assertTableUnchanged", "table": "body_metric" },
+        { "do": "assertSettingsRowCount", "expect": 3 }
+      ]
+    }
+  ]
+}
