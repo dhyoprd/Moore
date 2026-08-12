@@ -10,6 +10,7 @@
     "verify:routines": "node Tests/MooreRoutinesTests/VerifyRoutines.mjs",
 <<<<<<< HEAD
     "verify:rest": "node Tests/MooreRestTests/VerifyRest.mjs",
+<<<<<<< HEAD
     "verify:cues": "node Tests/MooreCuesTests/VerifyCues.mjs"
 =======
     "verify:workout": "node Tests/MooreWorkoutTests/VerifyWorkoutFsm.mjs",
@@ -18,6 +19,10 @@
     "verify:records": "node Tests/MooreRecordsTests/VerifyRecords.mjs",
     "verify:settings": "node Tests/MooreSettingsTests/VerifySettings.mjs"
 >>>>>>> feat/28-settings-data
+=======
+    "verify:cues": "node Tests/MooreCuesTests/VerifyCues.mjs",
+    "verify:import": "node Tests/MooreImportTests/VerifyImport.mjs"
+>>>>>>> feat/30-hevy-import
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2"

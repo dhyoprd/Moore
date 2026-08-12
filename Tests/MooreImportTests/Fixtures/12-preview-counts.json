@@ -1,0 +1,68 @@
+{
+  "label": "V12: preview counts exact — every PreviewCounts field asserted (AC-8)",
+  "cites": ["BR-014", "INV-IM5"],
+  "vectors": [
+    {
+      "id": "every-counter",
+      "csvFile": "12-counts.csv",
+      "expect": {
+        "unit": "kg",
+        "warnings": [],
+        "counts": {
+          "dataRows": 9,
+          "emptyRowsSkipped": 1,
+          "duplicatesCollapsed": 1,
+          "sessionsFound": 1,
+          "setsImported": 6,
+          "exercisesMatched": 4,
+          "sessionsAlreadyImported": 0,
+          "cardioRowsSkipped": 1,
+          "foldedSetTypes": 3,
+          "quarantinedCount": 0,
+          "metadataDropped": { "rpe": 1, "exerciseNotes": 0, "supersetId": 0 }
+        },
+        "quarantined": [],
+        "newExercises": [
+          { "name": "Gizmo Machine", "normalizedName": "gizmo machine", "metric": "reps" },
+          { "name": "Plank Hero", "normalizedName": "plank hero", "metric": "duration" }
+        ],
+        "sessions": [
+          {
+            "importKey": "count day|2025-10-01T12:00:00Z",
+            "name": "Count Day",
+            "notes": "Heavy session",
+            "startedAt": "2025-10-01T12:00:00Z",
+            "endedAt": "2025-10-01T13:00:00Z",
+            "setCount": 6
+          }
+        ],
+        "summary": { "sessionsImported": 1, "setsImported": 6, "exercisesCreated": 2 },
+        "db": {
+          "sessions": 1,
+          "sets": 6,
+          "sessionRows": [
+            { "importKey": "count day|2025-10-01T12:00:00Z", "name": "Count Day", "notes": "Heavy session", "importSource": "hevy", "routineIdNull": true }
+          ],
+          "setRows": [
+            { "sessionImportKey": "count day|2025-10-01T12:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 90, "actualReps": 5, "completedAt": "2025-10-01T13:00:00Z" },
+            { "sessionImportKey": "count day|2025-10-01T12:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 1, "actualWeight": 60, "actualReps": 10 },
+            { "sessionImportKey": "count day|2025-10-01T12:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 2, "actualWeight": 90, "actualReps": 4 },
+            { "sessionImportKey": "count day|2025-10-01T12:00:00Z", "exerciseName": "Gizmo Machine", "sortOrder": 3, "actualWeight": 40, "actualReps": 8 },
+            { "sessionImportKey": "count day|2025-10-01T12:00:00Z", "exerciseName": "Plank Hero", "sortOrder": 4, "actualWeight": null, "actualDuration": 45 },
+            { "sessionImportKey": "count day|2025-10-01T12:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 5, "actualWeight": 92.5, "actualReps": 3 }
+          ],
+          "prKindsByExercise": {
+            "Barbell Bench Press": ["max_1rm", "max_reps", "max_volume"],
+            "Gizmo Machine": ["max_1rm", "max_reps", "max_volume"],
+            "Plank Hero": ["max_duration"]
+          },
+          "prRows": [
+            { "exerciseName": "Barbell Bench Press", "kind": "max_1rm", "value": 105 },
+            { "exerciseName": "Barbell Bench Press", "kind": "max_reps", "value": 10 },
+            { "exerciseName": "Plank Hero", "kind": "max_duration", "value": 45 }
+          ]
+        }
+      }
+    }
+  ]
+}

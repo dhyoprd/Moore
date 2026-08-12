@@ -1,0 +1,39 @@
+{
+  "label": "V14: notes + literal \\n escapes — description → session.notes with real newlines; exercise_notes dropped",
+  "cites": ["BR-005", "BR-011"],
+  "vectors": [
+    {
+      "id": "newline-escapes-unescaped",
+      "csvFile": "14-notes.csv",
+      "expect": {
+        "unit": "kg",
+        "counts": {
+          "sessionsFound": 1,
+          "setsImported": 2,
+          "metadataDropped": { "rpe": 0, "exerciseNotes": 2, "supersetId": 0 }
+        },
+        "sessions": [
+          {
+            "importKey": "notes day|2025-12-10T18:00:00Z",
+            "name": "Notes Day",
+            "notes": "Heavy day\nFelt strong",
+            "startedAt": "2025-12-10T18:00:00Z",
+            "endedAt": "2025-12-10T18:50:00Z",
+            "setCount": 2
+          }
+        ],
+        "db": {
+          "sessions": 1,
+          "sets": 2,
+          "sessionRows": [
+            { "importKey": "notes day|2025-12-10T18:00:00Z", "name": "Notes Day", "notes": "Heavy day\nFelt strong", "importSource": "hevy" }
+          ],
+          "setRows": [
+            { "sessionImportKey": "notes day|2025-12-10T18:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 85, "actualReps": 5, "completedAt": "2025-12-10T18:50:00Z" },
+            { "sessionImportKey": "notes day|2025-12-10T18:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 1, "actualWeight": 85, "actualReps": 4 }
+          ]
+        }
+      }
+    }
+  ]
+}

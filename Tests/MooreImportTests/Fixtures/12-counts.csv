@@ -1,0 +1,10 @@
+title,start_time,end_time,description,exercise_title,superset_id,exercise_notes,set_index,set_type,weight_kg,reps,duration_seconds,rpe,distance_km
+"Count Day","01 Oct 2025, 12:00","01 Oct 2025, 13:00","Heavy session",Barbell Bench Press,,,0,normal,90,5,,
+"Count Day","01 Oct 2025, 12:00","01 Oct 2025, 13:00","Heavy session",Barbell Bench Press,,,1,warmup,60,10,,
+"Count Day","01 Oct 2025, 12:00","01 Oct 2025, 13:00","Heavy session",Barbell Bench Press,,,2,failure,90,4,,
+"Count Day","01 Oct 2025, 12:00","01 Oct 2025, 13:00","Heavy session",Gizmo Machine,,,0,dropset,40,8,,
+"Count Day","01 Oct 2025, 12:00","01 Oct 2025, 13:00","Heavy session",Gizmo Machine,,,0,dropset,40,8,,
+"Count Day","01 Oct 2025, 12:00","01 Oct 2025, 13:00","Heavy session",Treadmill Run,,,0,normal,,,,,5
+"Count Day","01 Oct 2025, 12:00","01 Oct 2025, 13:00","Heavy session",Plank Hero,,,0,normal,,,45,9
+
+"Count Day","01 Oct 2025, 12:00","01 Oct 2025, 13:00","Heavy session",Barbell Bench Press,,,3,normal,92.5,3,,
