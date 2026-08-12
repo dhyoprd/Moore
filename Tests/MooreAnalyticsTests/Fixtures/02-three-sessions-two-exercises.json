@@ -1,0 +1,102 @@
+{
+  "label": "V2 — 3 sessions across 2 exercises: e1RM trend plots, tonnage populates, split buckets correctly",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "category": "chest" },
+      { "id": "ex-squat", "name": "Squat", "exerciseType": "strength", "category": "quads" },
+      { "id": "ex-ohp", "name": "Overhead Press", "exerciseType": "strength", "category": "shoulders" }
+    ],
+    "sessions": [
+      { "id": "s1", "name": "Push A", "startedAt": "2026-08-10T10:00:00Z", "endedAt": "2026-08-10T11:00:00Z" },
+      { "id": "s2", "startedAt": "2026-08-11T10:00:00Z", "endedAt": "2026-08-11T11:00:00Z" },
+      { "id": "s3", "name": "Push C", "startedAt": "2026-08-12T10:00:00Z", "endedAt": "2026-08-12T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "set-b1", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 60, "actualReps": 5, "completedAt": "2026-08-10T10:10:00Z" },
+      { "id": "set-q1", "sessionId": "s1", "exerciseId": "ex-squat", "status": "completed", "setClass": "work", "actualWeight": 80, "actualReps": 5, "completedAt": "2026-08-10T10:20:00Z" },
+      { "id": "set-b2", "sessionId": "s2", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 62.5, "actualReps": 5, "completedAt": "2026-08-11T10:10:00Z" },
+      { "id": "set-q2", "sessionId": "s2", "exerciseId": "ex-squat", "status": "completed", "setClass": "work", "actualWeight": 82.5, "actualReps": 5, "completedAt": "2026-08-11T10:20:00Z" },
+      { "id": "set-b3", "sessionId": "s3", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 65, "actualReps": 5, "completedAt": "2026-08-12T10:10:00Z" },
+      { "id": "set-q3", "sessionId": "s3", "exerciseId": "ex-squat", "status": "completed", "setClass": "work", "actualWeight": 85, "actualReps": 5, "completedAt": "2026-08-12T10:20:00Z" }
+    ],
+    "personalRecords": [
+      { "exerciseId": "ex-bench", "sessionId": "s3", "setId": "set-b3", "kind": "max_1rm", "value": 75.83333333333334, "achievedAt": "2026-08-12T10:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V2a-header-3-3-streak3",
+      "query": { "op": "header" },
+      "expect": { "last7": 3, "last30": 3, "streak": 3 }
+    },
+    {
+      "id": "V2b-trend-bench-3-points-one-segment",
+      "query": { "op": "trend", "exerciseId": "ex-bench", "rangeDays": 30 },
+      "expect": {
+        "points": [
+          { "day": "2026-08-10", "value": 70, "segment": 0 },
+          { "day": "2026-08-11", "value": 72.91666666666667, "segment": 0 },
+          { "day": "2026-08-12", "value": 75.83333333333334, "segment": 0 }
+        ]
+      }
+    },
+    {
+      "id": "V2c-trend-squat",
+      "query": { "op": "trend", "exerciseId": "ex-squat", "rangeDays": 30 },
+      "expect": {
+        "points": [
+          { "day": "2026-08-10", "value": 93.33333333333334, "segment": 0 },
+          { "day": "2026-08-11", "value": 96.25, "segment": 0 },
+          { "day": "2026-08-12", "value": 99.16666666666667, "segment": 0 }
+        ]
+      }
+    },
+    {
+      "id": "V2d-trend-no-history-empty",
+      "query": { "op": "trend", "exerciseId": "ex-ohp", "rangeDays": 30 },
+      "expect": { "points": [] }
+    },
+    {
+      "id": "V2e-tonnage-week33-2175",
+      "query": { "op": "tonnage", "rangeDays": 30 },
+      "expect": { "weeks": [ { "week": "2026-W33", "tonnage": 2175 } ] }
+    },
+    {
+      "id": "V2f-split-upper-lower-sums-100",
+      "query": { "op": "split", "rangeDays": 30 },
+      "expect": {
+        "sumTolerance": 0.1,
+        "buckets": [
+          { "bucket": "upper", "tonnage": 937.5, "pct": 43.10344827586207 },
+          { "bucket": "lower", "tonnage": 1237.5, "pct": 56.89655172413793 }
+        ]
+      }
+    },
+    {
+      "id": "V2g-history-one-month-desc-rows",
+      "query": { "op": "history" },
+      "expect": {
+        "months": [
+          {
+            "month": "2026-08",
+            "rows": [
+              { "sessionId": "s3", "name": "Push C", "day": "2026-08-12", "completedCount": 2, "tonnage": 750, "prCount": 1, "badge": true },
+              { "sessionId": "s2", "name": null, "day": "2026-08-11", "completedCount": 2, "tonnage": 725, "prCount": 0, "badge": false },
+              { "sessionId": "s1", "name": "Push A", "day": "2026-08-10", "completedCount": 2, "tonnage": 700, "prCount": 0, "badge": false }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "V2h-prlist-single-item",
+      "query": { "op": "prList" },
+      "expect": {
+        "items": [
+          { "exerciseId": "ex-bench", "exerciseName": "Bench Press", "kind": "max_1rm", "value": 75.83333333333334, "day": "2026-08-12", "sessionId": "s3" }
+        ]
+      }
+    }
+  ]
+}

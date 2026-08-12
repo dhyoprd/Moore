@@ -1,0 +1,43 @@
+{
+  "label": "V6: quarantine — corrupt row set aside with rest applying; >50% corrupt aborts atomically (AC-6)",
+  "cites": ["BR-012", "INV-IM2", "INV-IM3"],
+  "vectors": [
+    {
+      "id": "single-corrupt-row-quarantined",
+      "csvFile": "06-quarantine.csv",
+      "expect": {
+        "unit": "kg",
+        "counts": {
+          "dataRows": 4,
+          "sessionsFound": 1,
+          "setsImported": 3,
+          "quarantinedCount": 1
+        },
+        "quarantined": [
+          {
+            "rowNumber": 3,
+            "column": "start_time",
+            "value": "32 Sep 2025, 18:00",
+            "messageContains": "unparseable start_time"
+          }
+        ],
+        "summary": { "sessionsImported": 1, "setsImported": 3 },
+        "db": {
+          "sessions": 1,
+          "sets": 3,
+          "setRows": [
+            { "sessionImportKey": "q day|2025-05-20T18:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 80, "actualReps": 5 },
+            { "sessionImportKey": "q day|2025-05-20T18:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 1, "actualWeight": 82.5, "actualReps": 4 },
+            { "sessionImportKey": "q day|2025-05-20T18:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 2, "actualWeight": 85, "actualReps": 3 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "majority-corrupt-aborts",
+      "csvFile": "06b-majority.csv",
+      "expectAbort": "notHevyExport",
+      "db": { "sessions": 0, "sets": 0 }
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "fixture": "01-taxonomy-fire-once",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-001, BR-002, BR-003, INV-C3, INV-C5, INV-C7 — each of the eight cues fires exactly once per lifecycle event with the exact §3(a) channel descriptor",
+  "vectors": [
+    {
+      "id": "V1",
+      "name": "eight cues, one lifecycle event each, byte-matched channel descriptors",
+      "cite": "BR-002, BR-003",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 0 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.rest.end", "haptic": "alert", "audio": true, "visual": "rest.over", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 1, "setId": "s0" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.failed", "at": 2, "setId": "s0" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.failed", "haptic": "nudge", "audio": false, "visual": "set.failDelta", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.dropped", "at": 3, "setId": "d0" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.dropped", "haptic": null, "audio": false, "visual": "set.dropUndo", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.pr.achieved", "at": 4, "setId": "s1", "beatenKinds": ["max_1rm"] },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.pr.achieved", "haptic": "celebration", "audio": false, "visual": "pr.toast", "blocking": false, "delivery": "inProcess", "headlineKind": "max_1rm" } } },
+        { "do": "evaluate", "event": { "cue": "cue.pr.summary", "at": 5 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.pr.summary", "haptic": null, "audio": false, "visual": "pr.cards", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.finish.morph", "at": 6 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.finish.morph", "haptic": null, "audio": false, "visual": "finish.morph", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.confirm.destructive", "at": 7 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.confirm.destructive", "haptic": null, "audio": false, "visual": "confirm.modal", "blocking": true, "delivery": "inProcess", "headlineKind": null } } }
+      ],
+      "finalExpect": {
+        "dispatchCount": 8,
+        "firedCues": ["cue.rest.end", "cue.set.completed", "cue.set.failed", "cue.set.dropped", "cue.pr.achieved", "cue.pr.summary", "cue.finish.morph", "cue.confirm.destructive"]
+      }
+    },
+    {
+      "id": "V-unknown",
+      "name": "unknown/forward-compat cue id suppresses, never crashes",
+      "cite": "BR-001, INV-C7",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.bogus.future", "at": 0 },
+          "expect": { "outcome": "suppressed", "reason": "unknownCue" } }
+      ],
+      "finalExpect": { "dispatchCount": 0, "firedCues": [] }
+    }
+  ]
+}

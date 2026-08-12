@@ -1,0 +1,26 @@
+{
+  "fixture": "forward-compat-suppress",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "#10 rest-end gating (cue only while overlay is in rest state; a later-running run is not consumed by an earlier morph)",
+  "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+  "vectors": [
+    {
+      "id": "E8",
+      "name": "a run logged after the finish morph hosts a normal countdown and fires cue.rest.end",
+      "cite": "#10: 'Superset flows are unaffected… a normal countdown and normal cue follow'",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": true,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": false },
+          "expect": { "state": "restRunning", "overlay": "rest", "durationSec": 90, "startedAt": 0 } },
+        { "do": "expireNaturally", "at": 90,
+          "expect": { "state": "noRest", "overlay": "finishPanel", "cue": "cue.finish.morph" } },
+        { "do": "setCompleted", "at": 100, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "state": "restRunning", "durationSec": 180, "startedAt": 100, "adjustmentSec": 0 } },
+        { "do": "expireNaturally", "at": 280,
+          "expect": { "state": "restExpired", "cue": "cue.rest.end" } }
+      ],
+      "finalExpect": { "cues": ["cue.finish.morph", "cue.rest.end"], "state": "restExpired" }
+    }
+  ]
+}

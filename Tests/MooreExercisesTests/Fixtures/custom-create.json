@@ -1,0 +1,70 @@
+{
+  "fixture": "custom-create",
+  "contract": "SC-exercises@1.0.0",
+  "cites": ["BR-005", "V2", "V4"],
+  "cases": [
+    {
+      "id": "V4-fresh-custom",
+      "preCondition": { "library": [] },
+      "input": { "name": "Tibialis Raise", "category": "calves", "defaultMetric": "reps", "equipment": "other" },
+      "expectedOutcome": "inserted",
+      "expectedRow": {
+        "isCustom": 1,
+        "name": "Tibialis Raise",
+        "nameNormalized": "tibialis raise",
+        "category": "calves",
+        "defaultMetric": "reps",
+        "equipment": "other"
+      },
+      "expectedIdFormat": "uuid",
+      "note": "Fresh custom inserted; new UUID must differ from every built-in slug."
+    },
+    {
+      "id": "V2-dedupe-by-normalized-name",
+      "preCondition": { "library": [{ "id": "existing-custom", "name": "Cable Woodchopper", "nameNormalized": "cable woodchopper", "isCustom": true }] },
+      "input": { "name": "  Cable   Woodchopper  ", "category": "core", "defaultMetric": "reps", "equipment": "cable" },
+      "expectedOutcome": "matchedExisting",
+      "expectedReturnedId": "existing-custom",
+      "expectedRowCountAfter": 1,
+      "note": "BR-005(a): exact-normalized hit reuses the row; no new row."
+    },
+    {
+      "id": "V7-restore-tombstoned-custom",
+      "preCondition": {
+        "library": [
+          {
+            "id": "custom-kb-halo",
+            "name": "Kettlebell Halo",
+            "nameNormalized": "kettlebell halo",
+            "isCustom": true,
+            "deleted": true
+          }
+        ]
+      },
+      "input": { "name": "kettlebell halo", "category": "shoulders", "defaultMetric": "reps", "equipment": "kettlebell" },
+      "expectedOutcome": "restoredCustom",
+      "expectedReturnedId": "custom-kb-halo",
+      "expectedDeletedCleared": true,
+      "note": "BR-005(b): tombstoned custom restored; same id reused."
+    },
+    {
+      "id": "V8-restore-tombstoned-built-in",
+      "preCondition": {
+        "library": [
+          {
+            "id": "barbell-curl",
+            "name": "Barbell Curl",
+            "nameNormalized": "barbell curl",
+            "isCustom": false,
+            "deleted": true
+          }
+        ]
+      },
+      "input": { "name": "Barbell Curl", "category": "biceps", "defaultMetric": "reps", "equipment": "barbell" },
+      "expectedOutcome": "restoredBuiltIn",
+      "expectedReturnedId": "barbell-curl",
+      "expectedDeletedCleared": true,
+      "note": "BR-005(c): tombstoned built-in restored; same id reused, isCustom stays 0."
+    }
+  ]
+}

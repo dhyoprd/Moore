@@ -1,0 +1,46 @@
+{
+  "label": "V3: exercise matching — primary, secondary (equipment strip), miss → custom, existing-custom dedupe (AC-3)",
+  "cites": ["BR-009", "INV-IM8"],
+  "seed": {
+    "customExercises": [
+      { "id": "custom-existing-1", "name": "Existing Custom", "exerciseType": "custom" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "match-miss-matrix",
+      "csvFile": "03-matching.csv",
+      "expect": {
+        "unit": "kg",
+        "counts": {
+          "sessionsFound": 1,
+          "setsImported": 6,
+          "exercisesMatched": 4,
+          "quarantinedCount": 0
+        },
+        "newExercises": [
+          { "name": "Bench Press (Dumbbell)", "normalizedName": "bench press (dumbbell)", "metric": "reps" },
+          { "name": "My Custom Lift", "normalizedName": "my custom lift", "metric": "reps" }
+        ],
+        "summary": { "sessionsImported": 1, "setsImported": 6, "exercisesCreated": 2 },
+        "db": {
+          "sessions": 1,
+          "sets": 6,
+          "customExercises": 3,
+          "setRows": [
+            { "sessionImportKey": "match day|2025-02-01T09:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 80, "actualReps": 5 },
+            { "sessionImportKey": "match day|2025-02-01T09:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 1, "actualWeight": 80, "actualReps": 5 },
+            { "sessionImportKey": "match day|2025-02-01T09:00:00Z", "exerciseName": "Squat", "sortOrder": 2, "actualWeight": 100, "actualReps": 5 },
+            { "sessionImportKey": "match day|2025-02-01T09:00:00Z", "exerciseName": "Bench Press (Dumbbell)", "sortOrder": 3, "actualWeight": 30, "actualReps": 8 },
+            { "sessionImportKey": "match day|2025-02-01T09:00:00Z", "exerciseName": "My Custom Lift", "sortOrder": 4, "actualWeight": 50, "actualReps": 10 },
+            { "sessionImportKey": "match day|2025-02-01T09:00:00Z", "exerciseName": "Existing Custom", "sortOrder": 5, "actualWeight": 20, "actualReps": 12 }
+          ],
+          "exerciseRows": [
+            { "name": "Bench Press (Dumbbell)", "exerciseType": "custom", "isCustom": 1 },
+            { "name": "My Custom Lift", "exerciseType": "custom", "isCustom": 1 }
+          ]
+        }
+      }
+    }
+  ]
+}

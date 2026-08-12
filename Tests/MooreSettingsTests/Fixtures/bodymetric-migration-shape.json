@@ -1,0 +1,28 @@
+{
+  "fixture": "bodymetric-migration-shape",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "§3d migration 0009 (rebuild), INV-ST6 (closed vocabulary, legacy remap), SC-prs §3d precedent (legacy table preserved)",
+  "migrationMode": "staged",
+  "legacySeed": {
+    "bodyMetrics": [
+      { "id": "bm-legacy-1", "kind": "weight", "value": 80, "unit": "kg", "recordedAt": "2026-08-01T07:00:00Z", "createdAt": "2026-08-01T07:00:01Z", "updatedAt": "2026-08-01T07:00:01Z" },
+      { "id": "bm-legacy-2", "kind": "bodyFat", "value": 18, "unit": "pct", "recordedAt": "2026-08-02T07:00:00Z", "createdAt": "2026-08-02T07:00:01Z", "updatedAt": "2026-08-02T07:00:01Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V7",
+      "name": "0009 remaps legacy kind='weight'→'bodyWeight', adds label column, admits measurement+cm, rejects legacy kind, preserves __legacy_0001",
+      "cite": "§3d, INV-ST6",
+      "steps": [
+        { "do": "assertBodyMetricRow", "id": "bm-legacy-1", "expect": { "kind": "bodyWeight", "label": null, "value": 80, "unit": "kg" } },
+        { "do": "assertBodyMetricRow", "id": "bm-legacy-2", "expect": { "kind": "bodyFat", "label": null, "value": 18, "unit": "pct" } },
+        { "do": "assertTableExists", "table": "body_metric__legacy_0001" },
+        { "do": "assertLegacyRawKind", "id": "bm-legacy-1", "expect": "weight" },
+        { "do": "assertBodyMetricColumns", "expect": ["id", "kind", "label", "value", "unit", "recordedAt", "createdAt", "updatedAt", "deletedAt"] },
+        { "do": "addBodyMetric", "kind": "measurement", "label": "Waist", "value": 84, "unit": "cm", "recordedAt": "2026-08-13T07:00:00Z", "at": "2026-08-13T07:00:01Z" },
+        { "do": "insertRawExpectCheckFailure", "kind": "weight", "value": 80, "unit": "kg", "recordedAt": "2026-08-13T07:00:00Z" }
+      ]
+    }
+  ]
+}

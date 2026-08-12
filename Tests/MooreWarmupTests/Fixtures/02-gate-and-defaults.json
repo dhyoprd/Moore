@@ -1,0 +1,25 @@
+{
+  "label": "V2/V6 — gate: default OFF yields zero rows (BR-002/BR-010); W ≤ bar and W NULL yield zero rows (BR-002).",
+  "materialize": [
+    { "id": "v2-default-off",
+      "scheme": null,
+      "exercises": [ { "id": "ex-bench", "work": [ {"weight": 82.5, "reps": 5} ] } ],
+      "expectSession": [ ["ex-bench","work",82.5] ] },
+    { "id": "v2-explicit-off",
+      "scheme": {"warmupEnabled": 0},
+      "exercises": [ { "id": "ex-bench", "work": [ {"weight": 82.5, "reps": 5} ] } ],
+      "expectSession": [ ["ex-bench","work",82.5] ] },
+    { "id": "v6-w-eq-bar",
+      "scheme": {"warmupEnabled": 1},
+      "exercises": [ { "id": "ex-bench", "work": [ {"weight": 20, "reps": 10} ] } ],
+      "expectSession": [ ["ex-bench","work",20] ] },
+    { "id": "v6-w-below-bar",
+      "scheme": {"warmupEnabled": 1},
+      "exercises": [ { "id": "ex-bench", "work": [ {"weight": 15, "reps": 10} ] } ],
+      "expectSession": [ ["ex-bench","work",15] ] },
+    { "id": "v6-bodyweight-null",
+      "scheme": {"warmupEnabled": 1},
+      "exercises": [ { "id": "ex-pullup", "work": [ {"weight": null, "reps": 8} ] } ],
+      "expectSession": [ ["ex-pullup","work",null] ] }
+  ]
+}

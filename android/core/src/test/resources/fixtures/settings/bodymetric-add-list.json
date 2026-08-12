@@ -1,0 +1,35 @@
+{
+  "fixture": "bodymetric-add-list",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "BR-006 (body metrics CRUD), BR-007 (trend list date-desc, no charts), §3b (measurement kind + label)",
+  "vectors": [
+    {
+      "id": "V6",
+      "name": "add weight/bodyFat/measurement entries; trend list renders date-descending; kind filter keeps only matching rows",
+      "cite": "BR-006, BR-007",
+      "steps": [
+        { "do": "listBodyMetrics", "expect": [] },
+        { "do": "addBodyMetric", "kind": "bodyWeight", "value": 82.4, "unit": "kg", "recordedAt": "2026-08-10T07:00:00Z", "at": "2026-08-10T07:00:01Z" },
+        { "do": "addBodyMetric", "kind": "bodyFat", "value": 15.5, "unit": "pct", "recordedAt": "2026-08-11T07:00:00Z", "at": "2026-08-11T07:00:01Z" },
+        { "do": "addBodyMetric", "kind": "measurement", "label": "Waist", "value": 84, "unit": "cm", "recordedAt": "2026-08-09T07:00:00Z", "at": "2026-08-09T07:00:01Z" },
+        { "do": "addBodyMetric", "kind": "bodyWeight", "value": 181, "unit": "lb", "recordedAt": "2026-08-12T07:00:00Z", "at": "2026-08-12T07:00:01Z" },
+        { "do": "listBodyMetrics",
+          "expect": [
+            { "kind": "bodyWeight", "value": 181, "unit": "lb", "recordedAt": "2026-08-12T07:00:00Z" },
+            { "kind": "bodyFat", "value": 15.5, "unit": "pct", "recordedAt": "2026-08-11T07:00:00Z" },
+            { "kind": "bodyWeight", "value": 82.4, "unit": "kg", "recordedAt": "2026-08-10T07:00:00Z" },
+            { "kind": "measurement", "label": "Waist", "value": 84, "unit": "cm", "recordedAt": "2026-08-09T07:00:00Z" }
+          ] },
+        { "do": "listBodyMetrics", "kind": "bodyWeight",
+          "expect": [
+            { "kind": "bodyWeight", "value": 181, "unit": "lb", "recordedAt": "2026-08-12T07:00:00Z" },
+            { "kind": "bodyWeight", "value": 82.4, "unit": "kg", "recordedAt": "2026-08-10T07:00:00Z" }
+          ] },
+        { "do": "listBodyMetrics", "kind": "measurement",
+          "expect": [
+            { "kind": "measurement", "label": "Waist", "value": 84, "unit": "cm", "recordedAt": "2026-08-09T07:00:00Z" }
+          ] }
+      ]
+    }
+  ]
+}

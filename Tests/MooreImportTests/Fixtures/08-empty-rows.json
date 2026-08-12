@@ -1,0 +1,43 @@
+{
+  "label": "V8: empty rows — blank records skipped silently; header-only file imports nothing without error",
+  "cites": ["BR-003", "BR-002"],
+  "vectors": [
+    {
+      "id": "blank-rows-skipped",
+      "csvFile": "08-empty-rows.csv",
+      "expect": {
+        "unit": "kg",
+        "counts": {
+          "dataRows": 5,
+          "emptyRowsSkipped": 3,
+          "sessionsFound": 1,
+          "setsImported": 2,
+          "quarantinedCount": 0
+        },
+        "db": {
+          "sessions": 1,
+          "sets": 2,
+          "setRows": [
+            { "sessionImportKey": "e day|2025-07-02T06:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 60, "actualReps": 8 },
+            { "sessionImportKey": "e day|2025-07-02T06:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 1, "actualWeight": 62.5, "actualReps": 6 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "header-only-file",
+      "csv": "title,start_time,end_time,exercise_title,set_index,set_type,weight_kg,reps\n",
+      "expect": {
+        "unit": "kg",
+        "counts": {
+          "dataRows": 0,
+          "sessionsFound": 0,
+          "setsImported": 0,
+          "quarantinedCount": 0
+        },
+        "summary": { "sessionsImported": 0, "setsImported": 0, "exercisesCreated": 0 },
+        "db": { "sessions": 0, "sets": 0 }
+      }
+    }
+  ]
+}

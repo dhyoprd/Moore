@@ -1,0 +1,22 @@
+{
+  "label": "V7 — empty home: zero routines, zero sessions → empty-state copy keys returned",
+  "setup": {
+    "routines": [],
+    "folders": [],
+    "completedSessions": [],
+    "activeSession": null
+  },
+  "expected": {
+    "routines": [],
+    "folders": [],
+    "activeSession": null,
+    "streakCount": null,
+    "isEmptyState": true,
+    "copyKeys": {
+      "title": "home.empty_title",
+      "sub": "home.empty_sub",
+      "cta": "home.empty_cta"
+    },
+    "startEmptyAlwaysVisible": true
+  }
+}

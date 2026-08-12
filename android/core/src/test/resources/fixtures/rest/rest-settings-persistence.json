@@ -1,0 +1,36 @@
+{
+  "fixture": "rest-settings-persistence",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "§3d migration 0007, INV-S1 (additive settings), INV-S2 (defaults seeded, re-migration never resets user values)",
+  "database": {
+    "needsAppSettingsTable": true,
+    "assertTableShape": {
+      "name": "app_setting",
+      "columns": ["key", "value", "updatedAt"],
+      "primaryKey": ["key"]
+    },
+    "assertColumnAdded": [
+      { "table": "planned_set", "column": "restDurationSec", "type": "INTEGER", "nullable": true },
+      { "table": "routine", "column": "restSec", "type": "INTEGER", "nullable": true }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V13",
+      "name": "post-migrate defaults land; an update persists; re-migration keeps the user's value",
+      "cite": "§3d, INV-S2 (INSERT OR IGNORE), SC-foundation INV-2 (updatedAt bump)",
+      "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+      "steps": [
+        { "do": "fetchSettings",
+          "expect": { "settings": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 } } },
+        { "do": "updateSettings", "compoundSec": 150,
+          "expect": { "settings": { "defaultRestCompoundSec": 150, "defaultRestIsolationSec": 90 } } },
+        { "do": "assertUpdatedAtBumped", "key": "defaultRestCompoundSec" },
+        { "do": "reapplyMigrations" },
+        { "do": "fetchSettings",
+          "expect": { "settings": { "defaultRestCompoundSec": 150, "defaultRestIsolationSec": 90 } } }
+      ],
+      "finalExpect": { "settings": { "defaultRestCompoundSec": 150, "defaultRestIsolationSec": 90 } }
+    }
+  ]
+}

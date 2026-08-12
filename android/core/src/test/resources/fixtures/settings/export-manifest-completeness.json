@@ -1,0 +1,75 @@
+{
+  "fixture": "export-manifest-completeness",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "BR-008 (full SQLite file copy, .moore-backup naming), BR-009 (manifest: ten core tables, tombstone counts, plannedX), INV-ST3",
+  "seed": {
+    "folders": [
+      { "id": "f-1", "name": "Push Pull Legs" }
+    ],
+    "exercises": [
+      { "id": "ex-1", "name": "Bench Press", "exerciseType": "strength", "isCustom": 0 },
+      { "id": "ex-2", "name": "My Custom Curl", "exerciseType": "custom", "isCustom": 1, "deletedAt": "2026-08-11T10:00:00Z" }
+    ],
+    "routines": [
+      { "id": "r-1", "folderId": "f-1", "name": "Push Day", "sortOrder": 0 }
+    ],
+    "plannedSets": [
+      { "id": "ps-1", "routineId": "r-1", "exerciseId": "ex-1", "sortOrder": 0, "plannedWeight": 100, "plannedReps": 5 },
+      { "id": "ps-2", "routineId": "r-1", "exerciseId": "ex-1", "sortOrder": 1, "plannedWeight": 100, "plannedReps": 5, "deletedAt": "2026-08-12T10:00:00Z" }
+    ],
+    "sessions": [
+      { "id": "s-1", "startedAt": "2026-08-12T08:00:00Z", "endedAt": "2026-08-12T09:00:00Z" }
+    ],
+    "completedSets": [
+      { "id": "cs-1", "sessionId": "s-1", "exerciseId": "ex-1", "plannedWeight": 100, "plannedReps": 5, "actualWeight": 102.5, "actualReps": 5, "status": "completed", "completedAt": "2026-08-12T08:20:00Z" },
+      { "id": "cs-2", "sessionId": "s-1", "exerciseId": "ex-1", "plannedWeight": null, "plannedReps": null, "actualWeight": 60, "actualReps": 8, "status": "completed", "completedAt": "2026-08-12T08:40:00Z" },
+      { "id": "cs-3", "sessionId": "s-1", "exerciseId": "ex-1", "plannedWeight": 100, "plannedReps": 5, "actualWeight": null, "actualReps": null, "status": "dropped", "deletedAt": "2026-08-12T09:30:00Z" }
+    ],
+    "personalRecords": [
+      { "id": "pr-1", "exerciseId": "ex-1", "sessionId": "s-1", "setId": "cs-1", "kind": "max_1rm", "value": 128.33, "achievedAt": "2026-08-12T08:20:00Z" }
+    ],
+    "bodyMetrics": [
+      { "id": "bm-1", "kind": "bodyWeight", "value": 82.4, "unit": "kg", "recordedAt": "2026-08-12T07:00:00Z" },
+      { "id": "bm-2", "kind": "measurement", "label": "Waist", "value": 84, "unit": "cm", "recordedAt": "2026-08-11T07:00:00Z", "deletedAt": "2026-08-12T12:00:00Z" }
+    ],
+    "progressionSchemes": [
+      { "id": "sch-1", "routineId": "r-1", "exerciseId": "ex-1", "scheme": "linear", "incrementValue": 2.5 }
+    ],
+    "settings": {
+      "weightUnit": "kg"
+    }
+  },
+  "vectors": [
+    {
+      "id": "V9",
+      "name": "manifest lists all ten core tables with exact total + tombstone counts; naming + flags fixed",
+      "cite": "BR-008, BR-009, INV-ST3",
+      "exportedAt": "2026-08-13T09:30:00Z",
+      "steps": [
+        { "do": "buildManifest",
+          "expect": {
+            "fileName": "moore-2026-08-13T09-30-00Z.moore-backup",
+            "format": "sqlite-file-copy",
+            "includesTombstones": true,
+            "includesPlannedColumns": true,
+            "tables": [
+              { "table": "folder", "rowCount": 1, "tombstoneCount": 0 },
+              { "table": "exercise", "rowCount": 2, "tombstoneCount": 1 },
+              { "table": "routine", "rowCount": 1, "tombstoneCount": 0 },
+              { "table": "planned_set", "rowCount": 2, "tombstoneCount": 1 },
+              { "table": "workout_session", "rowCount": 1, "tombstoneCount": 0 },
+              { "table": "completed_set", "rowCount": 3, "tombstoneCount": 1 },
+              { "table": "personal_record", "rowCount": 1, "tombstoneCount": 0 },
+              { "table": "body_metric", "rowCount": 2, "tombstoneCount": 1 },
+              { "table": "progression_scheme", "rowCount": 1, "tombstoneCount": 0 },
+              { "table": "app_setting", "rowCount": 3, "tombstoneCount": 0 }
+            ]
+          } },
+        { "do": "assertLegacyTablesPresent",
+          "expect": ["body_metric__legacy_0001", "personal_record__legacy_0001", "progression_scheme__legacy_0002"] },
+        { "do": "assertPlannedColumnsPresent", "table": "completed_set",
+          "columns": ["plannedWeight", "plannedReps", "plannedDuration"] }
+      ]
+    }
+  ]
+}

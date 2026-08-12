@@ -1,0 +1,46 @@
+{
+  "label": "BR-001 — failed and dropped sets never write; failed sets never feed baselines",
+  "seed": {
+    "exercises": [ { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength" } ],
+    "sessions": [
+      { "id": "s-hist", "startedAt": "2026-07-01T10:00:00Z", "endedAt": "2026-07-01T11:00:00Z" },
+      { "id": "s-now", "startedAt": "2026-08-12T10:00:00Z" }
+    ],
+    "sets": [
+      { "id": "set-h1", "sessionId": "s-hist", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 8, "completedAt": "2026-07-01T10:10:00Z" },
+      { "id": "set-h2", "sessionId": "s-hist", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 80, "actualReps": 11, "completedAt": "2026-07-01T10:20:00Z" },
+      { "id": "set-fail", "sessionId": "s-now", "exerciseId": "ex-bench", "status": "failed", "setClass": "work", "actualWeight": 100, "actualReps": 12, "completedAt": "2026-08-12T10:10:00Z" },
+      { "id": "set-drop", "sessionId": "s-now", "exerciseId": "ex-bench", "status": "dropped", "setClass": "work", "actualWeight": 120, "actualReps": 1, "completedAt": null },
+      { "id": "set-clean", "sessionId": "s-now", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 10, "completedAt": "2026-08-12T10:20:00Z" }
+    ],
+    "personalRecords": [
+      { "exerciseId": "ex-bench", "kind": "max_1rm", "value": 126.66666666666666, "setId": "set-h1", "sessionId": "s-hist", "achievedAt": "2026-07-01T10:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V4-failed-set-beats-rep-best-no-write",
+      "writeFromSet": { "setId": "set-fail" },
+      "expect": { "write": null, "fired": null, "rows": [
+        { "exerciseId": "ex-bench", "kind": "max_1rm", "value": 126.66666666666666, "setId": "set-h1", "sessionId": "s-hist" }
+      ] }
+    },
+    {
+      "id": "V4b-dropped-set-no-write",
+      "writeFromSet": { "setId": "set-drop" },
+      "expect": { "write": null, "fired": null }
+    },
+    {
+      "id": "V4c-failed-set-invisible-clean-set-beats-1rm",
+      "writeFromSet": { "setId": "set-clean" },
+      "expect": {
+        "written": ["max_1rm"],
+        "beaten": ["max_1rm"],
+        "fired": { "headlineKind": "max_1rm", "value": 133.33333333333331, "exerciseId": "ex-bench" },
+        "rows": [
+          { "exerciseId": "ex-bench", "kind": "max_1rm", "value": 133.33333333333331, "setId": "set-clean", "sessionId": "s-now" }
+        ]
+      }
+    }
+  ]
+}

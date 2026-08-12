@@ -1,0 +1,52 @@
+{
+  "label": "V11' V12 V14 V15 V16 — stall firing, weight-change reset, hold/ignore semantics",
+  "vectors": [
+    {
+      "id": "V11-stall-fires-at-three",
+      "rec": { "id":"r11","routineId":"rA","exerciseId":"ex-bench","scheme":"linear","stallCount":2,"stallMuted":0,"nextBannerAt":3 },
+      "metric": "reps",
+      "previousWeight": 80,
+      "currentSets": [
+        { "sessionId":"sN","status":"completed","exerciseId":"ex-bench","setOrdinal":1,"plannedWeight":80,"plannedReps":8,"actualReps":8,"actualWeight":80 },
+        { "sessionId":"sN","status":"failed","exerciseId":"ex-bench","setOrdinal":2,"plannedWeight":80,"plannedReps":8,"actualReps":4,"actualWeight":80 }
+      ],
+      "stall": {
+        "banner": true,
+        "copyMatch": "^Looks stalled on EX",
+        "rec": { "stallCount": 3 }
+      }
+    },
+    {
+      "id": "V12-weight-change-resets-chain",
+      "rec": { "id":"r12","routineId":"rA","exerciseId":"ex-bench","scheme":"linear","stallCount":2,"stallMuted":0,"nextBannerAt":3 },
+      "metric": "reps",
+      "previousWeight": 80,
+      "currentSets": [
+        { "sessionId":"sN","status":"failed","exerciseId":"ex-bench","setOrdinal":1,"plannedWeight":85,"plannedReps":8,"actualReps":5,"actualWeight":85 }
+      ],
+      "stall": {
+        "banner": false,
+        "rec": { "stallCount": 0 }
+      }
+    },
+    {
+      "id": "V14-hold-rearms-banner",
+      "rec": { "id":"r14","routineId":"rA","exerciseId":"ex-bench","scheme":"linear","stallCount":3,"stallMuted":0,"nextBannerAt":3 },
+      "stallAction": "hold",
+      "stallExpect": { "nextBannerAt": 5, "deloadPending": 0, "stallMuted": 0 }
+    },
+    {
+      "id": "V15-ignore-mutes",
+      "rec": { "id":"r15","routineId":"rA","exerciseId":"ex-bench","scheme":"linear","stallCount":3,"stallMuted":0,"nextBannerAt":3 },
+      "stallAction": "ignore",
+      "stallExpect": { "stallMuted": 1, "nextBannerAt": 3 }
+    },
+    {
+      "id": "V16-deload-sets-pending",
+      "rec": { "id":"r16","routineId":"rA","exerciseId":"ex-bench","scheme":"linear","stallCount":3,"stallMuted":0,"nextBannerAt":3 },
+      "stallAction": "deload",
+      "stallActionArgs": { "weight": 80, "reps": 8 },
+      "stallExpect": { "deloadPending": 1, "stalledWeight": 80, "stalledReps": 8 }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "fixture": "drop-no-rest",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "BR-005 (a drop never starts rest, and never modifies a running timer)",
+  "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+  "vectors": [
+    {
+      "id": "V9",
+      "name": "a dropped set from noRest starts no timer",
+      "cite": "BR-005",
+      "steps": [
+        { "do": "setDropped", "at": 0,
+          "expect": { "state": "noRest" } }
+      ],
+      "finalExpect": { "cues": [], "state": "noRest" }
+    },
+    {
+      "id": "E8",
+      "name": "a dropped set mid-rest leaves the running timer untouched",
+      "cite": "BR-005",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": false },
+          "expect": { "state": "restRunning", "durationSec": 90, "startedAt": 0, "adjustmentSec": 0 } },
+        { "do": "setDropped", "at": 20,
+          "expect": { "state": "restRunning", "durationSec": 90, "startedAt": 0, "adjustmentSec": 0 } }
+      ],
+      "finalExpect": { "cues": [], "state": "restRunning", "durationSec": 90, "startedAt": 0, "adjustmentSec": 0 }
+    }
+  ]
+}

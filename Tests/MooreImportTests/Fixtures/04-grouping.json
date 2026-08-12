@@ -1,0 +1,48 @@
+{
+  "label": "V4: session grouping — (start_time, title) identity, non-contiguous rows, no contiguity assumption (AC-4)",
+  "cites": ["BR-005", "BR-007", "INV-IM7"],
+  "vectors": [
+    {
+      "id": "interleaved-groups",
+      "csvFile": "04-grouping.csv",
+      "expect": {
+        "unit": "kg",
+        "counts": { "sessionsFound": 3, "setsImported": 5, "quarantinedCount": 0 },
+        "sessions": [
+          {
+            "importKey": "alpha|2025-03-05T07:00:00Z",
+            "name": "Alpha",
+            "startedAt": "2025-03-05T07:00:00Z",
+            "endedAt": "2025-03-05T07:40:00Z",
+            "setCount": 2
+          },
+          {
+            "importKey": "beta|2025-03-05T07:00:00Z",
+            "name": "Beta",
+            "startedAt": "2025-03-05T07:00:00Z",
+            "endedAt": "2025-03-05T07:35:00Z",
+            "setCount": 2
+          },
+          {
+            "importKey": "alpha|2025-03-06T07:00:00Z",
+            "name": "Alpha",
+            "startedAt": "2025-03-06T07:00:00Z",
+            "endedAt": "2025-03-06T07:50:00Z",
+            "setCount": 1
+          }
+        ],
+        "db": {
+          "sessions": 3,
+          "sets": 5,
+          "setRows": [
+            { "sessionImportKey": "alpha|2025-03-05T07:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 60, "actualReps": 8 },
+            { "sessionImportKey": "alpha|2025-03-05T07:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 1, "actualWeight": 65, "actualReps": 6 },
+            { "sessionImportKey": "beta|2025-03-05T07:00:00Z", "exerciseName": "Squat", "sortOrder": 0, "actualWeight": 90, "actualReps": 5 },
+            { "sessionImportKey": "beta|2025-03-05T07:00:00Z", "exerciseName": "Squat", "sortOrder": 1, "actualWeight": 95, "actualReps": 3 },
+            { "sessionImportKey": "alpha|2025-03-06T07:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 70, "actualReps": 5 }
+          ]
+        }
+      }
+    }
+  ]
+}

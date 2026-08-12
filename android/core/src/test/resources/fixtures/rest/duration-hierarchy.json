@@ -1,0 +1,57 @@
+{
+  "fixture": "duration-hierarchy",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "BR-001 (four-level hierarchy, first non-null wins at log-moment)",
+  "database": { "needsAppSettingsTable": true },
+  "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+  "vectors": [
+    {
+      "id": "V1",
+      "name": "per-set override beats every broader level",
+      "cite": "BR-001 level 1 + V4 (companion)",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": 240, "perExerciseSec": 120, "perRoutineSec": 200, "categoryIsCompound": true },
+          "expect": { "resolution": { "durationSec": 240, "source": "perSet" },
+                      "state": "restRunning", "durationSec": 240, "startedAt": 0, "adjustmentSec": 0, "cue": null } }
+      ]
+    },
+    {
+      "id": "V2",
+      "name": "per-exercise override used when per-set absent",
+      "cite": "BR-001 level 2",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": 120, "perRoutineSec": 200, "categoryIsCompound": true },
+          "expect": { "resolution": { "durationSec": 120, "source": "perExercise" },
+                      "state": "restRunning", "durationSec": 120, "startedAt": 0, "adjustmentSec": 0, "cue": null } }
+      ]
+    },
+    {
+      "id": "V3",
+      "name": "per-routine override used when per-set and per-exercise absent",
+      "cite": "BR-001 level 3",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": 200, "categoryIsCompound": true },
+          "expect": { "resolution": { "durationSec": 200, "source": "perRoutine" },
+                      "state": "restRunning", "durationSec": 200, "startedAt": 0, "adjustmentSec": 0, "cue": null } }
+      ]
+    },
+    {
+      "id": "V4",
+      "name": "global defaults bucket by exercise category (compound 180 / isolation 90)",
+      "cite": "BR-001 level 4 + #9 defaults",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "resolution": { "durationSec": 180, "source": "globalCompound" },
+                      "state": "restRunning", "durationSec": 180, "startedAt": 0, "adjustmentSec": 0, "cue": null } },
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": false },
+          "expect": { "resolution": { "durationSec": 90, "source": "globalIsolation" },
+                      "state": "restRunning", "durationSec": 90, "startedAt": 0, "adjustmentSec": 0, "cue": null } }
+      ]
+    }
+  ]
+}

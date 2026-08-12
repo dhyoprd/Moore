@@ -1,0 +1,72 @@
+{
+  "label": "V10: timezone — naive local wall-times shifted by device offset; importKey carries UTC stamp",
+  "cites": ["BR-004", "BR-013", "BR-017"],
+  "vectors": [
+    {
+      "id": "offset-plus-120",
+      "csvFile": "10-timezone.csv",
+      "options": { "timezoneOffsetMinutes": 120 },
+      "expect": {
+        "counts": { "sessionsFound": 2, "setsImported": 2 },
+        "sessions": [
+          {
+            "importKey": "tz morning|2025-09-14T15:41:00Z",
+            "name": "TZ Morning",
+            "startedAt": "2025-09-14T15:41:00Z",
+            "endedAt": "2025-09-14T16:23:00Z",
+            "setCount": 1
+          },
+          {
+            "importKey": "tz evening|2025-09-14T21:30:00Z",
+            "name": "TZ Evening",
+            "startedAt": "2025-09-14T21:30:00Z",
+            "endedAt": "2025-09-14T22:10:00Z",
+            "setCount": 1
+          }
+        ],
+        "db": {
+          "sessions": 2,
+          "sessionRows": [
+            { "importKey": "tz morning|2025-09-14T15:41:00Z", "startedAt": "2025-09-14T15:41:00Z", "endedAt": "2025-09-14T16:23:00Z" },
+            { "importKey": "tz evening|2025-09-14T21:30:00Z", "startedAt": "2025-09-14T21:30:00Z", "endedAt": "2025-09-14T22:10:00Z" }
+          ],
+          "setRows": [
+            { "sessionImportKey": "tz evening|2025-09-14T21:30:00Z", "exerciseName": "Squat", "sortOrder": 0, "completedAt": "2025-09-14T22:10:00Z" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "offset-minus-300",
+      "csvFile": "10-timezone.csv",
+      "options": { "timezoneOffsetMinutes": -300 },
+      "expect": {
+        "sessions": [
+          {
+            "importKey": "tz morning|2025-09-14T22:41:00Z",
+            "startedAt": "2025-09-14T22:41:00Z",
+            "endedAt": "2025-09-14T23:23:00Z"
+          },
+          {
+            "importKey": "tz evening|2025-09-15T04:30:00Z",
+            "startedAt": "2025-09-15T04:30:00Z",
+            "endedAt": "2025-09-15T05:10:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "offset-plus-90-half-hour",
+      "csvFile": "10-timezone.csv",
+      "options": { "timezoneOffsetMinutes": 90 },
+      "expect": {
+        "sessionsHead": [
+          {
+            "importKey": "tz morning|2025-09-14T16:11:00Z",
+            "startedAt": "2025-09-14T16:11:00Z"
+          }
+        ]
+      }
+    }
+  ]
+}

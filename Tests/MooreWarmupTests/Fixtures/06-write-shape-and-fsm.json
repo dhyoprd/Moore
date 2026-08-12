@@ -1,0 +1,24 @@
+{
+  "label": "V7 — post-write row shape + FSM behavior on warm-up rows (BR-008 write shape; BR-017/BR-018 1-tap + drop via SC-workout-logging, chip presence per BR-016).",
+  "session": {
+    "routineId": "rt-a",
+    "scheme": {"routineId": "rt-a", "exerciseId": "ex-bench", "warmupEnabled": 1},
+    "exercises": [ { "id": "ex-bench", "work": [ {"weight": 82.5, "reps": 5} ] } ],
+    "bar": 20,
+    "unit": "kg"
+  },
+  "expectRowShape": {
+    "setClass": "warmup", "status": "planned",
+    "actualWeight": null, "actualReps": null, "actualDuration": null,
+    "completedAt": null, "uiChip": "WU", "uiGrayed": true
+  },
+  "fsm": [
+    { "id": "v7-one-tap-accept-warmup",
+      "action": "accept", "setRef": "warmup", "by": "index", "index": 1,
+      "expectStatus": "completed",
+      "expectActuals": {"actualWeight": 40, "actualReps": 5} },
+    { "id": "v7-drop-warmup",
+      "action": "drop", "setRef": "warmup", "by": "index", "index": 0,
+      "expectStatus": "dropped" }
+  ]
+}

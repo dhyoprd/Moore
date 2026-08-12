@@ -1,0 +1,33 @@
+{
+  "label": "V8 — 12 routines in 3 folders, plus unfiled, ordered last-used desc within groups",
+  "now": "2026-08-11T09:00:00Z",
+  "folders": [
+    { "name": "Legs" },
+    { "name": "Pull" },
+    { "name": "Push" }
+  ],
+  "routines": [
+    { "name": "Squat Day",   "folder": "Legs",  "setCount": 5, "exerciseCount": 3, "lastCompletedEndedAt": "2026-08-10T18:00:00Z", "lastSetCount": 14, "lastVolumeKg": 11200.0 },
+    { "name": "Lunge Day",   "folder": "Legs",  "setCount": 4, "exerciseCount": 2, "lastCompletedEndedAt": "2026-08-08T18:00:00Z", "lastSetCount": 12, "lastVolumeKg": 8400.0 },
+    { "name": "Calf Day",    "folder": "Legs",  "setCount": 3, "exerciseCount": 2, "lastCompletedEndedAt": null, "lastSetCount": null, "lastVolumeKg": null },
+    { "name": "Deadlift Day","folder": "Pull",  "setCount": 4, "exerciseCount": 2, "lastCompletedEndedAt": "2026-08-09T18:00:00Z", "lastSetCount": 10, "lastVolumeKg": 9000.0 },
+    { "name": "Row Day",     "folder": "Pull",  "setCount": 4, "exerciseCount": 3, "lastCompletedEndedAt": "2026-08-07T18:00:00Z", "lastSetCount": 16, "lastVolumeKg": 7200.0 },
+    { "name": "Curl Day",    "folder": "Pull",  "setCount": 3, "exerciseCount": 2, "lastCompletedEndedAt": null, "lastSetCount": null, "lastVolumeKg": null },
+    { "name": "Bench Day",   "folder": "Push",  "setCount": 5, "exerciseCount": 3, "lastCompletedEndedAt": "2026-08-11T07:00:00Z", "lastSetCount": 15, "lastVolumeKg": 6240.0 },
+    { "name": "OHP Day",     "folder": "Push",  "setCount": 4, "exerciseCount": 2, "lastCompletedEndedAt": "2026-08-06T18:00:00Z", "lastSetCount": 12, "lastVolumeKg": 3600.0 },
+    { "name": "Incline Day", "folder": "Push",  "setCount": 4, "exerciseCount": 3, "lastCompletedEndedAt": null, "lastSetCount": null, "lastVolumeKg": null },
+    { "name": "Dip Day",     "folder": null,     "setCount": 3, "exerciseCount": 1, "lastCompletedEndedAt": "2026-08-05T18:00:00Z", "lastSetCount": 9, "lastVolumeKg": 1800.0 },
+    { "name": "Cardio Day",  "folder": null,     "setCount": 2, "exerciseCount": 1, "lastCompletedEndedAt": null, "lastSetCount": null, "lastVolumeKg": null },
+    { "name": "Mobility Day","folder": null,     "setCount": 2, "exerciseCount": 1, "lastCompletedEndedAt": null, "lastSetCount": null, "lastVolumeKg": null }
+  ],
+  "expected": {
+    "routineTotal": 12,
+    "folderGroupOrder": ["Legs", "Pull", "Push"],
+    "unfiledLast": true,
+    "legsOrder": ["Squat Day", "Lunge Day", "Calf Day"],
+    "pullOrder": ["Deadlift Day", "Row Day", "Curl Day"],
+    "pushOrder": ["Bench Day", "OHP Day", "Incline Day"],
+    "unfiledOrder": ["Dip Day", "Cardio Day", "Mobility Day"],
+    "constructsWithoutError": true
+  }
+}

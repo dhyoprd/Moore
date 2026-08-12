@@ -1,0 +1,6 @@
+title,start_time,end_time,exercise_title,superset_id,exercise_notes,set_index,set_type,weight_kg,reps
+"SS Day","01 Jun 2025, 17:00","01 Jun 2025, 17:30",Barbell Curl,0,,0,normal,30,10
+"SS Day","01 Jun 2025, 17:00","01 Jun 2025, 17:30",Tricep Pushdown,0,,0,normal,25,12
+"SS Day","01 Jun 2025, 17:00","01 Jun 2025, 17:30",Barbell Curl,0,,1,normal,30,8
+"SS Day","01 Jun 2025, 17:00","01 Jun 2025, 17:30",Tricep Pushdown,0,,1,normal,25,10
+"SS Day","01 Jun 2025, 17:00","01 Jun 2025, 17:30",Squat,,no notes here,0,normal,120,5

@@ -1,0 +1,17 @@
+{
+  "label": "V5 — folder delete leaves contained routines unfiled (BR-003 / INV-R3)",
+  "folder": { "name": "Legs" },
+  "routines": [
+    { "name": "Squat Day", "inFolder": true },
+    { "name": "Lunge Day", "inFolder": true },
+    { "name": "Push Day A", "inFolder": false }
+  ],
+  "action": "tombstoneFolder",
+  "expected": {
+    "folderTombstoned": true,
+    "squatDay": { "folderId": null, "tombstoned": false, "group": "Unfiled" },
+    "lungeDay": { "folderId": null, "tombstoned": false, "group": "Unfiled" },
+    "pushDayA": { "folderId": null, "tombstoned": false, "group": "Unfiled" },
+    "noRoutineReordered": true
+  }
+}

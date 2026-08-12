@@ -1,0 +1,41 @@
+{
+  "fixture": "tombstone-restore",
+  "contract": "SC-exercises@1.0.0",
+  "cites": ["INV-L2", "INV-L3", "BR-008", "V3"],
+  "cases": [
+    {
+      "id": "V3-tombstoned-built-in-name-resolves",
+      "preCondition": {
+        "library": [
+          { "id": "barbell-curl", "name": "Barbell Curl", "nameNormalized": "barbell curl", "isCustom": false }
+        ]
+      },
+      "action": { "tombstone": "barbell-curl" },
+      "expectedGetById": { "id": "barbell-curl", "name": "Barbell Curl", "deletedAtSet": true },
+      "note": "INV-L3: getById still returns the row with name intact after tombstone."
+    },
+    {
+      "id": "search-excludes-tombstoned",
+      "preCondition": {
+        "library": [
+          { "id": "barbell-curl", "name": "Barbell Curl", "nameNormalized": "barbell curl", "isCustom": false, "deleted": true }
+        ]
+      },
+      "action": { "search": "barbell" },
+      "expectedMatchIds": [],
+      "note": "BR-003: tombstoned rows do not appear in picker search."
+    },
+    {
+      "id": "V7-restore-clears-deleted",
+      "preCondition": {
+        "library": [
+          { "id": "barbell-curl", "name": "Barbell Curl", "nameNormalized": "barbell curl", "isCustom": false, "deleted": true }
+        ]
+      },
+      "action": { "restore": "barbell-curl" },
+      "expectedGetById": { "id": "barbell-curl", "deletedAtSet": false },
+      "expectedSearchAfter": ["barbell-curl"],
+      "note": "BR-008: restore clears deletedAt; the row becomes searchable again."
+    }
+  ]
+}

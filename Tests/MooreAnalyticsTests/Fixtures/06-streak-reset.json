@@ -1,0 +1,56 @@
+{
+  "label": "V7 — streak: consecutive days with logged (non-dropped) sets, resets on gap > 1 day, counts straight through week boundaries; failed days qualify, dropped-only days never do (BR-001)",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "category": "chest" }
+    ],
+    "sessions": [
+      { "id": "s-f", "startedAt": "2026-08-05T10:00:00Z", "endedAt": "2026-08-05T11:00:00Z" },
+      { "id": "s-a", "startedAt": "2026-08-07T10:00:00Z", "endedAt": "2026-08-07T11:00:00Z" },
+      { "id": "s-b", "startedAt": "2026-08-08T10:00:00Z", "endedAt": "2026-08-08T11:00:00Z" },
+      { "id": "s-c", "startedAt": "2026-08-09T10:00:00Z", "endedAt": "2026-08-09T11:00:00Z" },
+      { "id": "s-d", "startedAt": "2026-08-10T10:00:00Z", "endedAt": "2026-08-10T11:00:00Z" },
+      { "id": "s-drop", "startedAt": "2026-08-11T10:00:00Z", "endedAt": "2026-08-11T11:00:00Z" },
+      { "id": "s-e", "startedAt": "2026-08-12T10:00:00Z", "endedAt": "2026-08-12T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "st-f", "sessionId": "s-f", "exerciseId": "ex-bench", "status": "failed", "setClass": "work", "actualWeight": 60, "actualReps": 4, "completedAt": "2026-08-05T10:10:00Z" },
+      { "id": "st-a", "sessionId": "s-a", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 60, "actualReps": 5, "completedAt": "2026-08-07T10:10:00Z" },
+      { "id": "st-b", "sessionId": "s-b", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 62.5, "actualReps": 5, "completedAt": "2026-08-08T10:10:00Z" },
+      { "id": "st-c", "sessionId": "s-c", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 65, "actualReps": 5, "completedAt": "2026-08-09T10:10:00Z" },
+      { "id": "st-d", "sessionId": "s-d", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 67.5, "actualReps": 5, "completedAt": "2026-08-10T10:10:00Z" },
+      { "id": "st-drop", "sessionId": "s-drop", "exerciseId": "ex-bench", "status": "dropped", "plannedWeight": 70, "plannedReps": 5 },
+      { "id": "st-e", "sessionId": "s-e", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 70, "actualReps": 5, "completedAt": "2026-08-12T10:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V7a-qualifying-days-failed-in-dropped-out",
+      "query": { "op": "qualifyingDays" },
+      "expect": {
+        "days": ["2026-08-05", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-12"]
+      }
+    },
+    {
+      "id": "V7b-cross-week-run-is-4",
+      "query": { "op": "header", "today": "2026-08-10" },
+      "expect": { "last7": 5, "last30": 5, "streak": 4 }
+    },
+    {
+      "id": "V7c-dropped-only-day-resets",
+      "query": { "op": "header", "today": "2026-08-12" },
+      "expect": { "last7": 6, "last30": 7, "streak": 1 }
+    },
+    {
+      "id": "V7d-anchor-yesterday-keeps-streak-alive",
+      "query": { "op": "header", "today": "2026-08-13" },
+      "expect": { "last7": 6, "last30": 7, "streak": 1 }
+    },
+    {
+      "id": "V7e-gap-over-a-week-zero",
+      "query": { "op": "header", "today": "2026-08-20" },
+      "expect": { "last7": 0, "last30": 7, "streak": 0 }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+title,start_time,end_time,exercise_title,set_index,set_type,weight_kg,reps
+"Match Day","01 Feb 2025, 09:00","01 Feb 2025, 09:45",Barbell Bench Press,0,normal,80,5
+"Match Day","01 Feb 2025, 09:00","01 Feb 2025, 09:45",  barbell   bench press ,1,normal,80,5
+"Match Day","01 Feb 2025, 09:00","01 Feb 2025, 09:45",Squat (Barbell),0,normal,100,5
+"Match Day","01 Feb 2025, 09:00","01 Feb 2025, 09:45",Bench Press (Dumbbell),0,normal,30,8
+"Match Day","01 Feb 2025, 09:00","01 Feb 2025, 09:45",My Custom Lift,0,normal,50,10
+"Match Day","01 Feb 2025, 09:00","01 Feb 2025, 09:45",EXISTING  CUSTOM,0,normal,20,12

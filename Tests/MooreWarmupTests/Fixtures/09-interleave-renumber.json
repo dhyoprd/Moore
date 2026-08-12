@@ -1,0 +1,27 @@
+{
+  "label": "V12 — two exercises interleaved per #3's default; only bench has warm-ups ON. Ramp prepends before bench's first work row; sortOrder renumbers contiguously session-wide with exercise groups preserved (BR-008, SC-foundation BR-005).",
+  "session": {
+    "routineId": "rt-a",
+    "schemes": [
+      {"routineId": "rt-a", "exerciseId": "ex-bench", "warmupEnabled": 1},
+      {"routineId": "rt-a", "exerciseId": "ex-row",   "warmupEnabled": 0}
+    ],
+    "blueprintSets": [
+      {"exerciseId": "ex-bench", "weight": 82.5, "reps": 5},
+      {"exerciseId": "ex-row",   "weight": 60,   "reps": 8},
+      {"exerciseId": "ex-bench", "weight": 82.5, "reps": 5},
+      {"exerciseId": "ex-row",   "weight": 60,   "reps": 8}
+    ],
+    "bar": 20,
+    "unit": "kg"
+  },
+  "expectSession": [
+    ["ex-bench","warmup",20],
+    ["ex-bench","warmup",40],
+    ["ex-bench","warmup",60],
+    ["ex-bench","work",82.5],
+    ["ex-row","work",60],
+    ["ex-bench","work",82.5],
+    ["ex-row","work",60]
+  ]
+}

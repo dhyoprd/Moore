@@ -1,0 +1,28 @@
+{
+  "fixture": "03-dedupe-boundary",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-012 — interval >= 500ms fires (boundary is half-open); window keys by cue name, not across cues",
+  "vectors": [
+    {
+      "id": "V3",
+      "name": "exactly-500ms boundary fires; 499ms collapses; different cue names never dedupe each other",
+      "cite": "BR-012",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 0 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.rest.end", "haptic": "alert", "audio": true, "visual": "rest.over", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 0.499 },
+          "expect": { "outcome": "deduped", "reason": "dedupe500ms" } },
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 0.999 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.rest.end", "haptic": "alert", "audio": true, "visual": "rest.over", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 2.0, "setId": "s1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.failed", "at": 2.1, "setId": "s1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.failed", "haptic": "nudge", "audio": false, "visual": "set.failDelta", "blocking": false, "delivery": "inProcess", "headlineKind": null } } }
+      ],
+      "finalExpect": {
+        "dispatchCount": 4,
+        "firedCues": ["cue.rest.end", "cue.rest.end", "cue.set.completed", "cue.set.failed"]
+      }
+    }
+  ]
+}

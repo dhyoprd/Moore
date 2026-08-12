@@ -1,0 +1,66 @@
+{
+  "label": "V5 — muscle split buckets from exercise.category sum to 100% ± 0.1; warmups never bucket (BR-004)",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "category": "chest" },
+      { "id": "ex-row", "name": "Barbell Row", "exerciseType": "strength", "category": "back" },
+      { "id": "ex-squat", "name": "Squat", "exerciseType": "strength", "category": "quads" },
+      { "id": "ex-crunch", "name": "Weighted Crunch", "exerciseType": "strength", "category": "core" },
+      { "id": "ex-sled", "name": "Sled Push", "exerciseType": "custom", "category": null }
+    ],
+    "sessions": [
+      { "id": "s1", "startedAt": "2026-08-10T10:00:00Z", "endedAt": "2026-08-10T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "m-bench", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 3, "completedAt": "2026-08-10T10:10:00Z" },
+      { "id": "m-row", "sessionId": "s1", "exerciseId": "ex-row", "status": "completed", "setClass": "work", "actualWeight": 50, "actualReps": 4, "completedAt": "2026-08-10T10:15:00Z" },
+      { "id": "m-squat", "sessionId": "s1", "exerciseId": "ex-squat", "status": "completed", "setClass": "work", "actualWeight": 80, "actualReps": 5, "completedAt": "2026-08-10T10:20:00Z" },
+      { "id": "m-crunch", "sessionId": "s1", "exerciseId": "ex-crunch", "status": "completed", "setClass": "work", "actualWeight": 20, "actualReps": 15, "completedAt": "2026-08-10T10:25:00Z" },
+      { "id": "m-sled", "sessionId": "s1", "exerciseId": "ex-sled", "status": "completed", "setClass": "work", "actualWeight": 25, "actualReps": 4, "completedAt": "2026-08-10T10:30:00Z" },
+      { "id": "m-bench-warm", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "warmup", "actualWeight": 60, "actualReps": 10, "completedAt": "2026-08-10T10:05:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V5a-bucket-map",
+      "query": { "op": "bucketMap" },
+      "expect": {
+        "map": {
+          "chest": "upper",
+          "back": "upper",
+          "shoulders": "upper",
+          "biceps": "upper",
+          "triceps": "upper",
+          "forearms": "upper",
+          "quads": "lower",
+          "hamstrings": "lower",
+          "glutes": "lower",
+          "calves": "lower",
+          "core": "other",
+          "fullBody": "other",
+          "cardio": "other",
+          "other": "other",
+          "NULL": "other"
+        }
+      }
+    },
+    {
+      "id": "V5b-split-three-buckets-sum-100",
+      "query": { "op": "split", "rangeDays": 30 },
+      "expect": {
+        "sumTolerance": 0.1,
+        "buckets": [
+          { "bucket": "upper", "tonnage": 500, "pct": 38.46153846153847 },
+          { "bucket": "lower", "tonnage": 400, "pct": 30.76923076923077 },
+          { "bucket": "other", "tonnage": 400, "pct": 30.76923076923077 }
+        ]
+      }
+    },
+    {
+      "id": "V5c-tonnage-excludes-warmup-600",
+      "query": { "op": "tonnage", "rangeDays": 30 },
+      "expect": { "weeks": [ { "week": "2026-W33", "tonnage": 1300 } ] }
+    }
+  ]
+}

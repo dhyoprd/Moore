@@ -1,0 +1,68 @@
+{
+  "fixture": "empty-state-keys",
+  "contractId": "SC-settings@1.0.0",
+  "cites": "BR-013 (#14 empty-state copy wired verbatim; SC-foundation §6 fatal keys wired here per that contract)",
+  "vectors": [
+    {
+      "id": "V14a",
+      "name": "all nineteen #14 resolution keys resolve with exact strings",
+      "cite": "BR-013, #14 resolution",
+      "steps": [
+        { "do": "assertCopyTable", "table": "emptyStateCopy", "expect": {
+          "home.empty_title": "No routines yet",
+          "home.empty_sub": "Routines are your gym days. Create one and your next workout is one tap to start.",
+          "home.empty_cta": "Create your first routine",
+          "home.streak_label": "{n}-day streak",
+          "home.startEmpty_cta": "Start empty",
+          "activeWorkout.emptyList_line": "No sets yet",
+          "activeWorkout.addExercise_cta": "+ Add exercise",
+          "activeWorkout.startEmpty_help": "Add an exercise to start logging",
+          "history.empty_title": "No sessions yet",
+          "history.empty_sub": "Your gym visits will live here.",
+          "history.empty_cta": "Start a workout",
+          "analytics.empty_title": "Nothing to graph yet",
+          "analytics.empty_sub": "Log 3 sessions to start seeing trends.",
+          "analytics.empty_cta": "Log your first session",
+          "analytics.hint_body": "Every workout builds your stats.",
+          "picker.search_empty_title": "No matches",
+          "picker.search_empty_sub": "Check spelling or create it custom.",
+          "picker.createCustom_cta": "Create custom exercise",
+          "picker.browse_hint": "Or scroll to browse"
+        } }
+      ]
+    },
+    {
+      "id": "V14b",
+      "name": "SC-foundation §6 fatal-recovery keys wired verbatim",
+      "cite": "BR-013, SC-foundation §6",
+      "steps": [
+        { "do": "assertCopyTable", "table": "foundationDbCopy", "expect": {
+          "foundation.db.fatalTitle": "Storage unavailable",
+          "foundation.db.fatalBody": "Moore's local database can't be opened. Your training data may be at risk. Export a backup from Settings if you can, then reinstall the app.",
+          "foundation.db.fatalAction": "Export backup",
+          "foundation.db.migrationFailedTitle": "Update failed",
+          "foundation.db.migrationFailedBody": "This update requires a database change that didn't complete. Don't delete the app — export your data and contact support.",
+          "foundation.db.migrationFailedAction": "Contact support",
+          "foundation.db.corrupted": "The database file is damaged. Restore from your last backup.",
+          "foundation.db.unknownError": "Something went wrong with local storage. Try again."
+        } }
+      ]
+    },
+    {
+      "id": "V14c",
+      "name": "every settings-surface key is present and non-empty",
+      "cite": "§6, BR-013",
+      "steps": [
+        { "do": "assertCopyTableComplete", "table": "settingsCopy",
+          "keys": [
+            "settings.title", "settings.units.title", "settings.units.weight",
+            "settings.restDefaults.title", "settings.restDefaults.compound", "settings.restDefaults.isolation", "settings.restDefaults.value",
+            "settings.bodyMetrics.title", "settings.bodyMetrics.addCta", "settings.bodyMetrics.empty", "settings.bodyMetrics.trendTitle",
+            "settings.dataSync.title", "settings.dataSync.exportCta", "settings.dataSync.exportedToast", "settings.dataSync.importHevy", "settings.dataSync.importHevyBlocked",
+            "settings.cloudSync.title", "settings.cloudSync.coming",
+            "settings.tombstones.title", "settings.tombstones.restoreCta", "settings.tombstones.empty"
+          ] }
+      ]
+    }
+  ]
+}

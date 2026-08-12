@@ -1,0 +1,70 @@
+{
+  "label": "BR-008/BR-009 — tombstoning sets re-derives; next-best inherits; bookmark re-seeds silently",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength" },
+      { "id": "ex-ohp", "name": "Overhead Press", "exerciseType": "strength" },
+      { "id": "ex-row", "name": "Barbell Row", "exerciseType": "strength" }
+    ],
+    "sessions": [
+      { "id": "s-a", "startedAt": "2026-07-01T10:00:00Z", "endedAt": "2026-07-01T11:00:00Z" },
+      { "id": "s-b", "startedAt": "2026-07-08T10:00:00Z", "endedAt": "2026-07-08T11:00:00Z" },
+      { "id": "s-c", "startedAt": "2026-07-15T10:00:00Z", "endedAt": "2026-07-15T11:00:00Z" },
+      { "id": "s-d", "startedAt": "2026-07-22T10:00:00Z", "endedAt": "2026-07-22T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "set-a", "sessionId": "s-a", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 80, "actualReps": 5, "completedAt": "2026-07-01T10:10:00Z" },
+      { "id": "set-b", "sessionId": "s-b", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 90, "actualReps": 6, "completedAt": "2026-07-08T10:10:00Z" },
+      { "id": "set-c", "sessionId": "s-c", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-07-15T10:10:00Z" },
+      { "id": "set-o1", "sessionId": "s-a", "exerciseId": "ex-ohp", "status": "completed", "setClass": "work", "actualWeight": 40, "actualReps": 10, "completedAt": "2026-07-01T10:30:00Z" },
+      { "id": "set-o2", "sessionId": "s-b", "exerciseId": "ex-ohp", "status": "completed", "setClass": "work", "actualWeight": 45, "actualReps": 8, "completedAt": "2026-07-08T10:30:00Z" },
+      { "id": "set-r1", "sessionId": "s-c", "exerciseId": "ex-row", "status": "completed", "setClass": "work", "actualWeight": 80, "actualReps": 6, "completedAt": "2026-07-15T10:10:00Z" },
+      { "id": "set-r2", "sessionId": "s-d", "exerciseId": "ex-row", "status": "completed", "setClass": "work", "actualWeight": 90, "actualReps": 8, "completedAt": "2026-07-22T10:10:00Z" }
+    ],
+    "personalRecords": [
+      { "exerciseId": "ex-bench", "kind": "max_1rm", "value": 116.66666666666667, "setId": "set-c", "sessionId": "s-c", "achievedAt": "2026-07-15T10:10:00Z" },
+      { "exerciseId": "ex-bench", "kind": "max_volume", "value": 540, "setId": "set-b", "sessionId": "s-b", "achievedAt": "2026-07-08T10:10:00Z" },
+      { "exerciseId": "ex-ohp", "kind": "max_1rm", "value": 57, "setId": "set-o2", "sessionId": "s-b", "achievedAt": "2026-07-08T10:30:00Z" },
+      { "exerciseId": "ex-ohp", "kind": "max_reps", "value": 10, "setId": "set-o1", "sessionId": "s-a", "achievedAt": "2026-07-01T10:30:00Z" },
+      { "exerciseId": "ex-row", "kind": "max_1rm", "value": 114, "setId": "set-r2", "sessionId": "s-d", "achievedAt": "2026-07-22T10:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V6b-edit-holder-downward-row-drops-to-next-best",
+      "editSet": { "setId": "set-r2", "actualWeight": 70, "actualReps": 5 },
+      "rederive": { "exerciseId": "ex-row" },
+      "expect": {
+        "rows": [
+          { "exerciseId": "ex-row", "kind": "max_1rm", "value": 96, "setId": "set-r1", "sessionId": "s-c", "achievedAt": "2026-07-15T10:10:00Z" },
+          { "exerciseId": "ex-row", "kind": "max_volume", "value": 480, "setId": "set-r1", "sessionId": "s-c" },
+          { "exerciseId": "ex-row", "kind": "max_reps", "value": 6, "setId": "set-r1", "sessionId": "s-c" }
+        ]
+      }
+    },
+    {
+      "id": "V7-delete-top-holder-next-best-inherits",
+      "deleteSet": { "setId": "set-c" },
+      "rederive": { "exerciseId": "ex-bench" },
+      "expect": {
+        "rows": [
+          { "exerciseId": "ex-bench", "kind": "max_1rm", "value": 108, "setId": "set-b", "sessionId": "s-b", "achievedAt": "2026-07-08T10:10:00Z" },
+          { "exerciseId": "ex-bench", "kind": "max_volume", "value": 540, "setId": "set-b", "sessionId": "s-b" },
+          { "exerciseId": "ex-bench", "kind": "max_reps", "value": 6, "setId": "set-b", "sessionId": "s-b" }
+        ]
+      }
+    },
+    {
+      "id": "V8-delete-until-baseline-remains-bookmark-reseeds",
+      "deleteSet": { "setId": "set-o2" },
+      "rederive": { "exerciseId": "ex-ohp" },
+      "expect": {
+        "rows": [
+          { "exerciseId": "ex-ohp", "kind": "max_1rm", "value": 53.333333333333336, "setId": "set-o1", "sessionId": "s-a", "achievedAt": "2026-07-01T10:30:00Z" },
+          { "exerciseId": "ex-ohp", "kind": "max_reps", "value": 10, "setId": "set-o1", "sessionId": "s-a" },
+          { "exerciseId": "ex-ohp", "kind": "max_volume", "value": 400, "setId": "set-o1", "sessionId": "s-a" }
+        ]
+      }
+    }
+  ]
+}

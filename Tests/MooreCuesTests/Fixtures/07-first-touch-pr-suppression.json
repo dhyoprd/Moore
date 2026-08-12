@@ -1,0 +1,29 @@
+{
+  "fixture": "07-first-touch-pr-suppression",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-007 — cue.pr.achieved with no beaten kinds (no baseline row existed, SC-prs BR-002) suppresses; the set tick still fires",
+  "vectors": [
+    {
+      "id": "V7a",
+      "name": "first-ever session: set logs with its tick, PR cue suppressed firstTouch",
+      "cite": "BR-007, SC-prs BR-002",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 0, "setId": "s1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.pr.achieved", "at": 1, "setId": "s1", "beatenKinds": [] },
+          "expect": { "outcome": "suppressed", "reason": "firstTouch" } }
+      ],
+      "finalExpect": { "firedCues": ["cue.set.completed"], "dispatchCount": 1 }
+    },
+    {
+      "id": "V7b",
+      "name": "all-unknown beaten kinds degrade to firstTouch (INV-PR1 closed vocabulary)",
+      "cite": "BR-007, INV-C7",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.pr.achieved", "at": 0, "setId": "s2", "beatenKinds": ["unknown_kind"] },
+          "expect": { "outcome": "suppressed", "reason": "firstTouch" } }
+      ],
+      "finalExpect": { "firedCues": [], "dispatchCount": 0 }
+    }
+  ]
+}
