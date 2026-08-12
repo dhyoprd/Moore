@@ -1,0 +1,5 @@
+title,start_time,end_time,exercise_title,set_index,set_type,weight_kg,reps
+"Bad Day","garbage","20 May 2025, 18:40",Barbell Bench Press,0,normal,80,5
+"Bad Day","not-a-date","20 May 2025, 18:40",Barbell Bench Press,1,normal,82.5,4
+"Bad Day","??","20 May 2025, 18:40",Squat,0,normal,100,5
+"Bad Day","20 May 2025, 18:00","20 May 2025, 18:40",Squat,0,normal,100,5

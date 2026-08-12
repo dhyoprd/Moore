@@ -1,0 +1,29 @@
+{
+  "label": "V7: superset ordering — interleaved file order preserved via sortOrder; superset_id discarded + counted",
+  "cites": ["BR-007", "BR-011"],
+  "vectors": [
+    {
+      "id": "interleave-preserved",
+      "csvFile": "07-superset.csv",
+      "expect": {
+        "unit": "kg",
+        "counts": {
+          "sessionsFound": 1,
+          "setsImported": 5,
+          "metadataDropped": { "rpe": 0, "exerciseNotes": 1, "supersetId": 4 }
+        },
+        "db": {
+          "sessions": 1,
+          "sets": 5,
+          "setRows": [
+            { "sessionImportKey": "ss day|2025-06-01T17:00:00Z", "exerciseName": "Barbell Curl", "sortOrder": 0, "actualWeight": 30, "actualReps": 10 },
+            { "sessionImportKey": "ss day|2025-06-01T17:00:00Z", "exerciseName": "Tricep Pushdown", "sortOrder": 1, "actualWeight": 25, "actualReps": 12 },
+            { "sessionImportKey": "ss day|2025-06-01T17:00:00Z", "exerciseName": "Barbell Curl", "sortOrder": 2, "actualWeight": 30, "actualReps": 8 },
+            { "sessionImportKey": "ss day|2025-06-01T17:00:00Z", "exerciseName": "Tricep Pushdown", "sortOrder": 3, "actualWeight": 25, "actualReps": 10 },
+            { "sessionImportKey": "ss day|2025-06-01T17:00:00Z", "exerciseName": "Squat", "sortOrder": 4, "actualWeight": 120, "actualReps": 5 }
+          ]
+        }
+      }
+    }
+  ]
+}

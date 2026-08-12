@@ -1,0 +1,49 @@
+{
+  "label": "V11: RPE + distance discarded — duration rule, weighted-duration, cardio skip, bodyweight NULL",
+  "cites": ["BR-006", "BR-011", "INV-IM8"],
+  "vectors": [
+    {
+      "id": "rpe-distance-duration",
+      "csvFile": "11-rpe-distance.csv",
+      "expect": {
+        "unit": "kg",
+        "counts": {
+          "dataRows": 4,
+          "sessionsFound": 1,
+          "setsImported": 3,
+          "cardioRowsSkipped": 1,
+          "quarantinedCount": 0,
+          "metadataDropped": { "rpe": 2, "exerciseNotes": 0, "supersetId": 0 }
+        },
+        "newExercises": [
+          { "name": "Plank Hold", "normalizedName": "plank hold", "metric": "duration" },
+          { "name": "Weighted Plank", "normalizedName": "weighted plank", "metric": "duration" }
+        ],
+        "summary": { "sessionsImported": 1, "setsImported": 3, "exercisesCreated": 2 },
+        "db": {
+          "sessions": 1,
+          "sets": 3,
+          "customExercises": 2,
+          "exerciseRows": [
+            { "name": "Plank Hold", "exerciseType": "cardio", "isCustom": 1 },
+            { "name": "Weighted Plank", "exerciseType": "cardio", "isCustom": 1 }
+          ],
+          "setRows": [
+            { "sessionImportKey": "cardio mix|2025-09-20T08:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 70, "actualReps": 6, "actualDuration": null },
+            { "sessionImportKey": "cardio mix|2025-09-20T08:00:00Z", "exerciseName": "Plank Hold", "sortOrder": 1, "actualWeight": null, "actualReps": null, "actualDuration": 45 },
+            { "sessionImportKey": "cardio mix|2025-09-20T08:00:00Z", "exerciseName": "Weighted Plank", "sortOrder": 2, "actualWeight": 20, "actualReps": null, "actualDuration": 60 }
+          ],
+          "prKindsByExercise": {
+            "Barbell Bench Press": ["max_1rm", "max_reps", "max_volume"],
+            "Plank Hold": ["max_duration"],
+            "Weighted Plank": ["max_duration"]
+          },
+          "prRows": [
+            { "exerciseName": "Plank Hold", "kind": "max_duration", "value": 45 },
+            { "exerciseName": "Weighted Plank", "kind": "max_duration", "value": 60 }
+          ]
+        }
+      }
+    }
+  ]
+}

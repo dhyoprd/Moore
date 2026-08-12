@@ -1,5 +1,5 @@
 // swift-tools-version: 5.9
-// Moore umbrella package — merged shape post #19 + #20 + #21 + #22 + #23 + #24.
+// Moore umbrella package — merged shape post #19 + #20 + #21 + #22 + #23 + #24 + #30.
 // Owns all modules landed so far in this integration worktree.
 import PackageDescription
 
@@ -17,6 +17,7 @@ let package = Package(
         .library(name: "MooreRest", targets: ["MooreRest"]),
         .library(name: "MooreProgression", targets: ["MooreProgression"]),
         .library(name: "MooreRecords", targets: ["MooreRecords"]),
+        .library(name: "MooreImport", targets: ["MooreImport"]),
     ],
     dependencies: [
         .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.5.0"),
@@ -79,6 +80,13 @@ let package = Package(
             path: "Sources/MooreRecords",
             resources: [.process("Migrations")]
         ),
+        .target(
+            name: "MooreImport",
+            dependencies: [
+                .product(name: "GRDB", package: "GRDB.swift"),
+            ],
+            path: "Sources/MooreImport"
+        ),
         .testTarget(
             name: "MooreFoundationTests",
             dependencies: ["MooreFoundation"],
@@ -119,6 +127,12 @@ let package = Package(
             dependencies: ["MooreRecords"],
             path: "Tests/MooreRecordsTests",
             exclude: ["Fixtures", "VerifyRecords.mjs"]
+        ),
+        .testTarget(
+            name: "MooreImportTests",
+            dependencies: ["MooreImport"],
+            path: "Tests/MooreImportTests",
+            exclude: ["Fixtures", "VerifyImport.mjs"]
         ),
     ]
 )

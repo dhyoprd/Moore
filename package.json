@@ -9,7 +9,8 @@
     "verify:exercises": "node Tests/MooreExercisesTests/VerifyExerciseLibrary.mjs",
     "verify:routines": "node Tests/MooreRoutinesTests/VerifyRoutines.mjs",
     "verify:rest": "node Tests/MooreRestTests/VerifyRest.mjs",
-    "verify:cues": "node Tests/MooreCuesTests/VerifyCues.mjs"
+    "verify:cues": "node Tests/MooreCuesTests/VerifyCues.mjs",
+    "verify:import": "node Tests/MooreImportTests/VerifyImport.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2"
