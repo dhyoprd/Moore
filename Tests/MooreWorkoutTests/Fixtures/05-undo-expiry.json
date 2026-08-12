@@ -1,0 +1,32 @@
+{
+  "scenario": "V6 undo expiry — next set logged closes the window, no timer",
+  "ac": "Swipe-left Drop → set is dropped, undo toolbar appears; undo lasts until next set logged (no timer)",
+  "exercises": [{ "id": "ex-bench", "name": "Barbell Bench Press" }],
+  "routine": {
+    "id": "rt-a",
+    "name": "Push A",
+    "sets": [
+      { "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "plannedDuration": null, "setClass": "work" },
+      { "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "plannedDuration": null, "setClass": "work" }
+    ]
+  },
+  "actions": [
+    { "type": "materialize" },
+    { "type": "drop", "setIndex": 0 },
+    { "type": "accept", "setIndex": 1 },
+    { "type": "undoDrop", "setIndex": 0, "expectFailure": true }
+  ],
+  "expect": {
+    "setCount": 2,
+    "sets": [
+      { "status": "dropped", "actualWeight": null, "actualReps": null },
+      { "status": "completed", "actualWeight": 60, "actualReps": 8 }
+    ],
+    "snapshot": {
+      "overlayState": "finishRequested",
+      "restRequested": false,
+      "finishReady": true
+    },
+    "cues": ["cue.set.dropped", "cue.set.completed", "cue.finish.morph"]
+  }
+}

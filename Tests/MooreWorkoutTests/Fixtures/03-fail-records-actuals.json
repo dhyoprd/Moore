@@ -1,0 +1,28 @@
+{
+  "scenario": "V3 fail flow records actual reps",
+  "ac": "Swipe-left Failed → sheet pre-tagged failed, weight pre-filled, reps focused → type 7 → ✓ → set is failed, actual reps = 7",
+  "exercises": [{ "id": "ex-bench", "name": "Barbell Bench Press" }],
+  "routine": {
+    "id": "rt-a",
+    "name": "Push A",
+    "sets": [
+      { "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "plannedDuration": null, "setClass": "work" }
+    ]
+  },
+  "actions": [
+    { "type": "materialize" },
+    { "type": "fail", "setIndex": 0, "actualWeight": 60, "actualReps": 7 }
+  ],
+  "expect": {
+    "setCount": 1,
+    "sets": [
+      { "status": "failed", "actualWeight": 60, "actualReps": 7, "plannedWeight": 60, "plannedReps": 8, "completedAtNonNull": true }
+    ],
+    "snapshot": {
+      "overlayState": "finishRequested",
+      "restRequested": false,
+      "finishReady": true
+    },
+    "cues": ["cue.set.failed", "cue.finish.morph"]
+  }
+}

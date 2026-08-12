@@ -14,6 +14,7 @@ let package = Package(
         .library(name: "MooreFoundation", targets: ["MooreFoundation"]),
         .library(name: "MooreExercises", targets: ["MooreExercises"]),
         .library(name: "MooreRoutines", targets: ["MooreRoutines"]),
+        .library(name: "MooreWorkout", targets: ["MooreWorkout"]),
     ],
     dependencies: [
         .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.5.0"),
@@ -45,6 +46,13 @@ let package = Package(
             path: "Sources/MooreRoutines",
             resources: [.process("Migrations")]
         ),
+        .target(
+            name: "MooreWorkout",
+            dependencies: [
+                .product(name: "GRDB", package: "GRDB.swift"),
+            ],
+            path: "Sources/MooreWorkout"
+        ),
         .testTarget(
             name: "MooreFoundationTests",
             dependencies: ["MooreFoundation"],
@@ -62,5 +70,12 @@ let package = Package(
             path: "Tests/MooreRoutinesTests",
             resources: [.process("Fixtures")]
         ),
+        .testTarget(
+            name: "MooreWorkoutTests",
+            dependencies: ["MooreWorkout"],
+            path: "Tests/MooreWorkoutTests",
+            exclude: ["Fixtures", "VerifyWorkoutFsm.mjs"]
+        ),
+    ]
     ]
 )
