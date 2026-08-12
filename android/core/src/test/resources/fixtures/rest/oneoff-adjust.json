@@ -1,0 +1,76 @@
+{
+  "fixture": "oneoff-adjust",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "BR-002 (one-off ±15s adjust, never persisted), BR-003 (−15 with <15s ⇒ skip)",
+  "database": { "needsAppSettingsTable": true, "snapshotTable": "app_setting" },
+  "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+  "vectors": [
+    {
+      "id": "V5",
+      "name": "+15s adjusts running timer; nothing written back to any level",
+      "cite": "BR-002, INV-T2",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "state": "restRunning", "durationSec": 180, "startedAt": 0, "adjustmentSec": 0, "remainingSec": 180 } },
+        { "do": "adjustSec", "delta": 15, "at": 10,
+          "expect": { "state": "restRunning", "durationSec": 180, "startedAt": 0, "adjustmentSec": 15, "remainingSec": 185 } }
+      ],
+      "finalExpect": { "persistenceUnchanged": true, "cues": [] }
+    },
+    {
+      "id": "V6",
+      "name": "−15s with < 15s remaining is equivalent to skip",
+      "cite": "BR-002, BR-003",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "state": "restRunning", "durationSec": 180, "startedAt": 0, "adjustmentSec": 0, "remainingSec": 180 } },
+        { "do": "adjustSec", "delta": -15, "at": 170,
+          "expect": { "state": "noRest" } }
+      ],
+      "finalExpect": { "cues": [] }
+    },
+    {
+      "id": "E1",
+      "name": "repeated +15s caps the effective remaining at 600s",
+      "cite": "BR-002, INV-S3 clamp",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "state": "restRunning", "durationSec": 180, "startedAt": 0, "adjustmentSec": 0, "remainingSec": 180 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 195 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 210 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 225 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 240 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 255 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 270 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 285 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 300 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 315 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 330 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 345 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 360 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 375 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 390 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 405 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 420 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 435 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 450 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 465 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 480 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 495 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 510 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 525 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 540 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 555 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 570 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 585 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 600 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 600 } },
+        { "do": "adjustSec", "delta": 15, "at": 0, "expect": { "state": "restRunning", "remainingSec": 600 } }
+      ],
+      "finalExpect": { "state": "restRunning", "durationSec": 180, "adjustmentSec": 420, "remainingSec": 600, "cues": [] }
+    }
+  ]
+}

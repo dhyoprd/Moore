@@ -1,0 +1,62 @@
+{
+  "fixture": "04-rest-end-suppressed-post-morph",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-006 — rest-end fires only while the overlay is in rest state; the finish morph latches suppression; a fired set log unlatches (SC-rest INV-T6); a drop never unlatches",
+  "vectors": [
+    {
+      "id": "V4a",
+      "name": "morph latches, rest-end suppressed until a new set unlatches",
+      "cite": "BR-006, SC-rest §2b/INV-T6",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.finish.morph", "at": 0 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.finish.morph", "haptic": null, "audio": false, "visual": "finish.morph", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 1 },
+          "expect": { "outcome": "suppressed", "reason": "morphedToFinish" } },
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 2 },
+          "expect": { "outcome": "suppressed", "reason": "morphedToFinish" } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 3, "setId": "s1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.completed", "haptic": "success", "audio": false, "visual": "set.checkFill", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 4 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.rest.end", "haptic": "alert", "audio": true, "visual": "rest.over", "blocking": false, "delivery": "inProcess", "headlineKind": null } } }
+      ],
+      "finalExpect": {
+        "firedCues": ["cue.finish.morph", "cue.set.completed", "cue.rest.end"],
+        "overlayMorphedToFinish": false
+      }
+    },
+    {
+      "id": "V4b",
+      "name": "a drop does not unlatch the morph — rest-end stays suppressed",
+      "cite": "BR-006, SC-rest BR-005 (drop touches neither rest nor overlay)",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.finish.morph", "at": 0 },
+          "expect": { "outcome": "fired" } },
+        { "do": "evaluate", "event": { "cue": "cue.set.dropped", "at": 1, "setId": "d1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.dropped", "haptic": null, "audio": false, "visual": "set.dropUndo", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 2 },
+          "expect": { "outcome": "suppressed", "reason": "morphedToFinish" } }
+      ],
+      "finalExpect": {
+        "firedCues": ["cue.finish.morph", "cue.set.dropped"],
+        "overlayMorphedToFinish": true
+      }
+    },
+    {
+      "id": "V4c",
+      "name": "set.failed unlatches exactly as set.completed does",
+      "cite": "BR-006, SC-rest INV-T6",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.finish.morph", "at": 0 },
+          "expect": { "outcome": "fired" } },
+        { "do": "evaluate", "event": { "cue": "cue.set.failed", "at": 1, "setId": "s1" },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.set.failed", "haptic": "nudge", "audio": false, "visual": "set.failDelta", "blocking": false, "delivery": "inProcess", "headlineKind": null } } },
+        { "do": "evaluate", "event": { "cue": "cue.rest.end", "at": 2 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.rest.end", "haptic": "alert", "audio": true, "visual": "rest.over", "blocking": false, "delivery": "inProcess", "headlineKind": null } } }
+      ],
+      "finalExpect": {
+        "firedCues": ["cue.finish.morph", "cue.set.failed", "cue.rest.end"],
+        "overlayMorphedToFinish": false
+      }
+    }
+  ]
+}

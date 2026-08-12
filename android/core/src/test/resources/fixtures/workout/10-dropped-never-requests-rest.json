@@ -1,0 +1,30 @@
+{
+  "scenario": "V10b dropped never requests rest",
+  "ac": "Drop a set → no restRequested flag, overlay back to idle",
+  "exercises": [{ "id": "ex-bench", "name": "Barbell Bench Press" }],
+  "routine": {
+    "id": "rt-a",
+    "name": "Push A",
+    "sets": [
+      { "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "plannedDuration": null, "setClass": "work" },
+      { "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "plannedDuration": null, "setClass": "work" }
+    ]
+  },
+  "actions": [
+    { "type": "materialize" },
+    { "type": "drop", "setIndex": 0 }
+  ],
+  "expect": {
+    "setCount": 2,
+    "sets": [
+      { "status": "dropped", "actualWeight": null, "actualReps": null, "actualDuration": null },
+      { "status": "planned" }
+    ],
+    "snapshot": {
+      "overlayState": "idle",
+      "restRequested": false,
+      "finishReady": false
+    },
+    "cues": ["cue.set.dropped"]
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "label": "V8 — History groups by month header descending, rows date-descending within month; tombstoned sessions absent; same-instant rows tie-break by id (BR-006, INV-A2)",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "category": "chest" }
+    ],
+    "sessions": [
+      { "id": "s-a1", "name": "August B", "startedAt": "2026-08-12T09:00:00Z", "endedAt": "2026-08-12T10:00:00Z" },
+      { "id": "s-a2", "name": "August A", "startedAt": "2026-08-02T09:00:00Z", "endedAt": "2026-08-02T10:00:00Z" },
+      { "id": "s-tie-b", "startedAt": "2026-08-01T08:00:00Z", "endedAt": "2026-08-01T09:00:00Z" },
+      { "id": "s-tie-a", "startedAt": "2026-08-01T08:00:00Z", "endedAt": "2026-08-01T09:00:00Z" },
+      { "id": "s-b1", "startedAt": "2026-07-20T09:00:00Z", "endedAt": "2026-07-20T10:00:00Z" },
+      { "id": "s-b2", "startedAt": "2026-07-05T09:00:00Z", "endedAt": "2026-07-05T10:00:00Z" },
+      { "id": "s-c1", "startedAt": "2026-06-30T09:00:00Z", "endedAt": "2026-06-30T10:00:00Z" },
+      { "id": "s-dead", "startedAt": "2026-08-05T09:00:00Z", "endedAt": "2026-08-05T10:00:00Z", "deleted": true }
+    ],
+    "sets": [
+      { "id": "h-a1", "sessionId": "s-a1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-12T09:10:00Z" },
+      { "id": "h-a2", "sessionId": "s-a2", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-02T09:10:00Z" },
+      { "id": "h-tb", "sessionId": "s-tie-b", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-01T08:10:00Z" },
+      { "id": "h-ta", "sessionId": "s-tie-a", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-01T08:10:00Z" },
+      { "id": "h-b1", "sessionId": "s-b1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-07-20T09:10:00Z" },
+      { "id": "h-b2", "sessionId": "s-b2", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-07-05T09:10:00Z" },
+      { "id": "h-c1", "sessionId": "s-c1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-06-30T09:10:00Z" },
+      { "id": "h-dead", "sessionId": "s-dead", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-05T09:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V8a-months-desc-rows-desc-tombstone-absent",
+      "query": { "op": "history" },
+      "expect": {
+        "months": [
+          {
+            "month": "2026-08",
+            "rows": [
+              { "sessionId": "s-a1", "day": "2026-08-12", "name": "August B", "completedCount": 1, "tonnage": 500 },
+              { "sessionId": "s-a2", "day": "2026-08-02", "name": "August A", "completedCount": 1, "tonnage": 500 },
+              { "sessionId": "s-tie-a", "day": "2026-08-01", "completedCount": 1, "tonnage": 500 },
+              { "sessionId": "s-tie-b", "day": "2026-08-01", "completedCount": 1, "tonnage": 500 }
+            ]
+          },
+          {
+            "month": "2026-07",
+            "rows": [
+              { "sessionId": "s-b1", "day": "2026-07-20", "completedCount": 1, "tonnage": 500 },
+              { "sessionId": "s-b2", "day": "2026-07-05", "completedCount": 1, "tonnage": 500 }
+            ]
+          },
+          {
+            "month": "2026-06",
+            "rows": [
+              { "sessionId": "s-c1", "day": "2026-06-30", "completedCount": 1, "tonnage": 500 }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "V8b-tonnage-iso-weeks-w27-w30-w31-w33",
+      "query": { "op": "tonnage", "rangeDays": 60 },
+      "expect": {
+        "weeks": [
+          { "week": "2026-W27", "tonnage": 1000 },
+          { "week": "2026-W30", "tonnage": 500 },
+          { "week": "2026-W31", "tonnage": 1500 },
+          { "week": "2026-W33", "tonnage": 500 }
+        ]
+      }
+    }
+  ]
+}

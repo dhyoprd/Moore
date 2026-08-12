@@ -1,0 +1,51 @@
+{
+  "vector": 2,
+  "label": "Exercise (custom + library) and Routine (folder NULL + folder-linked) round-trips (V4, V5)",
+  "dependsOn": ["round-trip-vector-01.json"],
+  "entities": {
+    "Exercise.library": {
+      "id": "a1b2c3d4-0002-4000-8000-000000000001",
+      "name": "Barbell Bench Press",
+      "exerciseType": "strength",
+      "equipmentSlug": "barbell",
+      "primaryMuscleId": "chest",
+      "secondaryMuscleIdsJson": "[\"triceps\",\"front_delts\"]",
+      "instructions": "Retract scapulae, bar over mid-chest.",
+      "isCustom": 0,
+      "createdAt": "2026-08-11T10:05:00Z",
+      "updatedAt": "2026-08-11T10:05:00Z",
+      "deletedAt": null
+    },
+    "Exercise.custom": {
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Band Pull-Apart",
+      "exerciseType": "custom",
+      "equipmentSlug": null,
+      "primaryMuscleId": null,
+      "secondaryMuscleIdsJson": null,
+      "instructions": null,
+      "isCustom": 1,
+      "createdAt": "2026-08-11T10:06:00Z",
+      "updatedAt": "2026-08-11T10:06:00Z",
+      "deletedAt": null
+    },
+    "Routine.inFolder": {
+      "id": "a1b2c3d4-0002-4000-8000-000000000010",
+      "folderId": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Push A",
+      "sortOrder": 0,
+      "createdAt": "2026-08-11T10:07:00Z",
+      "updatedAt": "2026-08-11T10:07:00Z",
+      "deletedAt": null
+    },
+    "Routine.noFolder": {
+      "id": "a1b2c3d4-0002-4000-8000-000000000011",
+      "folderId": null,
+      "name": "Ad-hoc Pull",
+      "sortOrder": 1,
+      "createdAt": "2026-08-11T10:08:00Z",
+      "updatedAt": "2026-08-11T10:08:00Z",
+      "deletedAt": null
+    }
+  }
+}

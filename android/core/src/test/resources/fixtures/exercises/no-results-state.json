@@ -1,0 +1,36 @@
+{
+  "fixture": "no-results-state",
+  "contract": "SC-exercises@1.0.0",
+  "cites": ["BR-010", "V6", "INV-P1"],
+  "cases": [
+    {
+      "id": "V6-empty-library",
+      "preCondition": { "library": [] },
+      "action": { "search": "press" },
+      "expectedResults": [],
+      "expectedState": "noResults",
+      "expectedCopyKeys": ["picker.noMatches", "picker.createCustom"],
+      "note": "BR-010: empty library yields noResults + create CTA."
+    },
+    {
+      "id": "no-substring-match",
+      "preCondition": {
+        "library": [{ "id": "barbell-bench-press", "name": "Barbell Bench Press", "nameNormalized": "barbell bench press", "isCustom": false }]
+      },
+      "action": { "search": "zzz" },
+      "expectedResults": [],
+      "expectedState": "noResults",
+      "expectedCopyKeys": ["picker.noMatches", "picker.createCustom"],
+      "note": "Non-matching query yields the same noResults state."
+    },
+    {
+      "id": "empty-query-is-idle-not-noresults",
+      "preCondition": {
+        "library": [{ "id": "squat", "name": "Squat", "nameNormalized": "squat", "isCustom": false }]
+      },
+      "action": { "search": "   " },
+      "expectedState": "idle",
+      "note": "Whitespace-only input collapses to empty via BR-001 and returns to idle, not noResults."
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "scenario": "V7 add-set prefilled from last row",
+  "ac": "[+] adds a new set row to the exercise group pre-filled from the last row's values",
+  "exercises": [
+    { "id": "ex-bench", "name": "Barbell Bench Press" },
+    { "id": "ex-ohp", "name": "Barbell Overhead Press" }
+  ],
+  "routine": {
+    "id": "rt-a",
+    "name": "Push A",
+    "sets": [
+      { "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "plannedDuration": null, "setClass": "work" },
+      { "exerciseId": "ex-ohp", "plannedWeight": 40, "plannedReps": 10, "plannedDuration": null, "setClass": "work" }
+    ]
+  },
+  "actions": [
+    { "type": "materialize" },
+    { "type": "accept", "setIndex": 0 },
+    { "type": "addSet", "exerciseId": "ex-bench" }
+  ],
+  "expect": {
+    "setCount": 3,
+    "sets": [
+      { "status": "completed", "sortOrder": 0 },
+      { "status": "planned", "sortOrder": 1 },
+      { "status": "planned", "sortOrder": 2, "exerciseId": "ex-bench", "plannedWeight": 60, "plannedReps": 8, "actualWeight": null, "actualReps": null }
+    ],
+    "snapshot": {
+      "restRequested": true,
+      "nextIncompleteIsSet1": true
+    },
+    "cues": ["cue.set.completed"]
+  }
+}

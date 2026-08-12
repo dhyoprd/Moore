@@ -1,0 +1,24 @@
+{
+  "fixture": "10-confirm-blocking",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-010, INV-C5 — confirm.destructive is the only blocking cue; pendingConfirmation gates the destructive write until explicit resolution (SC-routines BR-004)",
+  "vectors": [
+    {
+      "id": "V10",
+      "name": "confirm blocks, sets pending, resolves explicitly, and may re-fire after the dedupe window",
+      "cite": "BR-010, BR-012, SC-routines BR-004",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.confirm.destructive", "at": 0 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.confirm.destructive", "haptic": null, "audio": false, "visual": "confirm.modal", "blocking": true, "delivery": "inProcess", "headlineKind": null }, "pendingConfirmation": true } },
+        { "do": "resolveConfirmation",
+          "expect": { "pendingConfirmation": false } },
+        { "do": "evaluate", "event": { "cue": "cue.confirm.destructive", "at": 2 },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.confirm.destructive", "haptic": null, "audio": false, "visual": "confirm.modal", "blocking": true, "delivery": "inProcess", "headlineKind": null }, "pendingConfirmation": true } }
+      ],
+      "finalExpect": {
+        "firedCues": ["cue.confirm.destructive", "cue.confirm.destructive"],
+        "pendingConfirmation": true
+      }
+    }
+  ]
+}

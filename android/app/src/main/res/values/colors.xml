@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lime accent per SC-cues/ticket AC: lime.vivid #D4FF3F on opaque steel. -->
+    <color name="lime_vivid">#FFD4FF3F</color>
+    <color name="steel">#FF1C1B1F</color>
+    <color name="ink">#FF0B0B0C</color>
+</resources>

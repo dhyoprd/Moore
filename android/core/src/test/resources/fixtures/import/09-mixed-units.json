@@ -1,0 +1,40 @@
+{
+  "label": "V9: mixed units — per-exercise override reinterprets file unit; conversion unrounded (AC-2 edge)",
+  "cites": ["BR-010"],
+  "vectors": [
+    {
+      "id": "per-exercise-lb-override",
+      "csvFile": "09-mixed.csv",
+      "options": {
+        "targetUnit": "kg",
+        "unitOverrides": { "dumbbell curl": "lb" }
+      },
+      "expect": {
+        "unit": "kg",
+        "counts": { "sessionsFound": 1, "setsImported": 3 },
+        "db": {
+          "setRows": [
+            { "sessionImportKey": "mix day|2025-08-15T09:00:00Z", "exerciseName": "Barbell Curl", "sortOrder": 0, "actualWeight": 40, "actualReps": 8 },
+            { "sessionImportKey": "mix day|2025-08-15T09:00:00Z", "exerciseName": "Dumbbell Curl", "sortOrder": 1, "actualWeight": 13.607787283069193, "actualReps": 10 },
+            { "sessionImportKey": "mix day|2025-08-15T09:00:00Z", "exerciseName": "Hammer Curl", "sortOrder": 2, "actualWeight": 16, "actualReps": 12 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "lb-file-lb-target-no-conversion",
+      "csvFile": "02b-lb.csv",
+      "options": { "targetUnit": "lb" },
+      "expect": {
+        "unit": "lb",
+        "counts": { "sessionsFound": 1, "setsImported": 2 },
+        "db": {
+          "setRows": [
+            { "sessionImportKey": "push day|2025-01-10T08:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 0, "actualWeight": 135, "actualReps": 8 },
+            { "sessionImportKey": "push day|2025-01-10T08:00:00Z", "exerciseName": "Barbell Bench Press", "sortOrder": 1, "actualWeight": 140, "actualReps": 6 }
+          ]
+        }
+      }
+    }
+  ]
+}

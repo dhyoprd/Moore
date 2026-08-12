@@ -1,0 +1,51 @@
+{
+  "fixture": "08-precedence-one-cue-per-set",
+  "contractId": "SC-cues@1.0.0",
+  "cites": "BR-008, INV-C4 — one cue per set; headline max_1rm > max_volume > max_reps > max_duration (SC-prs BR-005); celebration subsumes the completion tick",
+  "vectors": [
+    {
+      "id": "V8a",
+      "name": "three kinds beaten: exactly one dispatch, headline max_1rm; completion tick suppressed prSubsumes",
+      "cite": "BR-008, SC-prs BR-005",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.pr.achieved", "at": 0, "setId": "s1", "beatenKinds": ["max_volume", "max_reps", "max_1rm"] },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.pr.achieved", "haptic": "celebration", "audio": false, "visual": "pr.toast", "blocking": false, "delivery": "inProcess", "headlineKind": "max_1rm" } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 1, "setId": "s1" },
+          "expect": { "outcome": "suppressed", "reason": "prSubsumes" } }
+      ],
+      "finalExpect": { "firedCues": ["cue.pr.achieved"], "dispatchCount": 1 }
+    },
+    {
+      "id": "V8b",
+      "name": "reps beats duration: headline max_reps; tick subsumed",
+      "cite": "BR-008",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.pr.achieved", "at": 0, "setId": "s2", "beatenKinds": ["max_reps", "max_duration"] },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.pr.achieved", "haptic": "celebration", "audio": false, "visual": "pr.toast", "blocking": false, "delivery": "inProcess", "headlineKind": "max_reps" } } },
+        { "do": "evaluate", "event": { "cue": "cue.set.completed", "at": 1, "setId": "s2" },
+          "expect": { "outcome": "suppressed", "reason": "prSubsumes" } }
+      ],
+      "finalExpect": { "firedCues": ["cue.pr.achieved"], "dispatchCount": 1 }
+    },
+    {
+      "id": "V8c",
+      "name": "duration-only PR headlines max_duration",
+      "cite": "BR-008, SC-prs BR-004",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.pr.achieved", "at": 0, "setId": "s3", "beatenKinds": ["max_duration"] },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.pr.achieved", "haptic": "celebration", "audio": false, "visual": "pr.toast", "blocking": false, "delivery": "inProcess", "headlineKind": "max_duration" } } }
+      ],
+      "finalExpect": { "firedCues": ["cue.pr.achieved"], "dispatchCount": 1 }
+    },
+    {
+      "id": "V8d",
+      "name": "known + unknown kinds: headline resolves on the known one",
+      "cite": "BR-007, BR-008",
+      "steps": [
+        { "do": "evaluate", "event": { "cue": "cue.pr.achieved", "at": 0, "setId": "s4", "beatenKinds": ["future_kind", "max_volume"] },
+          "expect": { "outcome": "fired", "dispatch": { "cue": "cue.pr.achieved", "haptic": "celebration", "audio": false, "visual": "pr.toast", "blocking": false, "delivery": "inProcess", "headlineKind": "max_volume" } } }
+      ],
+      "finalExpect": { "firedCues": ["cue.pr.achieved"], "dispatchCount": 1 }
+    }
+  ]
+}

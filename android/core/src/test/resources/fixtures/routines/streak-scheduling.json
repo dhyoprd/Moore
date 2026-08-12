@@ -1,0 +1,41 @@
+{
+  "label": "V7, V9, V10 — streak chip visibility + consecutive-week rounding (BR-005)",
+  "cases": [
+    {
+      "id": "zero-sessions-chip-hidden",
+      "completedSessions": [],
+      "expectedStreak": null,
+      "expectedChipVisible": false
+    },
+    {
+      "id": "one-completed-session-chip-shows-1",
+      "completedSessions": [ "2026-08-11T08:00:00Z" ],
+      "now": "2026-08-11T09:00:00Z",
+      "expectedStreak": 1,
+      "expectedChipVisible": true
+    },
+    {
+      "id": "current-week-rounds-up",
+      "note": "completed sessions in each of the last 2 weeks + one today → 3; the current partial week rounds up",
+      "completedSessions": [
+        "2026-08-11T08:00:00Z",
+        "2026-08-04T08:00:00Z",
+        "2026-07-28T08:00:00Z"
+      ],
+      "now": "2026-08-11T09:00:00Z",
+      "expectedStreak": 3,
+      "expectedChipVisible": true
+    },
+    {
+      "id": "broken-chain-latest-run-wins",
+      "note": "two consecutive weeks 4+5 weeks ago, gap, then nothing recent → chip shows the most recent unbroken run",
+      "completedSessions": [
+        "2026-07-14T08:00:00Z",
+        "2026-07-07T08:00:00Z"
+      ],
+      "now": "2026-08-11T09:00:00Z",
+      "expectedStreak": 2,
+      "expectedChipVisible": true
+    }
+  ]
+}

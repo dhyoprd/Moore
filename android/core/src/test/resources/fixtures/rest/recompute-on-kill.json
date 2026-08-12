@@ -1,0 +1,42 @@
+{
+  "fixture": "recompute-on-kill",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "BR-007 (recompute-from-timestamps on kill/background; expired presents as expired)",
+  "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+  "vectors": [
+    {
+      "id": "V11",
+      "name": "app killed mid-rest: relaunch recomputes remaining, then presents as expired",
+      "cite": "BR-007, BR-008 first-opportunity",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "state": "restRunning", "durationSec": 180, "startedAt": 0, "adjustmentSec": 0 } },
+        { "do": "backgrounded", "at": 60,
+          "expect": { "state": "restRunning", "durationSec": 180, "startedAt": 0, "adjustmentSec": 0, "remainingSec": 120 } },
+        { "do": "backgrounded", "at": 200,
+          "expect": { "state": "restExpired", "cue": "cue.rest.end" } },
+        { "do": "backgrounded", "at": 250,
+          "expect": { "state": "restExpired" } }
+      ],
+      "finalExpect": { "cues": ["cue.rest.end"], "state": "restExpired" }
+    },
+    {
+      "id": "E4",
+      "name": "repeated expireNaturally at expiry fires exactly one cue",
+      "cite": "INV-T3 fire-once, clock-granularity re-arrival",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": false },
+          "expect": { "state": "restRunning", "durationSec": 90, "startedAt": 0 } },
+        { "do": "expireNaturally", "at": 90,
+          "expect": { "state": "restExpired", "cue": "cue.rest.end" } },
+        { "do": "expireNaturally", "at": 90,
+          "expect": { "state": "restExpired" } },
+        { "do": "expireNaturally", "at": 95,
+          "expect": { "state": "restExpired" } }
+      ],
+      "finalExpect": { "cues": ["cue.rest.end"], "state": "restExpired" }
+    }
+  ]
+}

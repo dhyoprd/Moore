@@ -1,0 +1,49 @@
+{
+  "label": "V11 — Epley math: per-session point = max Epley (not max weight); warmups and NULL-weight rows invisible (BR-002)",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "exerciseType": "strength", "category": "chest" }
+    ],
+    "sessions": [
+      { "id": "s1", "startedAt": "2026-08-10T10:00:00Z", "endedAt": "2026-08-10T11:00:00Z" },
+      { "id": "s2", "startedAt": "2026-08-11T10:00:00Z", "endedAt": "2026-08-11T11:00:00Z" }
+    ],
+    "sets": [
+      { "id": "e-100x3", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 100, "actualReps": 3, "completedAt": "2026-08-10T10:10:00Z" },
+      { "id": "e-90x8", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 90, "actualReps": 8, "completedAt": "2026-08-10T10:15:00Z" },
+      { "id": "e-warm-120x1", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "warmup", "actualWeight": 120, "actualReps": 1, "completedAt": "2026-08-10T10:05:00Z" },
+      { "id": "e-bw", "sessionId": "s1", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualReps": 8, "completedAt": "2026-08-10T10:20:00Z" },
+      { "id": "e-60x5", "sessionId": "s2", "exerciseId": "ex-bench", "status": "completed", "setClass": "work", "actualWeight": 60, "actualReps": 5, "completedAt": "2026-08-11T10:10:00Z" }
+    ]
+  },
+  "vectors": [
+    {
+      "id": "V11a-session-point-is-max-epley-114",
+      "query": { "op": "trend", "exerciseId": "ex-bench", "rangeDays": 30 },
+      "expect": {
+        "points": [
+          { "day": "2026-08-10", "value": 114, "segment": 0 },
+          { "day": "2026-08-11", "value": 70, "segment": 0 }
+        ]
+      }
+    },
+    {
+      "id": "V11b-epley-formula-60x5",
+      "query": { "op": "epley", "weight": 60, "reps": 5 },
+      "expect": { "value": 70 }
+    },
+    {
+      "id": "V11c-epley-formula-100x3",
+      "query": { "op": "epley", "weight": 100, "reps": 3 },
+      "expect": { "value": 110.00000000000001 }
+    },
+    {
+      "id": "V11d-tonnage-work-only",
+      "query": { "op": "tonnage", "rangeDays": 30 },
+      "expect": {
+        "weeks": [ { "week": "2026-W33", "tonnage": 1320 } ]
+      }
+    }
+  ]
+}
