@@ -1,0 +1,45 @@
+{
+  "fixture": "final-set-and-finish-morph",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "BR-006 (final-set-identical rule), §2b (morph consumes the run; morph is the cue)",
+  "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+  "vectors": [
+    {
+      "id": "E6",
+      "name": "the final set auto-starts rest exactly like every other set",
+      "cite": "BR-006, INV-T4",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": true,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "state": "restRunning", "overlay": "rest", "durationSec": 180, "startedAt": 0, "adjustmentSec": 0 } }
+      ],
+      "finalExpect": { "cues": [], "state": "restRunning", "overlay": "rest" }
+    },
+    {
+      "id": "V10",
+      "name": "final-set rest expiry morphs to the finish panel — no rest-end cue",
+      "cite": "§2b, BR-006, #10 morph rule",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": true,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": false },
+          "expect": { "state": "restRunning", "overlay": "rest", "durationSec": 90, "startedAt": 0 } },
+        { "do": "expireNaturally", "at": 90,
+          "expect": { "state": "noRest", "overlay": "finishPanel", "cue": "cue.finish.morph" } }
+      ],
+      "finalExpect": { "cues": ["cue.finish.morph"], "overlay": "finishPanel" }
+    },
+    {
+      "id": "E7",
+      "name": "skipping the final set's rest morphs just like expiry does",
+      "cite": "§2b, BR-003 + BR-006",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": true,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": true },
+          "expect": { "state": "restRunning", "overlay": "rest", "durationSec": 180, "startedAt": 0 } },
+        { "do": "skip", "at": 20,
+          "expect": { "state": "noRest", "overlay": "finishPanel", "cue": "cue.finish.morph" } }
+      ],
+      "finalExpect": { "cues": ["cue.finish.morph"], "overlay": "finishPanel" }
+    }
+  ]
+}

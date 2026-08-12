@@ -1,0 +1,28 @@
+{
+  "fixture": "rest-end-cue",
+  "contractId": "SC-rest@1.0.0",
+  "cites": "BR-008 (cue-per-channel dispatch, exactly once, gated to rest state)",
+  "settingsDefaults": { "defaultRestCompoundSec": 180, "defaultRestIsolationSec": 90 },
+  "cueContract": {
+    "id": "cue.rest.end",
+    "channels": ["haptic:alert", "audio:tone", "visual:restOverFlip"],
+    "firesSilenced": "visual+haptic only",
+    "firesBackgroundedOrLocked": "local-notification-class",
+    "firesOnce": true
+  },
+  "vectors": [
+    {
+      "id": "V12",
+      "name": "ordinary expiry fires one cue.rest.end into the abstract channel",
+      "cite": "BR-008, INV-T3",
+      "steps": [
+        { "do": "setCompleted", "at": 0, "allSetsTerminal": false,
+          "resolveInputs": { "perSetSec": null, "perExerciseSec": null, "perRoutineSec": null, "categoryIsCompound": false },
+          "expect": { "state": "restRunning", "durationSec": 90, "startedAt": 0, "adjustmentSec": 0 } },
+        { "do": "expireNaturally", "at": 90,
+          "expect": { "state": "restExpired", "cue": "cue.rest.end" } }
+      ],
+      "finalExpect": { "cues": ["cue.rest.end"], "state": "restExpired" }
+    }
+  ]
+}
