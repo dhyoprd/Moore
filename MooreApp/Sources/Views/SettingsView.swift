@@ -1,18 +1,24 @@
 // Ticket #38 — Settings tab: the SC-settings@1.0.0 surface. Five sections per
 // the contract + blueprint #7 §7: Units (display-only kg/lb), Rest defaults
 // (SC-rest's two level-4 keys), Body metrics (date-descending trend list + add
-// sheet), Data & sync (full-file backup export via ShareLink, dormant Hevy-import
-// entry stub, permanently greyed cloud-sync toggle, storage stats), and exercise
-// tombstones (list + restore). All copy binds UICopy's contract keys verbatim;
-// all logic lives in the Foundation-only SettingsModel driving SettingsEngine /
-// SettingsDAO — this view is layout + bindings.
+// sheet), Data & sync (Hevy CSV import entry — #39's live flow, full-file
+// backup export via ShareLink, permanently greyed cloud-sync toggle, storage
+// stats), and exercise tombstones (list + restore). All copy binds UICopy's
+// contract keys verbatim; all logic lives in the Foundation-only SettingsModel
+// driving SettingsEngine / SettingsDAO — this view is layout + bindings.
 
 import SwiftUI
+import UniformTypeIdentifiers
 import MooreSettings
 
 struct SettingsView: View {
     @Environment(AppState.self) private var appState
     @State private var showingAddMetric = false
+    /// #39: system file picker for the Hevy CSV export (SC-import §2 idle →
+    /// file-picked → parsing).
+    @State private var showingImportPicker = false
+    /// #39: the import flow sheet (preview → applying → done | error).
+    @State private var showingImportFlow = false
 
     var body: some View {
         if let model = appState.settings {
@@ -37,6 +43,36 @@ struct SettingsView: View {
                 .overlay(alignment: .bottom) {
                     if let fileName = model.exportedToastFileName {
                         toast(fileName: fileName) { model.clearToast() }
+                    }
+                }
+                // #39 — Hevy CSV import flow (SC-import §2): the system file
+                // picker hands a URL to the Foundation-only ImportModel, then
+                // the flow sheet renders preview → applying → done | error.
+                .fileImporter(
+                    isPresented: $showingImportPicker,
+                    allowedContentTypes: [UTType.commaSeparatedText, UTType.plainText],
+                    allowsMultipleSelection: false
+                ) { result in
+                    guard let importModel = appState.importFlow else { return }
+                    switch result {
+                    case .success(let urls):
+                        guard let url = urls.first else { return }
+                        importModel.loadFile(at: url)
+                        showingImportFlow = true
+                    case .failure(let error):
+                        // The picker reports cancellation as a failure — a
+                        // no-op, not an import error.
+                        let nsError = error as NSError
+                        if nsError.domain == NSCocoaErrorDomain, nsError.code == NSUserCancelledError {
+                            return
+                        }
+                        importModel.filePickFailed(detail: "\(error)")
+                        showingImportFlow = true
+                    }
+                }
+                .sheet(isPresented: $showingImportFlow) {
+                    if let importModel = appState.importFlow {
+                        HevyImportFlowView(model: importModel)
                     }
                 }
             }
@@ -188,8 +224,10 @@ struct SettingsView: View {
 
     private func dataSyncSection(_ model: SettingsModel) -> some View {
         Section {
+            // SC-import §6 placement: the import row sits directly above the
+            // export row.
+            importRow()
             exportRow(model)
-            importRow(model)
             cloudSyncRow(model)
             storageRows(model)
         } header: {
@@ -242,25 +280,18 @@ struct SettingsView: View {
         }
     }
 
-    /// BR-012 stub: the Hevy-import entry point renders on this seam, disabled —
-    /// #39 (Hevy CSV import flow; roadmap #30 per the contract) lands the handler
-    /// behind SettingsEngine.hevyImportEntry. Invoking it writes nothing (INV-ST5).
-    private func importRow(_ model: SettingsModel) -> some View {
+    /// #39 — the live Hevy-import entry (replaces the #38 BR-012 stub). Tap
+    /// opens the system file picker; the picked URL drives the Foundation-only
+    /// ImportModel through SC-import §2's machine, presented as the import
+    /// flow sheet. Copy: hevyImport.title ("Import from Hevy (CSV)").
+    private func importRow() -> some View {
         Button {
-            // Deliberately empty: enabled == false until #39 ships (INV-ST5).
+            showingImportPicker = true
         } label: {
-            VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
-                // settings.dataSync.importHevy
-                Text(UICopy.settingsDataSyncImportHevy)
-                    .font(MooreFont.body())
-                    .foregroundStyle(MooreColor.textPrimary)
-                // settings.dataSync.importHevyBlocked
-                Text(UICopy.settingsDataSyncImportHevyBlocked)
-                    .font(MooreFont.body(.caption))
-                    .foregroundStyle(MooreColor.textSecondary)
-            }
+            Label(UICopy.hevyImportTitle, systemImage: "square.and.arrow.down")
+                .font(MooreFont.display(.subheadline))
+                .foregroundStyle(MooreColor.lime)
         }
-        .disabled(!model.hevyImportEntry.enabled)
     }
 
     /// BR-011: cloud sync renders permanently greyed at v1 — disabled constant,
