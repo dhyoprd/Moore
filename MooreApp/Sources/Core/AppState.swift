@@ -73,6 +73,8 @@ public final class AppState {
     public let dependencies: AppDependencies?
     /// The Home surface model. Nil only when phase == .failed.
     public let home: HomeModel?
+    /// The Settings surface model (#38). Nil only when phase == .failed.
+    public let settings: SettingsModel?
 
     /// Selected bottom tab (Home is the landing tab).
     public var selectedTab: AppTab = .home
@@ -86,10 +88,11 @@ public final class AppState {
     /// Refreshed from SQLite (cold-render rule #9 r4), never from view state.
     public private(set) var activeSession: ActiveSessionSummary?
 
-    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?) {
+    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, settings: SettingsModel?) {
         self.phase = phase
         self.dependencies = dependencies
         self.home = home
+        self.settings = settings
         if phase == .ready {
             self.activeSession = try? dependencies?.sessionStats.activeSession()
         }
@@ -105,18 +108,21 @@ public final class AppState {
                 folderDAO: deps.folderDAO,
                 materialize: deps.materialize
             )
-            return AppState(phase: .ready, dependencies: deps, home: home)
+            let settings = SettingsModel(dao: deps.settingsDAO)
+            return AppState(phase: .ready, dependencies: deps, home: home, settings: settings)
         } catch let error as BootError {
             return AppState(
                 phase: .failed(BootFailure(isMigrationFailure: error.isMigrationFailure, detail: "\(error)")),
                 dependencies: nil,
-                home: nil
+                home: nil,
+                settings: nil
             )
         } catch {
             return AppState(
                 phase: .failed(BootFailure(isMigrationFailure: false, detail: "\(error)")),
                 dependencies: nil,
-                home: nil
+                home: nil,
+                settings: nil
             )
         }
     }
