@@ -81,6 +81,14 @@ public final class AppState {
     public private(set) var workout: WorkoutSessionModel?
     /// The Settings surface model (#38). Nil only when phase == .failed.
     public let settings: SettingsModel?
+    /// The History surface model (#37): month-grouped sessions + PR badges +
+    /// session detail (plan-vs-actual + e1RM sparklines). Drives the frozen
+    /// AnalyticsEngine/AnalyticsDAO read seams; nil only when phase == .failed.
+    public let history: HistoryModel?
+    /// The Analytics surface model (#37): strictly-derived streak/adherence,
+    /// Epley trend, weekly tonnage, muscle split, PR list. Nil only when
+    /// phase == .failed.
+    public let analytics: AnalyticsModel?
     /// The full-taxonomy cue dispatcher (#36): one shared CueState across rest
     /// + set + PR cues so the celebration subsumes the per-set tick (SC-cues
     /// BR-008/INV-C4). Host lifecycle writes `context` (BR-005 foreground
@@ -99,12 +107,14 @@ public final class AppState {
     /// Refreshed from SQLite (cold-render rule #9 r4), never from view state.
     public private(set) var activeSession: ActiveSessionSummary?
 
-    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?, cueDispatcher: CueDispatcher?) {
+    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?, history: HistoryModel?, analytics: AnalyticsModel?, cueDispatcher: CueDispatcher?) {
         self.phase = phase
         self.dependencies = dependencies
         self.home = home
         self.workout = workout
         self.settings = settings
+        self.history = history
+        self.analytics = analytics
         self.cueDispatcher = cueDispatcher
         if phase == .ready {
             self.activeSession = try? dependencies?.sessionStats.activeSession()
@@ -131,7 +141,7 @@ public final class AppState {
             // PersonalRecordDAO + CueEngine; the workout flow calls it after
             // every committed transition.
             let records = RecordsModel(
-                prDAO: PersonalRecordDAO(dbQueue: deps.dbQueue),
+                prDAO: deps.personalRecordDAO,
                 exerciseDAO: deps.exerciseDAO,
                 settingsDAO: deps.settingsDAO,
                 cueChannel: dispatcher
@@ -150,7 +160,18 @@ public final class AppState {
                 records: records
             )
             let settings = SettingsModel(dao: deps.settingsDAO)
-            return AppState(phase: .ready, dependencies: deps, home: home, workout: workout, settings: settings, cueDispatcher: dispatcher)
+            // History + Analytics (#37): strictly-derived read surfaces driving
+            // the frozen AnalyticsEngine/AnalyticsDAO + the #36 PR-badge probe.
+            let history = HistoryModel(
+                analyticsDAO: deps.analyticsDAO,
+                prDAO: deps.personalRecordDAO,
+                settingsDAO: deps.settingsDAO
+            )
+            let analytics = AnalyticsModel(
+                analyticsDAO: deps.analyticsDAO,
+                settingsDAO: deps.settingsDAO
+            )
+            return AppState(phase: .ready, dependencies: deps, home: home, workout: workout, settings: settings, history: history, analytics: analytics, cueDispatcher: dispatcher)
         } catch let error as BootError {
             return AppState(
                 phase: .failed(BootFailure(isMigrationFailure: error.isMigrationFailure, detail: "\(error)")),
@@ -158,6 +179,8 @@ public final class AppState {
                 home: nil,
                 workout: nil,
                 settings: nil,
+                history: nil,
+                analytics: nil,
                 cueDispatcher: nil
             )
         } catch {
@@ -167,6 +190,8 @@ public final class AppState {
                 home: nil,
                 workout: nil,
                 settings: nil,
+                history: nil,
+                analytics: nil,
                 cueDispatcher: nil
             )
         }

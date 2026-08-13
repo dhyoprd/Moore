@@ -91,6 +91,10 @@ targets:
         product: MooreRest
       - package: Moore
         product: MooreRecords
+      # #37: History + Analytics read surfaces drive the strictly-derived
+      # analytics engine (AnalyticsEngine/AnalyticsDAO, SC-analytics@1.0.0).
+      - package: Moore
+        product: MooreAnalytics
       # #36: the full-taxonomy cue engine (cue.pr.achieved / cue.pr.summary
       # evaluation, BR-014 gates) behind the celebration surface.
       - package: Moore

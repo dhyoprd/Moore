@@ -21,6 +21,7 @@ import MooreWorkout
 import MooreProgression
 import MooreRest
 import MooreRecords
+import MooreAnalytics
 import MooreWarmup
 import MooreSettings
 
@@ -62,6 +63,11 @@ public struct AppDependencies {
     public let settingsDAO: SettingsDAO
     public let progressionDAO: ProgressionDAO
     public let warmupDAO: WarmupDAO
+    /// #36/#37 — the record book seam (live write path, re-derivation, Summary
+    /// reads, and the History PR-badge probe `fetchSessionPRBadges`).
+    public let personalRecordDAO: PersonalRecordDAO
+    /// #37 — the strictly-derived analytics seam (read-only; INV-A1).
+    public let analyticsDAO: AnalyticsDAO
 
     public let sessionStats: SessionStatsProvider
     public let homeSurface: HomeSurfaceViewModel
@@ -109,6 +115,10 @@ public struct AppDependencies {
         let settingsDAO = SettingsDAO(dbQueue: dbQueue)
         let progressionDAO = ProgressionDAO(dbQueue: dbQueue)
         let warmupDAO = WarmupDAO(dbQueue: dbQueue)
+        let personalRecordDAO = PersonalRecordDAO(dbQueue: dbQueue)
+        // #37 — read-only analytics seam. No schema surface of its own (INV-A1);
+        // it composes AnalyticsEngine over the live tables migrated above.
+        let analyticsDAO = AnalyticsDAO(dbQueue: dbQueue)
         let sessionStats = SessionStatsProvider(dbQueue: dbQueue)
         let homeSurface = HomeSurfaceViewModel(
             routineDAO: routineDAO,
@@ -136,6 +146,8 @@ public struct AppDependencies {
             settingsDAO: settingsDAO,
             progressionDAO: progressionDAO,
             warmupDAO: warmupDAO,
+            personalRecordDAO: personalRecordDAO,
+            analyticsDAO: analyticsDAO,
             sessionStats: sessionStats,
             homeSurface: homeSurface,
             materialize: materialize,
