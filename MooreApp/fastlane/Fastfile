@@ -1,0 +1,35 @@
+# MooreApp/fastlane/Fastfile — OPTIONAL one-device install helper (ticket #41).
+#
+# The primary install path is the manual runbook in ../INSTALL.md (Xcode Cmd+R),
+# which is strictly simpler for a single personal device. This lane exists so a
+# headless rebuild+install is ready once Xcode signing already works:
+#
+#     brew install fastlane ios-deploy
+#     cd MooreApp && fastlane build_and_install
+#
+# fastlane itself cannot push to a device; gym builds + development-signs the
+# IPA and ios-deploy installs the unpacked .app on the connected iPhone.
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Build a development-signed MooreApp.ipa and install it on the connected iPhone"
+  lane :build_and_install do
+    unless Dir.exist?("MooreApp.xcodeproj")
+      UI.user_error!("MooreApp.xcodeproj missing — run `xcodegen generate` first (INSTALL.md step 2).")
+    end
+
+    build_app(
+      project: "MooreApp.xcodeproj",
+      scheme: "MooreApp",
+      export_method: "development",
+      output_directory: "fastlane/dist"
+    )
+
+    sh(
+      "rm -rf fastlane/dist/Payload && " \
+      "unzip -q fastlane/dist/*.ipa -d fastlane/dist && " \
+      "ios-deploy --justlaunch --no-wifi --bundle fastlane/dist/Payload/*.app"
+    )
+  end
+end
