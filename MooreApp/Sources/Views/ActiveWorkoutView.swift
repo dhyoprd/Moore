@@ -91,6 +91,40 @@ struct ActiveWorkoutView: View {
             .padding(.bottom, DesignTokens.Spacing.l)
         }
         .animation(.spring(duration: DesignTokens.Motion.morphSeconds), value: model.overlaySurface)
+        // In-session PR celebration (#36): the `pr.toast` visual element
+        // (SC-cues §3a) — compact, ≥3s, queued one-at-a-time, top-anchored so
+        // it never covers the ✓ column, and hit-testing OFF so it can never
+        // block the money screen (BR-011). In-session never escalates
+        // (SC-prs BR-011): one flat toast regardless of beaten-kind count.
+        .overlay(alignment: .top) { prToast }
+        .animation(.spring(duration: DesignTokens.Motion.popSeconds), value: model.records.currentToast?.id)
+    }
+
+    // MARK: PR celebration toast (SC-prs §6 toast.pr.new)
+
+    @ViewBuilder
+    private var prToast: some View {
+        if let toast = model.records.currentToast {
+            HStack(spacing: DesignTokens.Spacing.s) {
+                Text(toast.text)
+                    .font(MooreFont.display(.footnote))
+                    .foregroundStyle(MooreColor.textPrimary)
+                    .lineLimit(2)
+                Spacer(minLength: 0)
+            }
+            .moorePRCelebration()
+            .padding(.horizontal, DesignTokens.Spacing.l)
+            .padding(.top, DesignTokens.Spacing.s)
+            .allowsHitTesting(false)   // a witness, never a boss (BR-011)
+            .accessibilityElement(children: .combine)
+            .transition(.move(edge: .top).combined(with: .opacity))
+            // SC-cues §3a: the toast shows ≥3s, then the queue advances.
+            .task(id: toast.id) {
+                try? await Task.sleep(for: .seconds(RecordsModel.toastSeconds))
+                guard !Task.isCancelled else { return }
+                model.records.advanceToast()
+            }
+        }
     }
 
     // MARK: Header (#7 §3: minimize chevron · title · elapsed slot)

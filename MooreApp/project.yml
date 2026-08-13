@@ -76,6 +76,10 @@ targets:
         product: MooreRest
       - package: Moore
         product: MooreRecords
+      # #36: the full-taxonomy cue engine (cue.pr.achieved / cue.pr.summary
+      # evaluation, BR-014 gates) behind the celebration surface.
+      - package: Moore
+        product: MooreCues
       - package: Moore
         product: MooreWarmup
       - package: Moore

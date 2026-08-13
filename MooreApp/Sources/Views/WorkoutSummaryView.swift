@@ -26,6 +26,26 @@ struct WorkoutSummaryView: View {
                 .font(MooreFont.numeric(.subheadline))
                 .foregroundStyle(MooreColor.textSecondary)
 
+            // The Summary celebrates the day (SC-prs BR-010 / cue.pr.summary
+            // visual, #36): 0 session PRs → no section; 1 → single card; ≥2 →
+            // "🏆 {n} new PRs" banner above stacked cards, precedence-ordered.
+            // Summary owns ALL escalation — in-session never escalates (BR-011).
+            if !summary.prCards.isEmpty {
+                VStack(spacing: DesignTokens.Spacing.s) {
+                    if RecordsModel.showsSummaryBanner(cardCount: summary.prCards.count) {
+                        // summary.pr.banner
+                        Text(UICopy.summaryPrBanner(count: summary.prCards.count))
+                            .font(MooreFont.display(.headline))
+                            .foregroundStyle(MooreColor.lime)
+                            .moorePRCelebration()
+                    }
+                    ForEach(summary.prCards) { card in
+                        prCard(card)
+                    }
+                }
+                .padding(.horizontal, DesignTokens.Spacing.l)
+            }
+
             // Plan-vs-actual table.
             ScrollView {
                 VStack(spacing: DesignTokens.Spacing.s) {

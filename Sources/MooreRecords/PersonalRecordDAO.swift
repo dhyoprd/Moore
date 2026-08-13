@@ -108,6 +108,30 @@ public struct PersonalRecordDAO: Sendable {
         }
     }
 
+    /// History PR-badge groundwork (#36 → #37, SC-prs §9 feeds #27): per-session
+    /// live PR counts dated by the session's start day (UTC). The History screen
+    /// renders `history.badge.pr` on rows whose count > 0. Tombstoned PR rows and
+    /// tombstoned sessions are excluded; legacy `''`-sentinel sessionId rows never
+    /// join (0009's readers-tolerate shape).
+    public func fetchSessionPRBadges() throws -> [SessionPRBadge] {
+        try dbQueue.read { db in
+            let rows = try Row.fetchAll(db, sql: """
+                SELECT pr.sessionId AS sessionId,
+                       substr(ws.startedAt, 1, 10) AS day,
+                       COUNT(*) AS prCount
+                  FROM personal_record pr
+                  JOIN workout_session ws
+                    ON ws.id = pr.sessionId AND ws.deletedAt IS NULL
+                 WHERE pr.deletedAt IS NULL
+                 GROUP BY pr.sessionId
+                 ORDER BY day DESC, pr.sessionId ASC
+                """)
+            return rows.map { row in
+                SessionPRBadge(sessionId: row["sessionId"], day: row["day"], prCount: row["prCount"])
+            }
+        }
+    }
+
     // MARK: - Internals
 
     private func fetchRow(exerciseId: String, kind: PRKind, in db: Database) throws -> PersonalRecord? {
@@ -158,7 +182,7 @@ public struct PersonalRecordDAO: Sendable {
         let defaultMetric: String? = row["defaultMetric"]
         let classRaw: String? = row["setClass"]
         let statusRaw: String = row["status"]
-        let metric: ExerciseMetric
+        let metric: SeamMetric
         if let defaultMetric {
             metric = (defaultMetric == "duration") ? .duration : .reps
         } else {

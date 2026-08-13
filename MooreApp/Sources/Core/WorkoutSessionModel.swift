@@ -92,6 +92,10 @@ public struct SessionSummary: Equatable {
     /// volume shape; warmups excluded per INV-6's coalesce).
     public let volumeKg: Double
     public let rows: [SessionSummaryRow]
+    /// The session's PR cards (SC-prs BR-010 / INV-PR5): precedence-ordered,
+    /// read at render time by RecordsModel. 0 → no section; 1 → single card;
+    /// ≥2 → banner + stacked cards (Summary owns ALL escalation, BR-011).
+    public let prCards: [PRSummaryCard]
 }
 
 /// One exercise group of the flat, order-free set list (group order = first
@@ -155,6 +159,10 @@ public final class WorkoutSessionModel {
     /// Abstract cue channel (SC-rest §5). Concrete multi-channel delivery is
     /// #29's platform seam; the app wires the recording spy until then.
     public let cueChannel: any CueDispatching
+    /// The PR + celebrations model (#36): drives PREngine + PersonalRecordDAO
+    /// + CueEngine for the live completion path, corrections, and the Summary
+    /// surface. Owned by AppState; shared, never re-created per session.
+    public let records: RecordsModel
 
     // Session-scoped BR-001 inputs, loaded once at attach so resolution never
     // reaches into the database mid-session (SC-rest §5 resolver contract).
@@ -176,7 +184,8 @@ public final class WorkoutSessionModel {
         restSettingsDAO: RestSettingsDAO,
         settingsDAO: SettingsDAO,
         sessionStats: SessionStatsProvider,
-        cueChannel: any CueDispatching
+        cueChannel: any CueDispatching,
+        records: RecordsModel
     ) {
         self.dbQueue = dbQueue
         self.sessionDAO = sessionDAO
@@ -187,6 +196,7 @@ public final class WorkoutSessionModel {
         self.settingsDAO = settingsDAO
         self.sessionStats = sessionStats
         self.cueChannel = cueChannel
+        self.records = records
         self.snapshot = StateSnapshot(sessionId: "")
         self.restCycle = RestCycle()
     }
@@ -246,6 +256,9 @@ public final class WorkoutSessionModel {
             self.restCycle = RestCycle()
             self.summary = nil
             self.editRequest = nil
+            // #36: celebrations are session-scoped ephemera — a new session
+            // never inherits the previous one's toast queue.
+            self.records.resetCelebrations()
 
             if let active = try? sessionStats.activeSession(), active.id == sessionId {
                 self.routineName = active.routineName
@@ -663,7 +676,7 @@ public final class WorkoutSessionModel {
             try sessionDAO.finishSession(sessionId: sessionId, at: endedAt)
             fsm = machine
             snapshot = machine.state
-            buildSummary(endedAt: endedAt)
+            buildSummary(sessionId: sessionId, endedAt: endedAt)
             // The session surface is terminal (§2b): the rest cycle has nothing
             // left to run — drop it rather than let a stale run tick on.
             restCycle = RestCycle()
@@ -714,6 +727,10 @@ public final class WorkoutSessionModel {
                     break
                 }
                 reloadFSM()
+                // #36: PR evaluation rides AFTER the committed FSM transition —
+                // a post-commit witness (SC-cues BR-011), completed work sets
+                // only (SC-prs BR-001). Corrections re-derive the record book.
+                evaluatePRs(action: action, post: post)
                 if requestsRest {
                     startRest(for: post, at: Date())
                 }
@@ -723,6 +740,27 @@ public final class WorkoutSessionModel {
         } catch {
             errorMessage = "\(error)"
             return false
+        }
+    }
+
+    /// #36 — SC-prs seam, driven after every lawful terminal dispatch:
+    ///   accept / editAndAccept → live PR evaluation on the completed set
+    ///     (BR-002/BR-006; first-touch silent, failed/dropped/warmup never —
+    ///     the engine gates them, BR-001);
+    ///   editCompleted → re-derive that exercise's record book (BR-007);
+    ///   fail / editFailed / drop / undoDrop / addSet / finish → nothing
+    ///     (failed sets record actuals but never write PRs, SC-workout-logging
+    ///     BR-002 downstream note; drops carry no actuals at all).
+    /// Errors are swallowed by RecordsModel — the ✓ path already committed.
+    private func evaluatePRs(action: FsmAction, post: SetSnapshot) {
+        switch action {
+        case .accept, .editAndAccept:
+            guard post.status == .completed else { return }
+            records.setCompleted(setId: post.id)
+        case .editCompleted:
+            records.rederive(exerciseId: post.exerciseId)
+        case .fail, .editFailed, .drop, .undoDrop, .addSet, .finishSession:
+            break
         }
     }
 
@@ -826,7 +864,7 @@ public final class WorkoutSessionModel {
         weightUnit = (try? settingsDAO.fetchSettings().weightUnit) ?? .kg
     }
 
-    private func buildSummary(endedAt: Date) {
+    private func buildSummary(sessionId: String, endedAt: Date) {
         let sets = snapshot.sets
         let completed = sets.filter { $0.status == .completed }
         let volume = completed
@@ -850,7 +888,10 @@ public final class WorkoutSessionModel {
                     plannedText: plannedText(for: set),
                     actualText: actualText(for: set)
                 )
-            }
+            },
+            // #36: the Summary celebrates the day (SC-prs BR-010) — render-time
+            // PR read (INV-PR5), precedence-ordered, escalation in the view.
+            prCards: records.summaryCards(sessionId: sessionId)
         )
     }
 

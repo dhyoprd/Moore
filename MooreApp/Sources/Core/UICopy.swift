@@ -2,7 +2,8 @@
 // Every user-facing string binds to its contract key verbatim; code references
 // these constants, never ad-hoc literals. Sources: SC-routines@1.0.0 §6,
 // SC-settings@1.0.0 §6 (incl. the nineteen #14 empty-state keys),
-// SC-workout-logging@1.0.0 §6, SC-foundation@1.0.0 §6 (fatal-recovery keys).
+// SC-workout-logging@1.0.0 §6, SC-foundation@1.0.0 §6 (fatal-recovery keys),
+// SC-prs@1.0.0 §6 (PR toast / kind labels / summary cards / banner / badge).
 // Dynamic values use the {placeholder} shapes from the contracts, resolved by
 // the helper functions at the bottom. Voice per #17: declarative, factual,
 // no exclamation marks.
@@ -181,6 +182,19 @@ public enum UICopy {
     public static let confirmDiscardSessionConfirm = "Discard"
     /// confirm.discardSession.cancel
     public static let confirmDiscardSessionCancel = "Keep"
+
+    // MARK: Personal records (SC-prs §6)
+
+    /// pr.kind.max_1rm — headline kind label for toasts + summary cards
+    public static let prKindMax1rm = "1RM"
+    /// pr.kind.max_volume
+    public static let prKindMaxVolume = "Volume"
+    /// pr.kind.max_reps
+    public static let prKindMaxReps = "Reps"
+    /// pr.kind.max_duration
+    public static let prKindMaxDuration = "Duration"
+    /// history.badge.pr — History session-row PR badge (#36 groundwork for #37)
+    public static let historyBadgePr = "PR"
 
     // MARK: Rest overlay + Finish morph (SC-rest §6)
 
@@ -362,5 +376,35 @@ public enum UICopy {
     /// rest.finish.summary — "{setCount} sets · {exerciseCount} exercises · {duration}"
     public static func restFinishSummary(setCount: Int, exerciseCount: Int, duration: String) -> String {
         "\(setCount) sets · \(exerciseCount) exercises · \(duration)"
+    }
+
+    // MARK: Personal records dynamic resolution (SC-prs §6)
+
+    /// pr.kind.* — the §6 kind-label table keyed by SC-prs's canonical raw
+    /// values (INV-PR1 closed vocabulary). Unknown kinds render their raw
+    /// value verbatim (forward-compat, never a crash — mirrors SC-cues BR-007).
+    public static func prKindLabel(_ kindRaw: String) -> String {
+        switch kindRaw {
+        case "max_1rm": return prKindMax1rm
+        case "max_volume": return prKindMaxVolume
+        case "max_reps": return prKindMaxReps
+        case "max_duration": return prKindMaxDuration
+        default: return kindRaw
+        }
+    }
+
+    /// toast.pr.new — "🏆 New {kindLabel} PR — {exerciseName} {value}"
+    public static func toastPrNew(kindLabel: String, exerciseName: String, value: String) -> String {
+        "🏆 New \(kindLabel) PR — \(exerciseName) \(value)"
+    }
+
+    /// summary.pr.card — "{exerciseName} {kindLabel} {value}"
+    public static func summaryPrCard(exerciseName: String, kindLabel: String, value: String) -> String {
+        "\(exerciseName) \(kindLabel) \(value)"
+    }
+
+    /// summary.pr.banner — "🏆 {n} new PRs"
+    public static func summaryPrBanner(count: Int) -> String {
+        "🏆 \(count) new PRs"
     }
 }

@@ -9,7 +9,8 @@
 import Foundation
 import Observation
 import MooreRoutines
-import MooreRest
+import MooreCues
+import MooreRecords
 
 // MARK: - Tabs (screen blueprint #7: Home, History, Analytics, Settings)
 
@@ -80,6 +81,11 @@ public final class AppState {
     public private(set) var workout: WorkoutSessionModel?
     /// The Settings surface model (#38). Nil only when phase == .failed.
     public let settings: SettingsModel?
+    /// The full-taxonomy cue dispatcher (#36): one shared CueState across rest
+    /// + set + PR cues so the celebration subsumes the per-set tick (SC-cues
+    /// BR-008/INV-C4). Host lifecycle writes `context` (BR-005 foreground
+    /// gate); the platform haptic sink is #40's seam. Nil when phase == .failed.
+    public let cueDispatcher: CueDispatcher?
 
     /// Selected bottom tab (Home is the landing tab).
     public var selectedTab: AppTab = .home
@@ -93,12 +99,13 @@ public final class AppState {
     /// Refreshed from SQLite (cold-render rule #9 r4), never from view state.
     public private(set) var activeSession: ActiveSessionSummary?
 
-    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?) {
+    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?, cueDispatcher: CueDispatcher?) {
         self.phase = phase
         self.dependencies = dependencies
         self.home = home
         self.workout = workout
         self.settings = settings
+        self.cueDispatcher = cueDispatcher
         if phase == .ready {
             self.activeSession = try? dependencies?.sessionStats.activeSession()
         }
@@ -113,9 +120,21 @@ public final class AppState {
                 routineDAO: deps.routineDAO,
                 folderDAO: deps.folderDAO
             )
-            // Cue delivery: the abstract SC-rest channel with the recording spy.
-            // Concrete multi-channel platform delivery (haptic alert + tone +
-            // visual, notification-class when locked) is #29's seam.
+            // Cue delivery (#36): the full-taxonomy MooreCues dispatcher over
+            // the ABSTRACT recording sink — the platform haptic driver for the
+            // celebration/success/alert classes is #40's seam. One shared
+            // CueState across rest + set + PR cues so the PR celebration
+            // subsumes the per-set tick (SC-cues BR-008 / INV-C4).
+            let dispatcher = CueDispatcher(sink: RecordingCueSink())
+            // PR + celebrations model (#36): drives the frozen PREngine +
+            // PersonalRecordDAO + CueEngine; the workout flow calls it after
+            // every committed transition.
+            let records = RecordsModel(
+                prDAO: PersonalRecordDAO(dbQueue: deps.dbQueue),
+                exerciseDAO: deps.exerciseDAO,
+                settingsDAO: deps.settingsDAO,
+                cueChannel: dispatcher
+            )
             let workout = WorkoutSessionModel(
                 dbQueue: deps.dbQueue,
                 sessionDAO: deps.sessionDAO,
@@ -125,17 +144,19 @@ public final class AppState {
                 restSettingsDAO: deps.restSettingsDAO,
                 settingsDAO: deps.settingsDAO,
                 sessionStats: deps.sessionStats,
-                cueChannel: InMemoryCueDispatcher()
+                cueChannel: dispatcher,
+                records: records
             )
             let settings = SettingsModel(dao: deps.settingsDAO)
-            return AppState(phase: .ready, dependencies: deps, home: home, workout: workout, settings: settings)
+            return AppState(phase: .ready, dependencies: deps, home: home, workout: workout, settings: settings, cueDispatcher: dispatcher)
         } catch let error as BootError {
             return AppState(
                 phase: .failed(BootFailure(isMigrationFailure: error.isMigrationFailure, detail: "\(error)")),
                 dependencies: nil,
                 home: nil,
                 workout: nil,
-                settings: nil
+                settings: nil,
+                cueDispatcher: nil
             )
         } catch {
             return AppState(
@@ -143,7 +164,8 @@ public final class AppState {
                 dependencies: nil,
                 home: nil,
                 workout: nil,
-                settings: nil
+                settings: nil,
+                cueDispatcher: nil
             )
         }
     }
@@ -205,6 +227,17 @@ public final class AppState {
     /// Scene foreground: recompute any live rest run from timestamps (BR-007).
     public func sceneBecameActive() {
         workout?.sceneBecameActive()
+    }
+
+    /// Scene lifecycle → cue device context (SC-cues BR-005/INV-C6): only
+    /// cue.rest.end reaches a backgrounded/locked device; the PR celebration
+    /// is foreground-only BY CONSTRUCTION because the engine gates on this.
+    /// `silenced` is preserved — it is the host's audio-axis surface.
+    public func scenePhaseChanged(isActive: Bool) {
+        guard let cueDispatcher else { return }
+        var context = cueDispatcher.context
+        context.appState = isActive ? .foreground : .backgroundedOrLocked
+        cueDispatcher.context = context
     }
 
     /// Cold re-read of the in-flight session from SQLite.
