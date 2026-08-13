@@ -93,6 +93,11 @@ public final class AppState {
     /// row or the flow sheet — so the §2 machine survives the sheet's teardown
     /// and dismissal is a pure reset. Nil only when phase == .failed.
     public let importFlow: ImportModel?
+    /// The self-validation surface model (#43 — the 8-week gate dashboard):
+    /// drives ValidationMetricsEngine over AnalyticsDAO + ValidationDAO. Owned
+    /// HERE so scene-lifecycle foregrounds can record app-open events on the
+    /// same instance the Analytics tab renders. Nil only when phase == .failed.
+    public let validation: ValidationModel?
     /// The full-taxonomy cue dispatcher (#36): one shared CueState across rest
     /// + set + PR cues so the celebration subsumes the per-set tick (SC-cues
     /// BR-008/INV-C4). Host lifecycle writes `context` (BR-005 foreground
@@ -120,7 +125,7 @@ public final class AppState {
     /// Refreshed from SQLite (cold-render rule #9 r4), never from view state.
     public private(set) var activeSession: ActiveSessionSummary?
 
-    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?, history: HistoryModel?, analytics: AnalyticsModel?, importFlow: ImportModel?, cueDispatcher: CueDispatcher?, cueVisualPulse: CueVisualPulse?, restEndNotifier: any RestEndNotificationScheduling) {
+    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?, history: HistoryModel?, analytics: AnalyticsModel?, importFlow: ImportModel?, validation: ValidationModel?, cueDispatcher: CueDispatcher?, cueVisualPulse: CueVisualPulse?, restEndNotifier: any RestEndNotificationScheduling) {
         self.phase = phase
         self.dependencies = dependencies
         self.home = home
@@ -129,6 +134,7 @@ public final class AppState {
         self.history = history
         self.analytics = analytics
         self.importFlow = importFlow
+        self.validation = validation
         self.cueDispatcher = cueDispatcher
         self.cueVisualPulse = cueVisualPulse
         self.restEndNotifier = restEndNotifier
@@ -207,6 +213,7 @@ public final class AppState {
                 history: history,
                 analytics: analytics,
                 importFlow: importFlow,
+                validation: deps.validation,
                 cueDispatcher: dispatcher,
                 cueVisualPulse: visualPulse,
                 restEndNotifier: restEndNotifier
@@ -221,6 +228,7 @@ public final class AppState {
                 history: nil,
                 analytics: nil,
                 importFlow: nil,
+                validation: nil,
                 cueDispatcher: nil,
                 cueVisualPulse: nil,
                 restEndNotifier: NoopRestEndNotifier()
@@ -235,6 +243,7 @@ public final class AppState {
                 history: nil,
                 analytics: nil,
                 importFlow: nil,
+                validation: nil,
                 cueDispatcher: nil,
                 cueVisualPulse: nil,
                 restEndNotifier: NoopRestEndNotifier()
@@ -326,6 +335,10 @@ public final class AppState {
             cueDispatcher.context = context
         }
         if isActive {
+            // #43: every foreground stamps one app_open_event row (the
+            // retention signal). Boot recorded the first one; the model's
+            // once-per-foreground flag absorbs duplicates.
+            validation?.recordAppOpenIfNeeded()
             restEndNotifier.cancelPendingRestEnd()
             if let expiry = workout?.restExpiresAt,
                Date().timeIntervalSince(expiry) <= CueState.backgroundedNotificationGraceSec {
@@ -333,6 +346,8 @@ public final class AppState {
             }
             workout?.sceneBecameActive()
         } else {
+            // #43: the next foreground is a fresh app-open event.
+            validation?.markBackgrounded()
             scheduleRestEndNotificationIfRunning()
         }
     }

@@ -69,6 +69,9 @@ public struct AppDependencies {
     public let personalRecordDAO: PersonalRecordDAO
     /// #37 — the strictly-derived analytics seam (read-only; INV-A1).
     public let analyticsDAO: AnalyticsDAO
+    /// #43 — self-validation storage seam (app_open_event + validation_baseline
+    /// + the two manual gate confirmations; 0012_validation_metrics).
+    public let validationDAO: ValidationDAO
 
     public let sessionStats: SessionStatsProvider
     public let homeSurface: HomeSurfaceViewModel
@@ -79,6 +82,9 @@ public struct AppDependencies {
     /// #39 — Hevy CSV import seam-2 (SC-import BR-015/BR-016): the one-
     /// transaction apply + PR re-derivation. Driven by ImportModel.
     public let hevyImportDAO: HevyImportDAO
+    /// #43 — the self-validation surface model (the 8-week gate dashboard):
+    /// drives ValidationMetricsEngine over AnalyticsDAO + ValidationDAO reads.
+    public let validation: ValidationModel
 
     // MARK: Boot
 
@@ -131,6 +137,14 @@ public struct AppDependencies {
         )
         let materialize = Materialize(dao: sessionDAO)
         let hevyImportDAO = HevyImportDAO(dbQueue: dbQueue)
+        // #43 — self-validation storage seam + its surface model. The boot IS
+        // the first foreground of this process, so it records the first
+        // app-open event here (one row per foreground; later foregrounds ride
+        // AppState.scenePhaseChanged). A storage hiccup never blocks boot —
+        // the gate dashboard renders from whatever reads succeed.
+        let validationDAO = ValidationDAO(dbQueue: dbQueue)
+        let validation = ValidationModel(validationDAO: validationDAO, analyticsDAO: analyticsDAO)
+        validation.recordAppOpenIfNeeded()
         let progression = ProgressionModel(
             dbQueue: dbQueue,
             progressionDAO: progressionDAO,
@@ -153,11 +167,13 @@ public struct AppDependencies {
             warmupDAO: warmupDAO,
             personalRecordDAO: personalRecordDAO,
             analyticsDAO: analyticsDAO,
+            validationDAO: validationDAO,
             sessionStats: sessionStats,
             homeSurface: homeSurface,
             materialize: materialize,
             progression: progression,
-            hevyImportDAO: hevyImportDAO
+            hevyImportDAO: hevyImportDAO,
+            validation: validation
         )
     }
 
@@ -176,6 +192,7 @@ public struct AppDependencies {
         try MooreRecordsMigrations.migrate(writer)       // 0009       MooreRecords
         try MooreWarmupMigrations.migrate(writer)        // 0010       MooreWarmup
         try MooreSettingsMigrations.migrate(writer)      // 0011       MooreSettings
+        try MooreAnalyticsMigrations.migrate(writer)     // 0012       MooreAnalytics (#43)
     }
 
     /// Asserts every identifier of the canonical chain is present in

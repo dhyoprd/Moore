@@ -80,7 +80,8 @@ let package = Package(
         .target(
             name: "MooreAnalytics",
             dependencies: [.product(name: "GRDB", package: "GRDB.swift")],
-            path: "Sources/MooreAnalytics"
+            path: "Sources/MooreAnalytics",
+            resources: [.process("Migrations")]
         ),
         .target(
             name: "MooreSettings",

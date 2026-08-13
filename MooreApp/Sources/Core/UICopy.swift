@@ -429,6 +429,77 @@ public enum UICopy {
     /// Error-state dismissal CTA
     public static let hevyImportErrorCta = "OK"
 
+    // MARK: Self-validation (#43 — the 8-week gate; copy not yet contract-pinned,
+    // surfaced by the Analytics tab's Self-validation section. All local — the
+    // gate is measured from the builder's own data, nothing phones home.)
+
+    /// Section title (Analytics tab bottom).
+    public static let validationTitle = "Self-validation"
+    /// Section subtitle — the gate is derived, never vibes.
+    public static let validationSubtitle = "The 8-week gate, measured from your own data"
+    /// This-week qualifying-session count header.
+    public static let validationWeekTitle = "This week"
+    /// Consecutive ≥2-session weeks header.
+    public static let validationStreakTitle = "Week streak"
+    /// Logging-speed header.
+    public static let validationSpeedTitle = "Logging speed"
+    /// Speed proxy not derivable yet (needs ≥2 completed sets in a session).
+    public static let validationSpeedEmpty = "Log a session with 2+ sets to measure"
+    /// No baseline stored yet.
+    public static let validationBaselineEmpty = "No Hevy baseline yet"
+    /// Baseline entry field placeholder.
+    public static let validationBaselinePlaceholder = "Hevy seconds per set"
+    /// Baseline commit CTA.
+    public static let validationBaselineSave = "Save baseline"
+    /// Retention header.
+    public static let validationRetentionTitle = "Opened"
+    /// Retention empty state (no app-open events recorded yet).
+    public static let validationRetentionEmpty = "No opens recorded yet"
+    /// Gate card title.
+    public static let validationGateTitle = "The 8-week gate"
+    /// Gate verdicts (#4 activation trigger states).
+    public static let validationGatePass = "PASS"
+    public static let validationGateInProgress = "IN-PROGRESS"
+    public static let validationGateNotStarted = "NOT-STARTED"
+    /// Gate condition 1 — derived from local sessions.
+    public static let validationGateStreakCondition = "2+ sessions a week, 8 weeks straight"
+    /// Gate condition 2 — builder attests (weeks 5–8).
+    public static let validationGateDisplacementCondition = "Weeks 5–8: zero workouts logged in Hevy"
+    /// Gate condition 3 — builder answers at the week-8 checkpoint.
+    public static let validationGateRetentionCondition = "Week 8: would not return to Hevy"
+
+    // MARK: Self-validation dynamic resolution
+
+    /// "{n} of 2 sessions" — this week's qualifying count vs the gate's bar.
+    public static func validationWeekCount(_ n: Int) -> String {
+        "\(n) of 2 sessions"
+    }
+
+    /// "{n} of 8 weeks" — the consecutive-week streak vs the gate's bar.
+    public static func validationStreakCount(_ n: Int) -> String {
+        "\(n) of 8 weeks"
+    }
+
+    /// "{value} in Moore" — current logging-speed proxy.
+    public static func validationSpeedCurrent(_ value: String) -> String {
+        "\(value) in Moore"
+    }
+
+    /// "{value} in Hevy" — the stored baseline.
+    public static func validationSpeedBaseline(_ value: String) -> String {
+        "\(value) in Hevy"
+    }
+
+    /// "{n} days this week" — distinct open days in the current week.
+    public static func validationRetentionWeek(_ n: Int) -> String {
+        "\(n) days this week"
+    }
+
+    /// "{n} open days total" — distinct open days across the whole timeline.
+    public static func validationRetentionTotal(_ n: Int) -> String {
+        "\(n) open days total"
+    }
+
     // MARK: Dynamic value resolution ({placeholder} shapes from the contracts)
 
     /// home.streak_label — "{n}-day streak"
