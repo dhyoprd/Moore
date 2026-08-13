@@ -206,6 +206,27 @@ public struct WorkoutSessionDAO: Sendable {
         }
     }
 
+    /// Persist `undoDrop` (BR-003): re-open a dropped row to `planned` with NULL
+    /// actuals and NULL `completedAt` — the undo restores the pre-drop row shape
+    /// (§2a: `dropped → planned` while the window is open; JS mirror of the
+    /// contract verifier writes exactly these columns). Bumps `updatedAt` (INV-2).
+    public func undoDropSet(setId: String) throws {
+        let nowStr = iso.string(from: Date())
+        try dbQueue.write { db in
+            guard var row = try CompletedSetRowStorage.fetchOne(db, key: setId),
+                  row.deletedAt == nil else {
+                throw WorkoutSessionError.notFound(setId)
+            }
+            row.status = SetStatus.planned.rawValue
+            row.actualWeight = nil
+            row.actualReps = nil
+            row.actualDuration = nil
+            row.completedAt = nil
+            row.updatedAt = nowStr
+            try row.update(db)
+        }
+    }
+
     /// Append a new pre-filled row (BR-004). Returns the new set's id.
     @discardableResult
     public func appendSet(

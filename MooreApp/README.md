@@ -41,8 +41,9 @@ MooreApp/
     MooreApp.swift             @main — boots, injects AppState
     Core/                      Foundation-only (parses off-Mac; no SwiftUI)
       AppDependencies.swift    composition root: GRDB boot + DI wiring
-      AppState.swift           boot phase, tabs, Active Workout presentation hook
+      AppState.swift           boot phase, tabs, Active Workout presentation + start wiring
       HomeModel.swift          drives HomeSurfaceViewModel + DAO write seams
+      WorkoutSessionModel.swift #34 money-screen state: drives FSM + Materialize + RestCycle
       RoutineEditorModel.swift drives RoutineEditorBuffer + RoutineDAO
       UICopy.swift             contract UI-copy table (verbatim keys)
       DesignTokens.swift       frozen visual tokens (#17 resolution)
@@ -51,7 +52,10 @@ MooreApp/
       HomeView.swift           Home tracer bullet (folders, rows, streak, Start empty)
       RoutineEditorSheet.swift create/edit routine sheet
       ExercisePickerSheet.swift exercise picker (search / browse / create-custom)
-      ActiveWorkoutStubView.swift  #34 stub behind the presentation hook
+      ActiveWorkoutView.swift  #34 money screen (flat set list + per-set ✓)
+      SetEditSheet.swift       #34 bottom-sheet edit path (steppers/unit/plate preview)
+      RestOverlayView.swift    #34 ambient rest overlay + Finish-morph panel
+      WorkoutSummaryView.swift #34 plan-vs-actual summary
       MiniPlayerView.swift     persistent bar above the tab bar
       HistoryView.swift        placeholder (#37) with contract empty state
       AnalyticsView.swift      placeholder (#37) with contract empty state
@@ -69,6 +73,15 @@ MooreApp/
 - **Architecture rule.** All business/state logic lives in `Sources/Core`
   (Foundation-only) and the pre-existing module view-models; SwiftUI views stay
   thin. That keeps the Android port (#8) and off-Mac verification intact.
-- **Scope.** Active Workout is a stubbed presentation hook (money screen = #34);
-  History/Analytics/Settings are contract-empty placeholders (#37/#38). Visual
-  polish beyond tokens (rim light, glass tiers, motion) is #40.
+- **Active Workout (#34).** The money screen is `ActiveWorkoutView` bound to
+  `WorkoutSessionModel` (Core), which DRIVES the frozen engines — never
+  reimplements them: `WorkoutSessionFSM` + `Materialize` + `WorkoutSessionDAO`
+  (SC-workout-logging) for set logging, `RestCycle` + `RestResolver` (SC-rest)
+  for the ambient rest overlay + Finish morph. Persistence doctrine: after every
+  lawful FSM transition the model persists via the DAO, then cold re-reads the
+  FSM from SQLite (#9 r4); the BR-003 drop-undo window is carried by the model
+  (not derivable from rows, SC-workout-logging §8).
+- **Scope.** History/Analytics/Settings are contract-empty placeholders
+  (#37/#38). Visual polish beyond tokens (rim light, full glass treatment,
+  motion wiring) is #40; concrete haptic/audio cue delivery is #29's seam (the
+  app currently wires the abstract SC-rest channel to the recording spy).

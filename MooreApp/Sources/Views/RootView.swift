@@ -7,6 +7,7 @@ import SwiftUI
 
 struct RootView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         @Bindable var appState = appState
@@ -43,11 +44,21 @@ struct RootView: View {
                 }
             }
             // Active Workout — full-screen modal OVER the tab bar (#7 §2).
-            // #33 ships the presentation hook + stub content; the money screen is #34.
+            // #34: the money screen (flat set list + rest overlay + finish
+            // morph) replaces the #33 stub.
             .fullScreenCover(item: $appState.presentedWorkout) { presentation in
-                ActiveWorkoutStubView(sessionId: presentation.id)
+                if let workout = appState.workout, workout.sessionId == presentation.id {
+                    ActiveWorkoutView(model: workout)
+                }
             }
             .animation(.spring(duration: DesignTokens.Motion.expandSeconds), value: appState.activeSession?.id)
+            .onChange(of: scenePhase) { _, newPhase in
+                // BR-007: on foreground, recompute any live rest run from its
+                // timestamps — the timer survives via timestamps, never ticks.
+                if newPhase == .active {
+                    appState.sceneBecameActive()
+                }
+            }
         }
     }
 }
