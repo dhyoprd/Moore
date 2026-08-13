@@ -1,6 +1,6 @@
 // SC-settings@1.0.0 fixture runner (ticket #31 Stage A).
 // Kotlin mirror of Tests/MooreSettingsTests/VerifySettings.mjs: full migration
-// chain 0001–0009 (0004 excluded), fresh DB per vector, the SAME step executor
+// full canonical chain 0001–0011 (#32), fresh DB per vector, the SAME step executor
 // over the ported com.moore.settings.SettingsEngine + a JDBC seam-2 harness.
 // The backup round-trip uses VACUUM INTO (the SQLite full-file copy that the
 // SAF export ships on Android).
@@ -542,7 +542,7 @@ class SettingsFixtureTest {
                     } catch (e: Exception) {
                         true
                     }
-                    checks.ok(threw, "$id: kind='${step["kind"].asString}' must violate CHECK post-0009")
+                    checks.ok(threw, "$id: kind='${step["kind"].asString}' must violate CHECK post-0011")
                 }
                 "assertTableExists" -> {
                     val t = db.queryOne("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", step["table"].asString)

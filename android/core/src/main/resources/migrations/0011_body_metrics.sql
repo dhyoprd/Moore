@@ -1,23 +1,24 @@
--- Migration 0009: body metrics measurement support (SC-settings@1.0.0 §3d, #28).
+-- Migration 0011: body metrics measurement support (SC-settings@1.0.0 §3d, #28).
+-- Renumbered 0009→0011 by #32 to give the canonical chain unique identifiers.
 --
 -- 0001 shipped body_metric with kind CHECK IN ('bodyWeight','bodyFat','weight')
 -- and unit CHECK IN ('kg','lb','pct'). #28's BodyMetrics surface requires a
 -- third kind — 'measurement' (any string name + numeric value + unit, e.g.
 -- "Waist 84 cm") — plus free-form units. SQLite cannot ALTER a CHECK, so this
 -- migration uses the same table-rebuild pattern as 0007_progression_full.sql
--- and 0008_personal_records.sql: behavior-additive, no row ever lost.
+-- and 0009_personal_records.sql: behavior-additive, no row ever lost.
 --
 -- Changes vs 0001 shape:
 --   - kind CHECK widened to ('bodyWeight','bodyFat','measurement'); the legacy
 --     'weight' synonym is REMAPPED to 'bodyWeight' in the copy below (INV-ST6).
---   - label TEXT added (0009): free name, REQUIRED for kind='measurement',
+--   - label TEXT added (0011): free name, REQUIRED for kind='measurement',
 --     NULL otherwise (SC-settings BR-006).
 --   - unit widened to free TEXT: legality per kind is application-enforced
 --     (bodyWeight ∈ kg|lb; bodyFat = pct; measurement = any non-empty unit).
 --   - trend indexes for the date-descending list (BR-007).
 --
--- No renames/drops of columns, no edits to 0001–0008. app_setting is untouched
--- (already created by 0007_rest_fields.sql per SC-rest §3d — verified present).
+-- No renames/drops of columns, no edits to 0001–0010. app_setting is untouched
+-- (already created by 0008_rest_fields.sql per SC-rest §3d — verified present).
 
 -- Step 1: canonical table with the SC-settings §3b shape.
 CREATE TABLE IF NOT EXISTS body_metric_v2 (
@@ -43,7 +44,7 @@ SELECT id,
 FROM body_metric;
 
 -- Step 3: swap tables. The pre-remap shape is preserved under the legacy name
--- (0008 precedent) — it stays in every full-file export (SC-settings INV-ST3).
+-- (0009 precedent) — it stays in every full-file export (SC-settings INV-ST3).
 ALTER TABLE body_metric RENAME TO body_metric__legacy_0001;
 ALTER TABLE body_metric_v2 RENAME TO body_metric;
 

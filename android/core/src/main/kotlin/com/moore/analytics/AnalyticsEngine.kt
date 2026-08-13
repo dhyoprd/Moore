@@ -40,7 +40,7 @@ data class ExerciseInfo(
     var category: String?,            // SC-exercises §3b enum; NULL = unclassified
 )
 
-/// personal_record post-0008, live rows only.
+/// personal_record post-0009, live rows only.
 data class PRRow(
     var id: String,
     var exerciseId: String,

@@ -1,13 +1,14 @@
 {
   "vector": 5,
-  "label": "PersonalRecord (manual + set-linked), BodyMetric, ProgressionScheme with all #5 fields (V11, V12, V13)",
+  "label": "PersonalRecord (manual + set-linked), BodyMetric, ProgressionScheme with all #5 fields (V11, V12, V13). PersonalRecord is the post-0009 canonical shape (sessionId NOT NULL, kind ∈ max_*).",
   "dependsOn": ["round-trip-vector-04.json"],
   "entities": {
     "PersonalRecord.setLinked": {
       "id": "a1b2c3d4-0005-4000-8000-000000000001",
       "exerciseId": "a1b2c3d4-0002-4000-8000-000000000001",
+      "sessionId": "a1b2c3d4-0003-4000-8000-000000000010",
       "setId": "a1b2c3d4-0004-4000-8000-000000000001",
-      "kind": "weight",
+      "kind": "max_1rm",
       "value": 82.5,
       "achievedAt": "2026-08-11T11:15:00Z",
       "createdAt": "2026-08-11T11:15:00Z",
@@ -17,8 +18,9 @@
     "PersonalRecord.manualRep": {
       "id": "a1b2c3d4-0005-4000-8000-000000000002",
       "exerciseId": "a1b2c3d4-0002-4000-8000-000000000001",
+      "sessionId": "a1b2c3d4-0003-4000-8000-000000000010",
       "setId": null,
-      "kind": "rep",
+      "kind": "max_reps",
       "value": 15.0,
       "achievedAt": "2026-08-11T11:00:00Z",
       "createdAt": "2026-08-11T12:00:00Z",

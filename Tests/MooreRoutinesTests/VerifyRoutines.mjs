@@ -15,17 +15,22 @@ import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const worktreeRoot = join(here, '..', '..');
-const foundationMigDir = join(worktreeRoot, 'Sources', 'MooreFoundation', 'Migrations');
-const routinesMigDir = join(worktreeRoot, 'Sources', 'MooreRoutines', 'Migrations');
 const fixturesDir = join(here, 'Fixtures');
 
+// The ONE canonical chain (#32): unique numbers, applied in this order everywhere.
 const MIGRATIONS = [
-  { dir: foundationMigDir, name: '0001_core.sql' },
-  { dir: foundationMigDir, name: '0002_warmup_progression.sql' },
-  { dir: foundationMigDir, name: '0003_import_columns.sql' },
-  { dir: routinesMigDir, name: '0005_routines_folders.sql' },
-  { dir: routinesMigDir, name: '0006_routines_session_link.sql' },
-];
+  'Sources/MooreFoundation/Migrations/0001_core.sql',
+  'Sources/MooreFoundation/Migrations/0002_warmup_progression.sql',
+  'Sources/MooreFoundation/Migrations/0003_import_columns.sql',
+  'Sources/MooreExercises/Migrations/0004_exercise_library.sql',
+  'Sources/MooreRoutines/Migrations/0005_routines_folders.sql',
+  'Sources/MooreRoutines/Migrations/0006_routines_session_link.sql',
+  'Sources/MooreProgression/Migrations/0007_progression_full.sql',
+  'Sources/MooreRest/Migrations/0008_rest_fields.sql',
+  'Sources/MooreRecords/Migrations/0009_personal_records.sql',
+  'Sources/MooreWarmup/Migrations/0010_warmup_per_exercise_toggle.sql',
+  'Sources/MooreSettings/Migrations/0011_body_metrics.sql',
+].map((p) => join(worktreeRoot, ...p.split('/')));
 
 let failures = 0;
 const fail = (m) => { console.error(`FAIL: ${m}`); failures += 1; };
@@ -35,9 +40,10 @@ const now = () => new Date().toISOString();
 
 // ---------------- Foundation migrations (idempotent) ----------------
 function applyMigrations(db) {
-  for (const { dir, name } of MIGRATIONS) {
+  for (const migPath of MIGRATIONS) {
+    const name = migPath.split(/[\\/]/).pop();
     try {
-      db.exec(readFileSync(join(dir, name), 'utf8'));
+      db.exec(readFileSync(migPath, 'utf8'));
       pass(`migration.apply ${name}`);
     } catch (e) {
       fail(`migration.apply ${name}: ${e.message}`);

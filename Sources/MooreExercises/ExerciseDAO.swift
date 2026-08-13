@@ -2,6 +2,11 @@
 // GRDB-backed DAO for the `exercise` table.
 // This is the ONLY file in MooreExercises allowed to import GRDB. All other layers
 // see plain `Exercise` structs. Typed methods replace raw SQL for callers.
+//
+// Column names are the REAL schema (#32 reconciliation): 0001's camelCase columns
+// (exerciseType, equipmentSlug, isCustom, createdAt, updatedAt, deletedAt) plus
+// the rewritten 0004's additions (category, defaultMetric, defaultRestSec, and
+// the BR-001 key `name_normalized`, which keeps its snake_case spelling).
 
 import Foundation
 import GRDB
@@ -12,24 +17,48 @@ public struct ExerciseRow: Codable, FetchableRecord, PersistableRecord {
 
     public var id: String
     public var name: String
+    /// 0001's NOT NULL type column. Derived on write from the domain row
+    /// (customs → 'custom'; built-ins → 'cardio' when the default metric is
+    /// duration, else 'strength' — the INV-IM8 precedent).
+    public var exerciseType: String
     public var nameNormalized: String
-    public var category: String
-    public var defaultMetric: String
-    public var equipment: String
+    /// NULL = unclassified (import-created customs until the user files them);
+    /// reads resolve NULL → `.other`, the taxonomy's catch-all bucket.
+    public var category: String?
+    /// NULL = unset; reads resolve NULL → `.reps` (the v1 default metric).
+    public var defaultMetric: String?
+    /// Maps the 0001 `equipmentSlug` column; NULL = `.other`.
+    public var equipment: String?
     public var isCustom: Int
     public var defaultRestSec: Int?
     public var createdAt: String   // ISO-8601 UTC
     public var updatedAt: String
     public var deletedAt: String?
 
+    /// Property → real column name (GRDB uses the coding keys for both the
+    /// PersistableRecord encoding and the FetchableRecord decoding).
+    enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case exerciseType
+        case nameNormalized = "name_normalized"
+        case category
+        case defaultMetric
+        case equipment = "equipmentSlug"
+        case isCustom
+        case defaultRestSec
+        case createdAt
+        case updatedAt
+        case deletedAt
+    }
+
     public func toDomain() throws -> Exercise {
-        guard
-            let cat = ExerciseCategory(rawValue: category),
-            let met = DefaultMetric(rawValue: defaultMetric),
-            let eqp = ExerciseEquipment(rawValue: equipment)
-        else {
-            throw ExerciseLibraryError.malformedSeed("row \(id) has out-of-enum category/metric/equipment")
-        }
+        // NULL-safe resolution: unclassified customs read as `.other`, unset
+        // metrics as `.reps`, missing equipment as `.other` (#32 — the real
+        // schema leaves these columns NULL until the app classifies the row).
+        let cat = category.flatMap(ExerciseCategory.init(rawValue:)) ?? .other
+        let met = defaultMetric.flatMap(DefaultMetric.init(rawValue:)) ?? .reps
+        let eqp = equipment.flatMap(ExerciseEquipment.init(rawValue:)) ?? .other
         let fmt = ISO8601DateFormatter()
         guard let created = fmt.date(from: createdAt), let updated = fmt.date(from: updatedAt) else {
             throw ExerciseLibraryError.malformedSeed("row \(id) has unparseable timestamps")
@@ -53,6 +82,10 @@ public struct ExerciseRow: Codable, FetchableRecord, PersistableRecord {
         let fmt = ISO8601DateFormatter()
         self.id = domain.id
         self.name = domain.name
+        // INV-IM8: duration metric ⇔ exerciseType='cardio'; customs are 'custom'.
+        self.exerciseType = domain.isCustom
+            ? "custom"
+            : (domain.defaultMetric == .duration ? "cardio" : "strength")
         self.nameNormalized = domain.nameNormalized
         self.category = domain.category.rawValue
         self.defaultMetric = domain.defaultMetric.rawValue
@@ -67,10 +100,11 @@ public struct ExerciseRow: Codable, FetchableRecord, PersistableRecord {
     public init(
         id: String,
         name: String,
+        exerciseType: String,
         nameNormalized: String,
-        category: String,
-        defaultMetric: String,
-        equipment: String,
+        category: String?,
+        defaultMetric: String?,
+        equipment: String?,
         isCustom: Int,
         defaultRestSec: Int?,
         createdAt: String,
@@ -79,6 +113,7 @@ public struct ExerciseRow: Codable, FetchableRecord, PersistableRecord {
     ) {
         self.id = id
         self.name = name
+        self.exerciseType = exerciseType
         self.nameNormalized = nameNormalized
         self.category = category
         self.defaultMetric = defaultMetric
@@ -110,7 +145,9 @@ public struct ExerciseDAO: Sendable {
     // MARK: - Seeding (BR-006)
 
     /// Idempotent: runs every launch. INSERT OR IGNORE per seed row; conflicts leave
-    /// existing rows untouched (they keep their own createdAt/updatedAt).
+    /// existing rows untouched (they keep their own createdAt/updatedAt). Every
+    /// built-in row carries `category` + `defaultMetric` (+ `name_normalized` and
+    /// the derived `exerciseType`) into the exercise table (#32 AC-2).
     public func seedBuiltInsIfNeeded(seedURL: URL) throws {
         let jsonData = try Data(contentsOf: seedURL)
         let seed = try ExerciseLibrary.decodeBuiltinSeed(jsonData: jsonData)
@@ -136,7 +173,7 @@ public struct ExerciseDAO: Sendable {
     ) throws -> [Exercise] {
         let normalized = NameNormalization.normalize(query)
         let rows: [ExerciseRow] = try dbQueue.read { db in
-            var sql = "SELECT * FROM exercise WHERE deleted_at IS NULL"
+            var sql = "SELECT * FROM exercise WHERE deletedAt IS NULL"
             var args: [Any] = []
             if !excludeIds.isEmpty {
                 let placeholders = excludeIds.map { _ in "?" }.joined(separator: ",")
@@ -208,13 +245,13 @@ public struct ExerciseDAO: Sendable {
         return try dbQueue.write { db -> CreateCustomResult in
             // (a) non-tombstoned row sharing the normalized name?
             if let existing = try ExerciseRow
-                .filter(Column("name_normalized") == normalized && Column("deleted_at") == nil)
+                .filter(Column("name_normalized") == normalized && Column("deletedAt") == nil)
                 .fetchOne(db) {
                 return .matchedExisting(try existing.toDomain())
             }
             // (b)/(c) tombstoned row sharing the normalized name?
             if let tombstoned = try ExerciseRow
-                .filter(Column("name_normalized") == normalized && Column("deleted_at") != nil)
+                .filter(Column("name_normalized") == normalized && Column("deletedAt") != nil)
                 .fetchOne(db) {
                 var r = tombstoned
                 r.deletedAt = nil
@@ -227,6 +264,7 @@ public struct ExerciseDAO: Sendable {
             let newRow = ExerciseRow(
                 id: UUID().uuidString.lowercased(),
                 name: displayName,
+                exerciseType: "custom",
                 nameNormalized: normalized,
                 category: category.rawValue,
                 defaultMetric: defaultMetric.rawValue,
@@ -242,7 +280,7 @@ public struct ExerciseDAO: Sendable {
         }
     }
 
-    /// INV-L2 soft-delete. Sets `deleted_at`; never removes the row.
+    /// INV-L2 soft-delete. Sets `deletedAt`; never removes the row.
     public func tombstone(_ id: String) throws {
         let fmt = ISO8601DateFormatter()
         try dbQueue.write { db in
@@ -256,7 +294,7 @@ public struct ExerciseDAO: Sendable {
         }
     }
 
-    /// BR-008: clears `deleted_at`, bumps `updated_at`. No expiry.
+    /// BR-008: clears `deletedAt`, bumps `updatedAt`. No expiry.
     public func restore(_ id: String) throws {
         let fmt = ISO8601DateFormatter()
         try dbQueue.write { db in

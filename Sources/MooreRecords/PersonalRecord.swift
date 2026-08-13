@@ -1,5 +1,5 @@
 // contractId: SC-prs @1.0.0
-// §3a model + seam-1 value types. Canonical post-0008 shape. Additive-only;
+// §3a model + seam-1 value types. Canonical post-0009 shape. Additive-only;
 // SC-foundation's INV-2 (updatedAt bump) / INV-3 (tombstone) / INV-4 (additive-
 // only) hold on every row.
 
@@ -26,7 +26,7 @@ public enum PRKind: String, Codable, CaseIterable, Sendable {
 public struct PersonalRecord: Codable, Equatable, Sendable {
     public var id: String
     public var exerciseId: String
-    public var sessionId: String    // session where achieved; '' sentinel only via legacy 0001→0008 backfill
+    public var sessionId: String    // session where achieved; '' sentinel only via legacy 0001→0009 backfill
     public var setId: String?
     public var kind: PRKind
     public var value: Double        // unit per kind (§3b); unrounded

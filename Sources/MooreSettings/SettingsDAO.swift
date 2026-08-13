@@ -1,10 +1,10 @@
 // contractId: SC-settings @1.0.0
 // Seam-2 GRDB persistence for the Settings + Data & sync surface (#28).
 //
-// Assumes the full migration chain has been applied, incl. 0007_rest_fields
-// (app_setting + rest defaults, SC-rest §3d) and 0009_body_metrics (this
-// module's rebuild of body_metric). `MooreSettingsMigrations` below registers
-// the 0009 step for module-level runners.
+// Assumes the full migration chain has been applied, incl. 0008_rest_fields
+// (app_setting + rest defaults, SC-rest §3d) and 0011_body_metrics (this
+// module's rebuild of body_metric; renumbered 0009→0011 by #32).
+// `MooreSettingsMigrations` below registers the 0011 step for module-level runners.
 //
 // Tombstone rule (SC-foundation BR-003): no DELETE anywhere — deletes flip
 // `deletedAt`; restore clears it (BR-010/INV-ST4). Reads filter
@@ -13,7 +13,7 @@
 import Foundation
 import GRDB
 
-// MARK: - Module migration runner (0009)
+// MARK: - Module migration runner (0011)
 
 public enum MooreSettingsMigrationError: Error {
     case migrationResourceMissing(String)
@@ -21,7 +21,7 @@ public enum MooreSettingsMigrationError: Error {
 
 public enum MooreSettingsMigrations {
     public static let migrationNames: [String] = [
-        "0009_body_metrics.sql",
+        "0011_body_metrics.sql",
     ]
 
     public static func migrate(_ writer: some DatabaseWriter) throws {
@@ -43,7 +43,7 @@ public enum MooreSettingsMigrations {
 
 // MARK: - Row types
 
-/// Post-0009 body_metric row (§3b). Kind/unit are stringly-typed on purpose:
+/// Post-0011 body_metric row (§3b). Kind/unit are stringly-typed on purpose:
 /// the vocabulary is enforced by `SettingsEngine.validateBodyMetric` (BR-006),
 /// not re-encoded in a frozen enum (measurement carries a free label + unit).
 public struct SettingsBodyMetric: Codable, Equatable, Sendable {

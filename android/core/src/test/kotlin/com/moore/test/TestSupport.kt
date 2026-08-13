@@ -319,37 +319,33 @@ class TestDb : AutoCloseable {
     }
 }
 
-/// Canonical chain order used by the Node verifiers (0004 excluded — it awaits
-/// the rewrite per docs/MIGRATION-INTEGRATION-NOTE.md).
+/// The ONE canonical chain (reconciled by #32): unique numbers 0001..0011,
+/// applied in this order by every Node verifier, every Kotlin fixture runner,
+/// the Room database, and GRDB alike. 0004 is the rewritten exercise-library
+/// migration (category/defaultMetric/defaultRestSec/name_normalized over the
+/// real 0001 shape).
 object MigrationChain {
     val FOUNDATION = arrayOf("0001_core.sql", "0002_warmup_progression.sql", "0003_import_columns.sql")
+    val EXERCISES = arrayOf("0004_exercise_library.sql")
     val ROUTINES = arrayOf("0005_routines_folders.sql", "0006_routines_session_link.sql")
-    val REST = arrayOf("0007_rest_fields.sql")
     val PROGRESSION = arrayOf("0007_progression_full.sql")
-    val RECORDS = arrayOf("0008_personal_records.sql")
-    val WARMUP = arrayOf("0008_warmup_per_exercise_toggle.sql")
-    val SETTINGS = arrayOf("0009_body_metrics.sql")
+    val REST = arrayOf("0008_rest_fields.sql")
+    val RECORDS = arrayOf("0009_personal_records.sql")
+    val WARMUP = arrayOf("0010_warmup_per_exercise_toggle.sql")
+    val SETTINGS = arrayOf("0011_body_metrics.sql")
 
-    /// 0001,0002,0003,0005,0006,0007_progression_full (VerifyProgression).
-    val PROGRESSION_FULL = FOUNDATION + ROUTINES + PROGRESSION
+    /// Every in-chain migration, canonical order — the full chain every
+    /// verifier applies (no subsets; #32).
+    val ALL = FOUNDATION + EXERCISES + ROUTINES + PROGRESSION + REST + RECORDS + WARMUP + SETTINGS
 
-    /// 0001..0006, 0007_rest_fields, 0008_personal_records (VerifyRecords).
-    val RECORDS_FULL = FOUNDATION + ROUTINES + REST + RECORDS
-
-    /// 0001..0006, 0007_progression_full, 0008_warmup (VerifyWarmup).
-    val WARMUP_FULL = FOUNDATION + ROUTINES + PROGRESSION + WARMUP
-
-    /// 0001..0006 (VerifyWorkoutFsm).
-    val WORKOUT_FULL = FOUNDATION + ROUTINES
-
-    /// 0001..0007_rest, 0008_personal_records (VerifyAnalytics / VerifyImport).
-    val ANALYTICS_FULL = FOUNDATION + ROUTINES + REST + RECORDS
-
-    /// The whole chain: + 0007_progression_full, 0008_warmup, 0009 (VerifySettings).
-    val SETTINGS_FULL = FOUNDATION + ROUTINES + PROGRESSION + REST + RECORDS + SETTINGS
-
-    /// Every in-chain migration, canonical order (MigrationChainTest).
-    val ALL = FOUNDATION + ROUTINES + PROGRESSION + REST + RECORDS + WARMUP + SETTINGS
+    /// Named aliases kept for the fixture runners: all of them now apply the
+    /// FULL canonical chain in order (#32 — no verifier cherry-picks subsets).
+    val PROGRESSION_FULL = ALL
+    val RECORDS_FULL = ALL
+    val WARMUP_FULL = ALL
+    val WORKOUT_FULL = ALL
+    val ANALYTICS_FULL = ALL
+    val SETTINGS_FULL = ALL
 }
 
 /// ISO-8601 UTC second-precision stamp used as the deterministic "now" across

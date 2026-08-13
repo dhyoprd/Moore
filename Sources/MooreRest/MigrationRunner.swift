@@ -1,8 +1,9 @@
 // contractId: SC-rest @1.0.0
-// MooreRest module migration runner (§3d). Registers migration 0007 verbatim
-// from its raw .sql resource, keyed by its filename. Foundation (#19) and
-// routines (#21) migrations run in their own modules' runners; this runner is
-// just the rest layer's additive step.
+// MooreRest module migration runner (§3d). Registers migration 0008 verbatim
+// from its raw .sql resource, keyed by its filename (renumbered 0007→0008 by
+// #32 when the canonical chain was reconciled). Foundation (#19) and routines
+// (#21) migrations run in their own modules' runners; this runner is just the
+// rest layer's additive step.
 
 import Foundation
 import GRDB
@@ -13,7 +14,7 @@ public enum MooreRestMigrationError: Error {
 
 public enum MooreRestMigrations {
     public static let migrationNames: [String] = [
-        "0007_rest_fields.sql",
+        "0008_rest_fields.sql",
     ]
 
     public static func migrate(_ writer: some DatabaseWriter) throws {

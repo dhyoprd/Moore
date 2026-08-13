@@ -11,7 +11,7 @@
 //   - Export manifest builder (BR-008/BR-009): `.moore-backup` naming + the
 //     ten-table honest manifest (tombstones + plannedX always included).
 //   - Tombstone listing (BR-010): pure filter/sort over exercise rows.
-//   - Body-metric validation (BR-006): closed kind vocabulary post-0009.
+//   - Body-metric validation (BR-006): closed kind vocabulary post-0011.
 //   - Keyed copy (BR-013): #14's nineteen empty-state keys + SC-foundation
 //     §6's eight fatal-recovery keys + this surface's own keys.
 
@@ -296,7 +296,7 @@ public enum SettingsEngine {
         case invalidValue(String)
     }
 
-    /// Closed kind vocabulary post-0009.
+    /// Closed kind vocabulary post-0011.
     public static let bodyMetricKinds: [String] = ["bodyWeight", "bodyFat", "measurement"]
 
     /// Pure validation gate for body-metric create/update (BR-006). Returns nil

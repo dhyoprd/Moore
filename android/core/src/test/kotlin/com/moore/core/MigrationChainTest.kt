@@ -1,22 +1,20 @@
-// MigrationChainTest (ticket #31 Stage A).
+// MigrationChainTest (ticket #31 Stage A; chain reconciled by #32).
 // Applies EVERY shared .sql migration in the canonical chain order to an
 // in-memory sqlite-jdbc database and asserts the resulting table shapes —
 // the byte-identical-artifact AC: the same files iOS applies via GRDB apply
 // verbatim on Android and produce the same schema.
 //
-// Chain order (Node-verifier order; 0004 excluded per docs/MIGRATION-INTEGRATION-NOTE.md):
+// Canonical chain (#32 — unique numbers, no collisions, 0004 rewritten over
+// the real 0001 shape and admitted into the chain):
 //   0001_core, 0002_warmup_progression, 0003_import_columns,
-//   0005_routines_folders, 0006_routines_session_link,
-//   0007_progression_full, 0007_rest_fields,
-//   0008_personal_records, 0008_warmup_per_exercise_toggle,
-//   0009_body_metrics
+//   0004_exercise_library, 0005_routines_folders, 0006_routines_session_link,
+//   0007_progression_full, 0008_rest_fields, 0009_personal_records,
+//   0010_warmup_per_exercise_toggle, 0011_body_metrics
 package com.moore.core
 
 import com.moore.test.Checks
 import com.moore.test.MigrationChain
 import com.moore.test.TestDb
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Test
 
 class MigrationChainTest {
@@ -67,7 +65,8 @@ class MigrationChainTest {
             checks.eq(columns(db, "exercise"),
                 listOf("id", "name", "exerciseType", "equipmentSlug", "primaryMuscleId",
                     "secondaryMuscleIdsJson", "instructions", "isCustom",
-                    "createdAt", "updatedAt", "deletedAt"), "shape.exercise")
+                    "createdAt", "updatedAt", "deletedAt",
+                    "category", "defaultMetric", "defaultRestSec", "name_normalized"), "shape.exercise")
             checks.eq(columns(db, "routine"),
                 listOf("id", "folderId", "name", "sortOrder", "createdAt", "updatedAt", "deletedAt", "restSec"),
                 "shape.routine")
@@ -108,7 +107,7 @@ class MigrationChainTest {
                 listOf("id", "contractId", "version", "createdAt", "updatedAt", "deletedAt"),
                 "shape.warmup_contract_scaffold")
 
-            // INV-S2: the 0007 seed installed the two rest defaults.
+            // INV-S2: the 0008 seed installed the two rest defaults.
             val compound = db.queryOne("SELECT value FROM app_setting WHERE key = 'defaultRestCompoundSec'")
             val isolation = db.queryOne("SELECT value FROM app_setting WHERE key = 'defaultRestIsolationSec'")
             checks.eq(compound?.get("value"), "180", "seed.defaultRestCompoundSec")
@@ -121,7 +120,7 @@ class MigrationChainTest {
             db.insert("workout_session", mapOf(
                 "id" to "s-x", "startedAt" to "t", "createdAt" to "t", "updatedAt" to "t"))
 
-            // personal_record: post-0008 kinds accepted, legacy kind rejected.
+            // personal_record: post-0009 kinds accepted, legacy kind rejected.
             db.insert("personal_record", mapOf(
                 "id" to "p-ok", "exerciseId" to "ex-x", "sessionId" to "s-x", "kind" to "max_duration",
                 "value" to 90.0, "achievedAt" to "t", "createdAt" to "t", "updatedAt" to "t"))
@@ -136,7 +135,7 @@ class MigrationChainTest {
             }
             checks.ok(badKind, "check.personal_record.legacy-kind-rejected")
 
-            // body_metric: measurement accepted post-0009, legacy weight rejected.
+            // body_metric: measurement accepted post-0011, legacy weight rejected.
             db.insert("body_metric", mapOf(
                 "id" to "bm-ok", "kind" to "measurement", "label" to "Waist", "value" to 84.0,
                 "unit" to "cm", "recordedAt" to "t", "createdAt" to "t", "updatedAt" to "t"))
@@ -198,32 +197,58 @@ class MigrationChainTest {
                 "id" to "s-null2", "startedAt" to "2025-01-03T00:00:00Z", "createdAt" to "t", "updatedAt" to "t"))
             checks.pass("check.importKey.null-never-collides")
 
-            // 0008_warmup shape-assertion marker (setClass + warmupEnabled confirmed present).
+            // 0010_warmup shape-assertion marker (setClass + warmupEnabled confirmed present).
             val marker = db.queryOne(
                 "SELECT id FROM warmup_contract_scaffold WHERE id = 'sc-warmup-1.0.0-shape-check'")
-            checks.ok(marker != null, "migration.0008.shape-assertion-marker")
+            checks.ok(marker != null, "migration.0010.shape-assertion-marker")
 
             checks.flush()
         }
     }
 
     @Test
-    fun `0004 exercise library stays out of the chain pending rewrite`() {
-        // docs/MIGRATION-INTEGRATION-NOTE.md: 0004 targets the assumed #19 shape
-        // (snake_case + category) and MUST be rewritten before it applies over
-        // 0001. Every Node verifier skips it; the Android chain does the same.
+    fun `0004 exercise library applies cleanly over the real foundation shape`() {
+        // #32: 0004 was rewritten against the REAL 0001 exercise shape
+        // (camelCase columns) and admitted into the canonical chain. It is
+        // purely additive: category / defaultMetric / defaultRestSec /
+        // name_normalized land via ALTER TABLE, the normalized-name backfill
+        // runs, and both partial indexes target the camelCase `deletedAt`.
         TestDb().use { db ->
             db.applyAll(*MigrationChain.FOUNDATION)
-            val failsOverRealChain = try {
-                db.applyMigration("0004_exercise_library.sql")
-                false
-            } catch (e: Exception) {
-                true
+            // A pre-0004 row to prove the name_normalized backfill.
+            db.insert("exercise", mapOf(
+                "id" to "ex-pre", "name" to "  Barbell   Bench Press  ", "exerciseType" to "strength",
+                "isCustom" to 0, "createdAt" to "t", "updatedAt" to "t"))
+            db.applyMigration("0004_exercise_library.sql")
+
+            val cols = db.tableColumns("exercise").map { it["name"] as String }
+            val checks = Checks("MigrationChain.0004")
+            for (c in listOf("category", "defaultMetric", "defaultRestSec", "name_normalized")) {
+                checks.ok(c in cols, "0004.adds $c")
             }
-            assertTrue(
-                "0004 must not apply over the real 0001 shape until rewritten",
-                failsOverRealChain,
-            )
+            // Backfill: lower(trim(name)) for rows that pre-date the column.
+            // Interior whitespace is NOT collapsed by SQL — BR-001 collapse is
+            // app-side; the migration documents exactly this.
+            checks.eq(db.queryOne("SELECT name_normalized FROM exercise WHERE id = 'ex-pre'")?.get("name_normalized"),
+                "barbell   bench press", "0004.backfill name_normalized (lower+trim, no interior collapse)")
+            // defaultMetric CHECK vocabulary: reps/duration accepted, others rejected, NULL passes.
+            db.insert("exercise", mapOf(
+                "id" to "ex-ok", "name" to "Squat", "exerciseType" to "strength", "isCustom" to 0,
+                "category" to "quads", "defaultMetric" to "reps", "createdAt" to "t", "updatedAt" to "t"))
+            checks.pass("0004.defaultMetric reps accepted")
+            val badMetric = try {
+                db.insert("exercise", mapOf(
+                    "id" to "ex-bad", "name" to "X", "exerciseType" to "strength", "isCustom" to 0,
+                    "defaultMetric" to "sets", "createdAt" to "t", "updatedAt" to "t"))
+                false
+            } catch (e: Exception) { true }
+            checks.ok(badMetric, "0004.defaultMetric CHECK rejects other values")
+            // Indexes target the real tombstone column (camelCase deletedAt).
+            val idx = db.query(
+                "SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='exercise' AND name LIKE 'idx_exercise_%'")
+            checks.eq(idx.size, 2, "0004.indexes present")
+            checks.ok(idx.all { (it["sql"] as String).contains("deletedAt") }, "0004.indexes use deletedAt")
+            checks.flush()
         }
     }
 }

@@ -1,7 +1,8 @@
 // Seam-2 verifier for SC-foundation@1.0.0 (ticket #19).
-// Applies migrations 0001→0003 to an in-memory SQLite instance, then for every
-// fixture: insert every entity → SELECT by id → assert field-for-field equality
-// including NULL preservation. Exits non-zero on first failure detail.
+// Applies the FULL canonical migration chain (0001→0011, reconciled by #32) to
+// an in-memory SQLite instance, then for every fixture: insert every entity →
+// SELECT by id → assert field-for-field equality including NULL preservation.
+// Exits non-zero on first failure detail.
 //
 // Usage (from the worktree root):
 //   npm install            # once, installs better-sqlite3
@@ -14,6 +15,10 @@
 //   V9, V10 → BR-004 (dual plannedX/actualX lawful NULL)
 //   V14     → BR-003 (tombstone semantics: deletedAt hides row from default fetch)
 //   V15     → BR-004 stress (planned-only vs planned-NULL rows in same session)
+//
+// Fixtures round-trip against the POST-chain canonical shapes: personal_record
+// is the post-0009 rebuild (sessionId + max_* kinds), body_metric the post-0011
+// rebuild (label column), progression_scheme the post-0007 rebuild.
 
 import Database from 'better-sqlite3';
 import { readFileSync } from 'node:fs';
@@ -22,10 +27,22 @@ import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const worktreeRoot = join(here, '..', '..');
-const migrationsDir = join(worktreeRoot, 'Sources', 'MooreFoundation', 'Migrations');
 const fixturesDir = join(here, 'Fixtures');
 
-const MIGRATIONS = ['0001_core.sql', '0002_warmup_progression.sql', '0003_import_columns.sql'];
+// The ONE canonical chain (#32): unique numbers, applied in this order everywhere.
+const MIGRATIONS = [
+  'Sources/MooreFoundation/Migrations/0001_core.sql',
+  'Sources/MooreFoundation/Migrations/0002_warmup_progression.sql',
+  'Sources/MooreFoundation/Migrations/0003_import_columns.sql',
+  'Sources/MooreExercises/Migrations/0004_exercise_library.sql',
+  'Sources/MooreRoutines/Migrations/0005_routines_folders.sql',
+  'Sources/MooreRoutines/Migrations/0006_routines_session_link.sql',
+  'Sources/MooreProgression/Migrations/0007_progression_full.sql',
+  'Sources/MooreRest/Migrations/0008_rest_fields.sql',
+  'Sources/MooreRecords/Migrations/0009_personal_records.sql',
+  'Sources/MooreWarmup/Migrations/0010_warmup_per_exercise_toggle.sql',
+  'Sources/MooreSettings/Migrations/0011_body_metrics.sql',
+].map((p) => join(worktreeRoot, ...p.split('/')));
 const FIXTURES = [
   'round-trip-vector-01.json',
   'round-trip-vector-02.json',
@@ -92,8 +109,9 @@ function main() {
   const db = new Database(':memory:');
 
   // V1 — apply migrations in order.
-  for (const migName of MIGRATIONS) {
-    const sql = readFileSync(join(migrationsDir, migName), 'utf8');
+  for (const migPath of MIGRATIONS) {
+    const migName = migPath.split(/[\\/]/).pop();
+    const sql = readFileSync(migPath, 'utf8');
     try {
       db.exec(sql);
       pass(`migration.apply ${migName}`);
@@ -120,7 +138,8 @@ function main() {
   // be idempotent is the *migration tracker*. We simulate GRDB here by wrapping
   // each migration in a name check: if a marker row says it's applied, skip.
   db.exec(`CREATE TABLE IF NOT EXISTS schema_migrations (identifier TEXT PRIMARY KEY, appliedAt TEXT NOT NULL);`);
-  for (const migName of MIGRATIONS) {
+  for (const migPath of MIGRATIONS) {
+    const migName = migPath.split(/[\\/]/).pop();
     const already = db.prepare(`SELECT 1 FROM schema_migrations WHERE identifier = ?`).get(migName);
     if (already) { pass(`migration.idempotent ${migName} (skipped)`); continue; }
     // First pass already applied them; only insert markers.

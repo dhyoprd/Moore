@@ -1,10 +1,11 @@
--- Migration 0007: rest-timer configuration fields (SC-rest@1.0.0, #23).
+-- Migration 0008: rest-timer configuration fields (SC-rest@1.0.0, #23).
+-- Renumbered 0007→0008 by #32 to give the canonical chain unique identifiers.
 -- Purely additive per INV-4 / SC-foundation BR-001: two new nullable columns,
 -- one new singleton settings table, one idempotent defaults seed.
 --
--- Level 2 of #9's hierarchy (exercise.default_rest_sec) is authored by #20's
--- 0004_exercise_library.sql and is NOT re-added here — see §3a of the contract
--- and docs/MIGRATION-INTEGRATION-NOTE.md for the #19<->#20 drift resolution.
+-- Level 2 of #9's hierarchy (exercise.defaultRestSec) is authored by #20's
+-- 0004_exercise_library.sql (rewritten by #32 against the real 0001 shape) and
+-- is NOT re-added here — see §3a of the contract.
 
 -- Level 1: per-set override slot. NULL = inherit down the chain (BR-001).
 -- #22's session materialization snapshot-copies this onto completed_set like

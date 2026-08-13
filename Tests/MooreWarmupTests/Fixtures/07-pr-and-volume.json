@@ -11,7 +11,7 @@
     "completeAllAtPlanned": true
   },
   "preExistingPRs": [
-    {"exerciseId": "ex-bench", "kind": "rep", "value": 8}
+    {"exerciseId": "ex-bench", "kind": "max_reps", "value": 8}
   ],
   "expect": {
     "prRowsAfter": 1,
