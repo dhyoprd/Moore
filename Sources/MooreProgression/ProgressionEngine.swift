@@ -38,6 +38,41 @@ public struct ProgressionRecord: Equatable, Codable {
     public var stalledDurationSec: Int?
     public var baselineDurationSec: Int?
     public var updatedAt: Date
+
+    // Explicit public init (#35): integration layers outside this module map
+    // ProgressionSchemeRow → ProgressionRecord at the DAO seam. Declaration
+    // order + defaults mirror the property list exactly (memberwise shape).
+    public init(
+        id: String,
+        routineId: String,
+        exerciseId: String,
+        scheme: Scheme = .none,
+        stallCount: Int = 0,
+        stallMuted: Bool = false,
+        nextBannerAt: Int = 3,
+        deloadPending: Bool = false,
+        lastDeloadSessionId: String? = nil,
+        stalledWeight: Double? = nil,
+        stalledReps: Int? = nil,
+        stalledDurationSec: Int? = nil,
+        baselineDurationSec: Int? = nil,
+        updatedAt: Date
+    ) {
+        self.id = id
+        self.routineId = routineId
+        self.exerciseId = exerciseId
+        self.scheme = scheme
+        self.stallCount = stallCount
+        self.stallMuted = stallMuted
+        self.nextBannerAt = nextBannerAt
+        self.deloadPending = deloadPending
+        self.lastDeloadSessionId = lastDeloadSessionId
+        self.stalledWeight = stalledWeight
+        self.stalledReps = stalledReps
+        self.stalledDurationSec = stalledDurationSec
+        self.baselineDurationSec = baselineDurationSec
+        self.updatedAt = updatedAt
+    }
 }
 
 // MARK: - Aggregates over a reference session

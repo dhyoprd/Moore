@@ -55,17 +55,21 @@ public struct ProgressionSchemeRow: Codable, FetchableRecord, PersistableRecord 
 
 // MARK: - DAO
 
+// Seam type note (#35): the frozen app composition root (AppDependencies) opens
+// ONE DatabaseQueue for the whole canonical chain; every other module DAO is
+// typed against DatabaseQueue. The DAO's body only ever uses `.read` / `.write`
+// (DatabaseReader/DatabaseWriter), so the seam is queue-typed to be drivable.
 public final class ProgressionDAO {
-    let dbPool: DatabasePool
+    let dbQueue: DatabaseQueue
 
-    public init(dbPool: DatabasePool) { self.dbPool = dbPool }
+    public init(dbQueue: DatabaseQueue) { self.dbQueue = dbQueue }
 
     /// BR-002 / BR-017 seam: fetch the scheme row for a (routineId, exerciseId)
     /// pair, auto-creating it at `none` if it doesn't exist (per #5's "auto-create
     /// if absent" in the pseudocode). Returned row is a snapshot; further mutations
     /// go through `save`.
     public func scheme(for routineId: String, exerciseId: String) throws -> ProgressionSchemeRow {
-        try dbPool.read { db in
+        try dbQueue.read { db in
             if let row = try ProgressionSchemeRow
                 .filter(Column("routineId") == routineId && Column("exerciseId") == exerciseId && Column("deletedAt") == nil)
                 .fetchOne(db) {
@@ -87,7 +91,7 @@ public final class ProgressionDAO {
     /// `ProgressionEngine.suggest` / `increment(forExerciseCategory:)`; nil
     /// (unclassified row or missing exercise) takes the upper-biased 2.5kg path.
     public func exerciseCategory(ofExercise exerciseId: String) throws -> String? {
-        try dbPool.read { db in
+        try dbQueue.read { db in
             try String.fetchOne(
                 db,
                 sql: "SELECT category FROM exercise WHERE id = ?",
@@ -99,7 +103,7 @@ public final class ProgressionDAO {
     public func save(_ row: ProgressionSchemeRow) throws {
         var copy = row
         copy.updatedAt = ISO8601DateFormatter().string(from: Date())
-        try dbPool.write { db in
+        try dbQueue.write { db in
             try copy.save(db)
         }
     }
@@ -107,7 +111,7 @@ public final class ProgressionDAO {
     /// Read the ≤5 newest completed sessions bearing this exercise, same routine
     /// preferred (BR-004). Returns rows ordered newest-first.
     public func referenceHistory(routineId: String, exerciseId: String, limit: Int = 5) throws -> [(sessionId: String, isSameRoutine: Bool, endedAt: String)] {
-        try dbPool.read { db in
+        try dbQueue.read { db in
             let sql = """
                 SELECT ws.id AS sessionId,
                        CASE WHEN ws.routineId = ? THEN 1 ELSE 0 END AS sameRoutine,
@@ -128,7 +132,7 @@ public final class ProgressionDAO {
     /// Load every completed_set row for a given exercise within a given session
     /// (BR-006/BR-007 evaluation feed).
     public func loadSets(sessionId: String, exerciseId: String) throws -> [ReferenceSessionSet] {
-        try dbPool.read { db in
+        try dbQueue.read { db in
             let sql = """
                 SELECT id, sessionId, exerciseId, sortOrder,
                        plannedWeight, plannedReps, plannedDuration,
@@ -137,6 +141,50 @@ public final class ProgressionDAO {
                 FROM completed_set
                 WHERE sessionId = ? AND exerciseId = ? AND deletedAt IS NULL
                 ORDER BY sortOrder ASC
+                """
+            return try Row.fetchAll(db, sql: sql, arguments: [sessionId, exerciseId]).map { row in
+                ReferenceSessionSet(
+                    sessionId: row["sessionId"],
+                    routineId: nil,
+                    status: SetStatus(rawValue: row["status"]) ?? .completed,
+                    exerciseId: row["exerciseId"],
+                    setOrdinal: row["sortOrder"],
+                    plannedWeight: row["plannedWeight"],
+                    plannedReps: row["plannedReps"],
+                    plannedDuration: row["plannedDuration"],
+                    actualWeight: row["actualWeight"],
+                    actualReps: row["actualReps"],
+                    actualDuration: row["actualDuration"]
+                )
+            }
+        }
+    }
+
+    /// #35 seam — WORK-CLASS rows only, for reference resolution (BR-004/BR-005)
+    /// and stall evaluation (BR-012). Progression never reads warm-up rows
+    /// (SC-warmup BR-011/BR-012); NULL-setClass rows coalesce to work UNLESS the
+    /// session classifies warm-up rows for this exercise — then ambiguous
+    /// unclassified rows drop out of work-class reads (SC-warmup BR-015
+    /// mixed-history rule). Dropped rows are included (callers filter per BR-006).
+    public func loadWorkSets(sessionId: String, exerciseId: String) throws -> [ReferenceSessionSet] {
+        try dbQueue.read { db in
+            let sql = """
+                SELECT cs.id, cs.sessionId, cs.exerciseId, cs.sortOrder,
+                       cs.plannedWeight, cs.plannedReps, cs.plannedDuration,
+                       cs.actualWeight,  cs.actualReps,  cs.actualDuration,
+                       cs.status
+                FROM completed_set cs
+                WHERE cs.sessionId = ? AND cs.exerciseId = ? AND cs.deletedAt IS NULL
+                  AND (
+                        cs.setClass = 'work'
+                        OR (cs.setClass IS NULL AND NOT EXISTS (
+                              SELECT 1 FROM completed_set w
+                              WHERE w.sessionId = cs.sessionId
+                                AND w.exerciseId = cs.exerciseId
+                                AND w.setClass = 'warmup'
+                                AND w.deletedAt IS NULL))
+                  )
+                ORDER BY cs.sortOrder ASC
                 """
             return try Row.fetchAll(db, sql: sql, arguments: [sessionId, exerciseId]).map { row in
                 ReferenceSessionSet(

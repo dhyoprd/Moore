@@ -182,6 +182,47 @@ public enum UICopy {
     /// confirm.discardSession.cancel
     public static let confirmDiscardSessionCancel = "Keep"
 
+    // MARK: Progression (SC-progression §5 — verbatim)
+
+    /// progression.banner.deloadCta — renders only when the pair has a weight (BR-013)
+    public static let progressionDeloadCta = "Deload −10%"
+    /// progression.banner.holdCta
+    public static let progressionHoldCta = "Hold"
+    /// progression.banner.ignoreCta
+    public static let progressionIgnoreCta = "Ignore"
+
+    /// progression.banner.stall — "Looks stalled on {name} — {n} sessions short of target."
+    public static func progressionBannerStall(name: String, n: Int) -> String {
+        "Looks stalled on \(name) — \(n) sessions short of target."
+    }
+
+    /// progression.nextLine — "Next: {name} {weight}×{reps}" (`value` is the
+    /// resolved "{weight}×{reps}" pair, or the duration shape for
+    /// duration-metric exercises).
+    public static func progressionNextLine(name: String, value: String) -> String {
+        "Next: \(name) \(value)"
+    }
+
+    // MARK: Warm-ups (SC-warmup §5 — verbatim)
+
+    /// warmup.chip — the warm-up row tag (BR-016)
+    public static let warmupChip = "WU"
+    /// warmup.editor.toggle — routine-editor per-pair toggle (BR-010)
+    public static let warmupEditorToggle = "Auto warm-ups"
+    /// warmup.editor.toggleSub
+    public static let warmupEditorToggleSub = "Adds a weight-matched ramp at session start. Warm-ups never count toward PRs, volume, or stall detection."
+
+    // MARK: Progression editor (surfaced by #35; no contract §6 keys exist for
+    // the picker labels — move into SC-progression §6 when the surface freezes)
+
+    /// Per-exercise scheme picker label (routine editor)
+    public static let editorSchemeLabel = "Progression"
+    /// Scheme values (SC-progression §2 vocabulary)
+    public static let schemeNone = "None"
+    public static let schemeLinear = "Linear"
+    public static let schemeDouble = "Double progression"
+    public static let schemeHoldDuration = "Hold duration"
+
     // MARK: Rest overlay + Finish morph (SC-rest §6)
 
     /// rest.overlay.title

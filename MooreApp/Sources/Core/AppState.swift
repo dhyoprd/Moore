@@ -111,7 +111,8 @@ public final class AppState {
             let home = HomeModel(
                 surface: deps.homeSurface,
                 routineDAO: deps.routineDAO,
-                folderDAO: deps.folderDAO
+                folderDAO: deps.folderDAO,
+                progression: deps.progression
             )
             // Cue delivery: the abstract SC-rest channel with the recording spy.
             // Concrete multi-channel platform delivery (haptic alert + tone +
@@ -125,6 +126,7 @@ public final class AppState {
                 restSettingsDAO: deps.restSettingsDAO,
                 settingsDAO: deps.settingsDAO,
                 sessionStats: deps.sessionStats,
+                progression: deps.progression,
                 cueChannel: InMemoryCueDispatcher()
             )
             let settings = SettingsModel(dao: deps.settingsDAO)
