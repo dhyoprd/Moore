@@ -9,6 +9,7 @@
 import Foundation
 import Observation
 import MooreRoutines
+import MooreRest
 
 // MARK: - Tabs (screen blueprint #7: Home, History, Analytics, Settings)
 
@@ -73,23 +74,28 @@ public final class AppState {
     public let dependencies: AppDependencies?
     /// The Home surface model. Nil only when phase == .failed.
     public let home: HomeModel?
+    /// The Active Workout money-screen model (#34). Owned HERE — not by the
+    /// presented view — so minimize → re-present keeps the same instance and
+    /// the rest run's timestamps survive the cover's teardown (SC-rest BR-007).
+    public private(set) var workout: WorkoutSessionModel?
 
     /// Selected bottom tab (Home is the landing tab).
     public var selectedTab: AppTab = .home
 
-    /// Active Workout full-screen cover hook (#33 stub; the money screen is #34).
-    /// Non-nil ⇔ the modal is presented. Dismissal gesture is disabled — the only
-    /// way down is the minimize chevron → mini-player (#7 §2).
+    /// Active Workout full-screen cover hook. Non-nil ⇔ the modal is presented.
+    /// Dismissal gesture is disabled — the only ways down are the minimize
+    /// chevron → mini-player (#7 §2) or Finish/Discard through the session FSM.
     public var presentedWorkout: ActiveWorkoutPresentation?
 
     /// The live session summary driving the mini-player bar + Home resume card.
     /// Refreshed from SQLite (cold-render rule #9 r4), never from view state.
     public private(set) var activeSession: ActiveSessionSummary?
 
-    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?) {
+    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?) {
         self.phase = phase
         self.dependencies = dependencies
         self.home = home
+        self.workout = workout
         if phase == .ready {
             self.activeSession = try? dependencies?.sessionStats.activeSession()
         }
@@ -102,38 +108,97 @@ public final class AppState {
             let home = HomeModel(
                 surface: deps.homeSurface,
                 routineDAO: deps.routineDAO,
-                folderDAO: deps.folderDAO,
-                materialize: deps.materialize
+                folderDAO: deps.folderDAO
             )
-            return AppState(phase: .ready, dependencies: deps, home: home)
+            // Cue delivery: the abstract SC-rest channel with the recording spy.
+            // Concrete multi-channel platform delivery (haptic alert + tone +
+            // visual, notification-class when locked) is #29's seam.
+            let workout = WorkoutSessionModel(
+                dbQueue: deps.dbQueue,
+                sessionDAO: deps.sessionDAO,
+                exerciseDAO: deps.exerciseDAO,
+                routineDAO: deps.routineDAO,
+                materialize: deps.materialize,
+                restSettingsDAO: deps.restSettingsDAO,
+                settingsDAO: deps.settingsDAO,
+                sessionStats: deps.sessionStats,
+                cueChannel: InMemoryCueDispatcher()
+            )
+            return AppState(phase: .ready, dependencies: deps, home: home, workout: workout)
         } catch let error as BootError {
             return AppState(
                 phase: .failed(BootFailure(isMigrationFailure: error.isMigrationFailure, detail: "\(error)")),
                 dependencies: nil,
-                home: nil
+                home: nil,
+                workout: nil
             )
         } catch {
             return AppState(
                 phase: .failed(BootFailure(isMigrationFailure: false, detail: "\(error)")),
                 dependencies: nil,
-                home: nil
+                home: nil,
+                workout: nil
             )
         }
     }
 
     // MARK: Active Workout presentation orchestration
 
-    /// Present the Active Workout modal for a session (start / start-empty / resume).
+    /// Present the Active Workout modal for a session (resume). Adopts the
+    /// session into the owned model — cold re-read from SQLite (#9 r4).
     public func presentWorkout(sessionId: String) {
+        guard let workout else { return }
+        if workout.sessionId != sessionId {
+            _ = workout.attach(sessionId: sessionId)
+        } else {
+            // Same session re-presented (mini-player tap): recompute any live
+            // rest run from its timestamps (BR-007), nothing else changes.
+            workout.sceneBecameActive()
+        }
         presentedWorkout = ActiveWorkoutPresentation(id: sessionId)
         refreshActiveSession()
     }
 
+    /// Home's Start CTA (#34 wiring): materialise the routine's planned sets
+    /// into a fresh session and present the money screen.
+    public func startWorkout(routineId: String) {
+        guard let workout else { return }
+        if workout.start(routineId: routineId), let sessionId = workout.sessionId {
+            home?.refresh()
+            presentedWorkout = ActiveWorkoutPresentation(id: sessionId)
+            refreshActiveSession()
+        }
+    }
+
+    /// Home's Start-empty CTA (#34 wiring): ad-hoc session, zero rows.
+    public func startWorkoutEmpty() {
+        guard let workout else { return }
+        if workout.startEmpty(), let sessionId = workout.sessionId {
+            home?.refresh()
+            presentedWorkout = ActiveWorkoutPresentation(id: sessionId)
+            refreshActiveSession()
+        }
+    }
+
     /// Minimize chevron → collapse to the mini-player bar (#7 §2). The session
-    /// row stays live; dismissal never ends a session.
+    /// row AND the workout model stay live; dismissal never ends a session.
     public func minimizeWorkout() {
         presentedWorkout = nil
         refreshActiveSession()
+    }
+
+    /// Summary Done (#34): the session is finished (endedAt stamped) — drop the
+    /// modal and re-read Home + the mini-player. The model keeps the finished
+    /// session's id harmlessly; the next start()/attach() re-adopts a new one.
+    public func closeFinishedWorkout() {
+        presentedWorkout = nil
+        refreshActiveSession()
+        home?.refresh()
+    }
+
+    /// Scene foreground: recompute any live rest run from timestamps (BR-007).
+    public func sceneBecameActive() {
+        workout?.sceneBecameActive()
     }
 
     /// Cold re-read of the in-flight session from SQLite.

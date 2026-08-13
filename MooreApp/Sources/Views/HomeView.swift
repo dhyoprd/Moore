@@ -83,9 +83,9 @@ struct HomeView: View {
                     // Start empty — always visible, never ghosted (#14 §1).
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(UICopy.homeStartEmptyCta) {
-                            if let sessionId = home.startEmpty() {
-                                appState.presentWorkout(sessionId: sessionId)
-                            }
+                            // #34: the session lifecycle (materialise → present →
+                            // log → finish) is owned by AppState + WorkoutSessionModel.
+                            appState.startWorkoutEmpty()
                         }
                         .buttonStyle(MooreSecondaryButtonStyle())
                     }
@@ -270,9 +270,8 @@ struct HomeView: View {
             Spacer()
             // home.routineRow_start
             Button(UICopy.homeRoutineRowStart) {
-                if let sessionId = home.start(routineId: row.routine.id) {
-                    appState.presentWorkout(sessionId: sessionId)
-                }
+                // #34: materialise + present owned by AppState + WorkoutSessionModel.
+                appState.startWorkout(routineId: row.routine.id)
             }
             .buttonStyle(MoorePrimaryButtonStyle())
             .disabled(!row.startEnabled)

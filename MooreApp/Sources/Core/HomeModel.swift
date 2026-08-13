@@ -1,7 +1,11 @@
 // Ticket #33 — Home surface app model. Drives the existing HomeSurfaceViewModel
 // (SC-routines §5: `readModel()` is the ONLY read) and the DAO write seams
-// (RoutineDAO/FolderDAO/Materialize). No business logic is reimplemented here —
-// this file only orchestrates: read → expose, gesture → DAO call → re-read.
+// (RoutineDAO/FolderDAO). No business logic is reimplemented here — this file
+// only orchestrates: read → expose, gesture → DAO call → re-read.
+//
+// #34: session start moved to WorkoutSessionModel (AppState.startWorkout /
+// startWorkoutEmpty) — one owner for the materialise → present → log → finish
+// lifecycle. HomeModel stays the Home READ surface + routine/folder mutations.
 //
 // Foundation-only (@Observable, no SwiftUI) so it parses/verifies off-Mac.
 
@@ -47,18 +51,15 @@ public final class HomeModel {
     private let surface: HomeSurfaceViewModel
     private let routineDAO: RoutineDAO
     private let folderDAO: FolderDAO
-    private let materialize: Materialize
 
     public init(
         surface: HomeSurfaceViewModel,
         routineDAO: RoutineDAO,
-        folderDAO: FolderDAO,
-        materialize: Materialize
+        folderDAO: FolderDAO
     ) {
         self.surface = surface
         self.routineDAO = routineDAO
         self.folderDAO = folderDAO
-        self.materialize = materialize
         self.snapshot = (try? surface.readModel())
             ?? HomeSnapshot(activeSession: nil, streakCount: nil, routines: [], folders: [])
     }
@@ -99,48 +100,6 @@ public final class HomeModel {
     /// True when the first-run empty state (home.empty_*) renders: no routines at all.
     public var isEmpty: Bool {
         snapshot.routines.isEmpty && snapshot.folders.isEmpty
-    }
-
-    // MARK: Start / resume (SC-workout-logging §5 materialisation)
-
-    /// Start a session from a routine row: snapshot-copy its live PlannedSets into
-    /// a fresh session (§2b / INV-R5). Returns the new session id, or nil when the
-    /// routine has no plan (BR-001: zero-exercise routines never start).
-    @discardableResult
-    public func start(routineId: String) -> String? {
-        do {
-            let sets = try routineDAO.fetchSets(routineId: routineId)
-            guard !sets.isEmpty else { return nil }   // BR-001
-            let inputs = sets.map { set in
-                Materialize.PlannedSetInput(
-                    exerciseId: set.exerciseId,
-                    plannedWeight: set.plannedWeight,
-                    plannedReps: set.plannedReps,
-                    plannedDuration: set.plannedDuration,
-                    setClass: set.setClass.flatMap { MooreWorkout.SetClass(rawValue: $0.rawValue) }
-                )
-            }
-            let sessionId = try materialize.startSession(routineId: routineId, plannedSets: inputs)
-            refresh()
-            return sessionId
-        } catch {
-            errorMessage = "\(error)"
-            return nil
-        }
-    }
-
-    /// Start empty — the always-visible ad-hoc escape hatch (#14 §1): a session
-    /// with `routineId = NULL` and an empty flat list. Never gated, never ghosted.
-    @discardableResult
-    public func startEmpty() -> String? {
-        do {
-            let sessionId = try materialize.startSession(routineId: nil, plannedSets: [])
-            refresh()
-            return sessionId
-        } catch {
-            errorMessage = "\(error)"
-            return nil
-        }
     }
 
     // MARK: Routine mutations (write seam — typed DAO calls, then re-read)

@@ -58,6 +58,8 @@ public struct AppDependencies {
     public let routineDAO: RoutineDAO
     public let folderDAO: FolderDAO
     public let sessionDAO: WorkoutSessionDAO
+    public let restSettingsDAO: RestSettingsDAO
+    public let settingsDAO: SettingsDAO
 
     public let sessionStats: SessionStatsProvider
     public let homeSurface: HomeSurfaceViewModel
@@ -98,6 +100,8 @@ public struct AppDependencies {
         let routineDAO = RoutineDAO(dbQueue: dbQueue)
         let folderDAO = FolderDAO(dbQueue: dbQueue)
         let sessionDAO = WorkoutSessionDAO(dbQueue: dbQueue)
+        let restSettingsDAO = RestSettingsDAO(dbQueue: dbQueue)
+        let settingsDAO = SettingsDAO(dbQueue: dbQueue)
         let sessionStats = SessionStatsProvider(dbQueue: dbQueue)
         let homeSurface = HomeSurfaceViewModel(
             routineDAO: routineDAO,
@@ -113,6 +117,8 @@ public struct AppDependencies {
             routineDAO: routineDAO,
             folderDAO: folderDAO,
             sessionDAO: sessionDAO,
+            restSettingsDAO: restSettingsDAO,
+            settingsDAO: settingsDAO,
             sessionStats: sessionStats,
             homeSurface: homeSurface,
             materialize: materialize

@@ -117,6 +117,61 @@ public enum UICopy {
 
     /// workout.adhoc_title — title for sessions with no routine (Start empty)
     public static let workoutAdhocTitle = "Workout"
+    /// workout.section.nextUp — derived first-non-terminal highlight tag (INV-W1)
+    public static let workoutSectionNextUp = "Next up"
+    /// workout.set.dropped — row state copy for a dropped set
+    public static let workoutSetDropped = "Set dropped"
+    /// workout.set.acceptHint — accessibility hint for the per-set ✓ target
+    public static let workoutSetAcceptHint = "Tap ✓ to log"
+    /// workout.edit.title — bottom-sheet title for the edit path
+    public static let workoutEditTitle = "Edit set"
+    /// workout.edit.failTitle — bottom-sheet title, pre-tagged failed (BR-002)
+    public static let workoutEditFailTitle = "Failed set"
+    /// workout.edit.weightLabel
+    public static let workoutEditWeightLabel = "Weight"
+    /// workout.edit.repsLabel
+    public static let workoutEditRepsLabel = "Reps"
+    /// workout.edit.durationLabel
+    public static let workoutEditDurationLabel = "Duration"
+    /// workout.edit.actualRepsPlaceholder — fail-flow reps field (BR-002)
+    public static let workoutEditActualRepsPlaceholder = "Reps completed"
+    /// workout.edit.accept — sheet ✓ CTA
+    public static let workoutEditAccept = "Done"
+    /// workout.addSet.cta — exercise-group header [+] (BR-004)
+    public static let workoutAddSetCta = "+"
+    /// workout.undo.title — drop-undo toolbar state copy (BR-003)
+    public static let workoutUndoTitle = "Set dropped"
+    /// workout.undo.cta — drop-undo toolbar CTA (BR-003)
+    public static let workoutUndoCta = "Undo"
+    /// workout.finish.title — summary screen title
+    public static let workoutFinishTitle = "Workout complete"
+    /// workout.finish.cta — finish-panel CTA
+    public static let workoutFinishCta = "Finish workout"
+    /// workout.empty.title — zero-row money screen state (Start empty)
+    public static let workoutEmptyTitle = "No sets yet"
+    /// workout.empty.sub
+    public static let workoutEmptySub = "Add an exercise to start logging."
+    /// confirm.discardSession.title
+    public static let confirmDiscardSessionTitle = "Discard workout?"
+    /// confirm.discardSession.confirm
+    public static let confirmDiscardSessionConfirm = "Discard"
+    /// confirm.discardSession.cancel
+    public static let confirmDiscardSessionCancel = "Keep"
+
+    // MARK: Rest overlay + Finish morph (SC-rest §6)
+
+    /// rest.overlay.title
+    public static let restOverlayTitle = "Rest"
+    /// rest.overlay.cta.skip
+    public static let restOverlayCtaSkip = "Skip"
+    /// rest.overlay.cta.plus15
+    public static let restOverlayCtaPlus15 = "+15s"
+    /// rest.overlay.cta.minus15
+    public static let restOverlayCtaMinus15 = "−15s"
+    /// rest.over.title — expired rest state
+    public static let restOverTitle = "Rest over"
+    /// rest.finish.cta — Finish-morph panel CTA (§2b)
+    public static let restFinishCta = "Finish Workout"
 
     // MARK: Active Workout empty state (#14 §2 / SC-settings §6)
 
@@ -165,6 +220,12 @@ public enum UICopy {
     public static let pickerEquipmentLabel = "Equipment"
     /// Routine editor dismiss action
     public static let editorCancel = "Cancel"
+    /// Money-screen swipe-left actions (SC-workout-logging BR-002/BR-003 gestures;
+    /// no contract §6 keys exist for the swipe labels themselves)
+    public static let workoutSwipeFail = "Failed"
+    public static let workoutSwipeDrop = "Drop"
+    /// Summary plan-vs-actual column lead-in (no contract key)
+    public static let workoutSummaryPlanned = "Planned"
 
     // MARK: Dynamic value resolution ({placeholder} shapes from the contracts)
 
@@ -199,5 +260,51 @@ public enum UICopy {
     /// workout.title — "{routineName}" (nil → workout.adhoc_title)
     public static func workoutTitle(routineName: String?) -> String {
         routineName ?? workoutAdhocTitle
+    }
+
+    /// workout.set.plannedValue — "{weight} × {reps}"
+    public static func workoutSetPlannedValue(weight: String, reps: Int) -> String {
+        "\(weight) × \(reps)"
+    }
+
+    /// workout.set.durationValue — "{duration}"
+    public static func workoutSetDurationValue(duration: String) -> String {
+        duration
+    }
+
+    /// workout.set.doneDelta — "{actualWeight} × {actualReps}"
+    public static func workoutSetDoneDelta(actualWeight: String, actualReps: Int) -> String {
+        "\(actualWeight) × \(actualReps)"
+    }
+
+    /// workout.set.failedDelta — "Failed at {actualReps} — {plannedWeight} × {plannedReps}"
+    public static func workoutSetFailedDelta(actualReps: Int, plannedWeight: String, plannedReps: Int) -> String {
+        "Failed at \(actualReps) — \(plannedWeight) × \(plannedReps)"
+    }
+
+    /// workout.finish.subtitle — "{setsDone} sets · {volumeKg} kg"
+    public static func workoutFinishSubtitle(setsDone: Int, volumeKg: Double) -> String {
+        "\(setsDone) sets · \(volumeKg) kg"
+    }
+
+    /// confirm.discardSession.body — "{setsLogged} sets logged. This can't be undone."
+    public static func confirmDiscardSessionBody(setsLogged: Int) -> String {
+        "\(setsLogged) sets logged. This can't be undone."
+    }
+
+    /// rest.overlay.remaining — "{mm:ss}"
+    public static func restOverlayRemaining(seconds: Int) -> String {
+        let clamped = max(0, seconds)
+        return String(format: "%d:%02d", clamped / 60, clamped % 60)
+    }
+
+    /// rest.over.body — "{exerciseName} — set {n} of {total}"
+    public static func restOverBody(exerciseName: String, n: Int, total: Int) -> String {
+        "\(exerciseName) — set \(n) of \(total)"
+    }
+
+    /// rest.finish.summary — "{setCount} sets · {exerciseCount} exercises · {duration}"
+    public static func restFinishSummary(setCount: Int, exerciseCount: Int, duration: String) -> String {
+        "\(setCount) sets · \(exerciseCount) exercises · \(duration)"
     }
 }
