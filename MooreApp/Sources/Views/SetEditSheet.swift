@@ -6,6 +6,9 @@
 // BR-002 — pre-tagged failed, weight pre-filled, reps focused), editCompleted
 // and editFailed (post-completion corrections, BR-006 — no rest re-trigger).
 //
+// #40: Tier 2 glass chrome (SC-visual-system sheets/modals tier) — dark glass
+// presentation + rim-light top hairline; the steel cards/fields ride above it.
+//
 // Thin view: Done maps to exactly one FsmAction via model.commitEdit; values
 // travel in the display unit and convert to canonical kg in the model
 // (SC-settings INV-ST2).
@@ -84,7 +87,10 @@ struct SetEditSheet: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, DesignTokens.Spacing.l)
-        .background(MooreColor.steelBase)
+        // #40: Tier 2 glass (sheets/modals tier) — the opaque steel gave way
+        // to the static dark glass + rim-light; the money screen beneath
+        // stays opaque (the glass rides ABOVE it, never in it).
+        .mooreSheetGlass()
         .preferredColorScheme(.dark)
         .onAppear {
             if request.mode == .fail {

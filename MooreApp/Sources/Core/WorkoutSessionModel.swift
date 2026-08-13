@@ -164,9 +164,11 @@ public final class WorkoutSessionModel {
     /// and by the stall-banner gestures. All its logic is Foundation-only in
     /// ProgressionModel.swift.
     public let progression: ProgressionModel
-    /// Abstract cue channel (SC-rest §5). Concrete multi-channel delivery is
-    /// #29's platform seam; the app wires the recording spy until then.
-    public let cueChannel: any CueDispatching
+    /// The cue channel (SC-rest §5 + SC-cues §5). Production wiring is the
+    /// shared CueDispatcher: it accepts SC-rest's two-case emission here AND
+    /// the full-taxonomy events (set witnesses below; PR cues via
+    /// RecordsModel), all through one shared CueState.
+    public let cueChannel: any CueDispatching & FullCueDispatching
     /// The PR + celebrations model (#36): drives PREngine + PersonalRecordDAO
     /// + CueEngine for the live completion path, corrections, and the Summary
     /// surface. Owned by AppState; shared, never re-created per session.
@@ -193,7 +195,7 @@ public final class WorkoutSessionModel {
         settingsDAO: SettingsDAO,
         sessionStats: SessionStatsProvider,
         progression: ProgressionModel,
-        cueChannel: any CueDispatching,
+        cueChannel: any CueDispatching & FullCueDispatching,
         records: RecordsModel
     ) {
         self.dbQueue = dbQueue
@@ -570,6 +572,10 @@ public final class WorkoutSessionModel {
             }
             undoableDrop = UndoableDrop(setId: setId, available: true)
             _ = restCycle.dispatch(.setDropped)   // BR-005: faithful no-op
+            // #40: the drop witness (SC-cues §3a cue.set.dropped) — visual-only
+            // by construction (BR-009: no haptic, the undo toolbar IS the cue;
+            // undoing fires nothing). Post-commit (BR-011).
+            cueChannel.dispatch(MooreCues.CueEvent(name: .setDropped, at: Date(), setId: setId))
             reloadFSM()
             errorMessage = nil
             return true
@@ -763,6 +769,11 @@ public final class WorkoutSessionModel {
                 // a post-commit witness (SC-cues BR-011), completed work sets
                 // only (SC-prs BR-001). Corrections re-derive the record book.
                 evaluatePRs(action: action, post: post)
+                // #40: the set-lifecycle witness (SC-cues §3a). Rides AFTER the
+                // PR evaluation so a fired celebration subsumes the completion
+                // tick (BR-008 natural order); the engine's per-set budget gate
+                // does the suppressing, never this caller.
+                dispatchSetWitness(action: action, post: post)
                 if requestsRest {
                     startRest(for: post, at: Date())
                 }
@@ -792,6 +803,24 @@ public final class WorkoutSessionModel {
         case .editCompleted:
             records.rederive(exerciseId: post.exerciseId)
         case .fail, .editFailed, .drop, .undoDrop, .addSet, .finishSession:
+            break
+        }
+    }
+
+    /// #40 — SC-cues §3a set-lifecycle witnesses, dispatched post-commit
+    /// (BR-011: cues never interpose on the ✓ path):
+    ///   accept / editAndAccept → cue.set.completed (success haptic — unless
+    ///     the celebration already subsumed it, BR-008 engine gate);
+    ///   fail → cue.set.failed (nudge haptic, BR-002 records actuals);
+    ///   corrections (BR-006), addSet, finish → nothing (no lifecycle change
+    ///     to witness); drop/undo witness separately below (BR-009).
+    private func dispatchSetWitness(action: FsmAction, post: SetSnapshot) {
+        switch action {
+        case .accept, .editAndAccept:
+            cueChannel.dispatch(MooreCues.CueEvent(name: .setCompleted, at: Date(), setId: post.id))
+        case .fail:
+            cueChannel.dispatch(MooreCues.CueEvent(name: .setFailed, at: Date(), setId: post.id))
+        case .editCompleted, .editFailed, .addSet, .finishSession, .drop, .undoDrop:
             break
         }
     }

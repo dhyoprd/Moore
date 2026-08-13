@@ -96,8 +96,17 @@ public final class AppState {
     /// The full-taxonomy cue dispatcher (#36): one shared CueState across rest
     /// + set + PR cues so the celebration subsumes the per-set tick (SC-cues
     /// BR-008/INV-C4). Host lifecycle writes `context` (BR-005 foreground
-    /// gate); the platform haptic sink is #40's seam. Nil when phase == .failed.
+    /// gate). #40: the sink is the platform renderer (PlatformCueSink) composed
+    /// with the recording spy — nil dispatcher only when phase == .failed.
     public let cueDispatcher: CueDispatcher?
+    /// #40: the visual pulse surface (SC-cues INV-C3). The platform sink
+    /// publishes every rendered cue's visual element here; overlays bind it
+    /// for emphasis. Nil only when phase == .failed.
+    public let cueVisualPulse: CueVisualPulse?
+    /// #40: rest-end notification-class delivery (SC-cues BR-005 host
+    /// scheduling contract) — the summoner surface for backgrounded/locked
+    /// rest expiry (INV-C6). Noop on the boot-failure path.
+    public let restEndNotifier: any RestEndNotificationScheduling
 
     /// Selected bottom tab (Home is the landing tab).
     public var selectedTab: AppTab = .home
@@ -111,7 +120,7 @@ public final class AppState {
     /// Refreshed from SQLite (cold-render rule #9 r4), never from view state.
     public private(set) var activeSession: ActiveSessionSummary?
 
-    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?, history: HistoryModel?, analytics: AnalyticsModel?, importFlow: ImportModel?, cueDispatcher: CueDispatcher?) {
+    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?, history: HistoryModel?, analytics: AnalyticsModel?, importFlow: ImportModel?, cueDispatcher: CueDispatcher?, cueVisualPulse: CueVisualPulse?, restEndNotifier: any RestEndNotificationScheduling) {
         self.phase = phase
         self.dependencies = dependencies
         self.home = home
@@ -121,6 +130,8 @@ public final class AppState {
         self.analytics = analytics
         self.importFlow = importFlow
         self.cueDispatcher = cueDispatcher
+        self.cueVisualPulse = cueVisualPulse
+        self.restEndNotifier = restEndNotifier
         if phase == .ready {
             self.activeSession = try? dependencies?.sessionStats.activeSession()
         }
@@ -136,12 +147,19 @@ public final class AppState {
                 folderDAO: deps.folderDAO,
                 progression: deps.progression
             )
-            // Cue delivery (#36): the full-taxonomy MooreCues dispatcher over
-            // the ABSTRACT recording sink — the platform haptic driver for the
-            // celebration/success/alert classes is #40's seam. One shared
-            // CueState across rest + set + PR cues so the PR celebration
-            // subsumes the per-set tick (SC-cues BR-008 / INV-C4).
-            let dispatcher = CueDispatcher(sink: RecordingCueSink())
+            // Cue delivery (#40): the platform renderer replaces the #36 spy
+            // at boot. CompositeCueSink keeps the RecordingCueSink live so
+            // diagnostics still see every rendered channel call; the ring
+            // buffer (BR-013) rides CueState either way (cueDispatcher.cueLog).
+            // Cue DECISIONS stay in CueEngine — the sinks render only what the
+            // engine fires. One shared CueState across rest + set + PR cues so
+            // the PR celebration subsumes the per-set tick (BR-008 / INV-C4).
+            let visualPulse = CueVisualPulse()
+            let dispatcher = CueDispatcher(sink: CompositeCueSink(sinks: [
+                PlatformCueSink(visualPulse: visualPulse),
+                RecordingCueSink(),
+            ]))
+            let restEndNotifier: any RestEndNotificationScheduling = RestEndNotificationScheduler()
             // PR + celebrations model (#36): drives the frozen PREngine +
             // PersonalRecordDAO + CueEngine; the workout flow calls it after
             // every committed transition.
@@ -180,7 +198,19 @@ public final class AppState {
             // (seam-1 plan build) + HevyImportDAO (seam-2 atomic apply + PR
             // re-derivation) — SC-import@1.0.0.
             let importFlow = ImportModel(dao: deps.hevyImportDAO)
-            return AppState(phase: .ready, dependencies: deps, home: home, workout: workout, settings: settings, history: history, analytics: analytics, importFlow: importFlow, cueDispatcher: dispatcher)
+            return AppState(
+                phase: .ready,
+                dependencies: deps,
+                home: home,
+                workout: workout,
+                settings: settings,
+                history: history,
+                analytics: analytics,
+                importFlow: importFlow,
+                cueDispatcher: dispatcher,
+                cueVisualPulse: visualPulse,
+                restEndNotifier: restEndNotifier
+            )
         } catch let error as BootError {
             return AppState(
                 phase: .failed(BootFailure(isMigrationFailure: error.isMigrationFailure, detail: "\(error)")),
@@ -191,7 +221,9 @@ public final class AppState {
                 history: nil,
                 analytics: nil,
                 importFlow: nil,
-                cueDispatcher: nil
+                cueDispatcher: nil,
+                cueVisualPulse: nil,
+                restEndNotifier: NoopRestEndNotifier()
             )
         } catch {
             return AppState(
@@ -203,7 +235,9 @@ public final class AppState {
                 history: nil,
                 analytics: nil,
                 importFlow: nil,
-                cueDispatcher: nil
+                cueDispatcher: nil,
+                cueVisualPulse: nil,
+                restEndNotifier: NoopRestEndNotifier()
             )
         }
     }
@@ -229,6 +263,9 @@ public final class AppState {
     /// into a fresh session and present the money screen.
     public func startWorkout(routineId: String) {
         guard let workout else { return }
+        // #40: the one notification permission prompt rides the FIRST workout
+        // start — never mid-set. The scheduler guards the once-semantics.
+        restEndNotifier.requestAuthorizationOnce()
         if workout.start(routineId: routineId), let sessionId = workout.sessionId {
             home?.refresh()
             presentedWorkout = ActiveWorkoutPresentation(id: sessionId)
@@ -239,6 +276,7 @@ public final class AppState {
     /// Home's Start-empty CTA (#34 wiring): ad-hoc session, zero rows.
     public func startWorkoutEmpty() {
         guard let workout else { return }
+        restEndNotifier.requestAuthorizationOnce()
         if workout.startEmpty(), let sessionId = workout.sessionId {
             home?.refresh()
             presentedWorkout = ActiveWorkoutPresentation(id: sessionId)
@@ -258,6 +296,10 @@ public final class AppState {
     /// session's id harmlessly; the next start()/attach() re-adopts a new one.
     public func closeFinishedWorkout() {
         presentedWorkout = nil
+        // #40: finish cancels the rest-end summons (SC-cues BR-005 host
+        // scheduling contract) — a finished session never rings.
+        restEndNotifier.cancelPendingRestEnd()
+        restEndNotifier.removeDeliveredRestEnd()
         refreshActiveSession()
         home?.refresh()
     }
@@ -271,11 +313,64 @@ public final class AppState {
     /// cue.rest.end reaches a backgrounded/locked device; the PR celebration
     /// is foreground-only BY CONSTRUCTION because the engine gates on this.
     /// `silenced` is preserved — it is the host's audio-axis surface.
+    ///
+    /// #40 — this is also the BR-005 host scheduling contract for the rest-end
+    /// summoner: backgrounding mid-run schedules the local notification at the
+    /// run's expiry instant; foreground cancels it (the in-process cue takes
+    /// over — and within the grace window the delivered notification is
+    /// removed in favor of the in-process cue, first-deliverable-opportunity).
     public func scenePhaseChanged(isActive: Bool) {
-        guard let cueDispatcher else { return }
-        var context = cueDispatcher.context
-        context.appState = isActive ? .foreground : .backgroundedOrLocked
-        cueDispatcher.context = context
+        if let cueDispatcher {
+            var context = cueDispatcher.context
+            context.appState = isActive ? .foreground : .backgroundedOrLocked
+            cueDispatcher.context = context
+        }
+        if isActive {
+            restEndNotifier.cancelPendingRestEnd()
+            if let expiry = workout?.restExpiresAt,
+               Date().timeIntervalSince(expiry) <= CueState.backgroundedNotificationGraceSec {
+                restEndNotifier.removeDeliveredRestEnd()
+            }
+            workout?.sceneBecameActive()
+        } else {
+            scheduleRestEndNotificationIfRunning()
+        }
+    }
+
+    /// BR-005 host scheduling: the scene backgrounded while a rest run is
+    /// still live ⇒ schedule the rest-end notification for the run's expiry
+    /// (timestamps are authoritative — BR-007). An already-expired run has
+    /// cued in-process already; nothing to schedule.
+    private func scheduleRestEndNotificationIfRunning() {
+        guard let workout,
+              let expiry = workout.restExpiresAt,
+              expiry > Date(),
+              let next = workout.restOverDescription
+        else { return }
+        restEndNotifier.scheduleRestEnd(
+            expiry: expiry,
+            exerciseName: next.exerciseName,
+            setNumber: next.n,
+            setTotal: next.total
+        )
+    }
+
+    // MARK: Blocking-confirm seam (SC-cues BR-010 / §2b)
+
+    /// A confirm-first destructive action was invoked (delete routine / delete
+    /// folder / discard session): evaluate cue.confirm.destructive — the ONLY
+    /// blocking cue (INV-C5). The dialog itself is the visual element
+    /// (confirm.modal); the engine sets pendingConfirmation and the write gate
+    /// is explicit acceptance via confirmResolved().
+    public func confirmInvoked() {
+        cueDispatcher?.dispatch(CueEvent(name: .confirmDestructive, at: Date()))
+    }
+
+    /// §2b exit — explicit acceptance (the destructive write may now execute)
+    /// or explicit rejection (it must not). Idempotent: dismissal and the
+    /// accept action both land here; nothing else resolves a confirm.
+    public func confirmResolved() {
+        cueDispatcher?.resolveConfirmation()
     }
 
     /// Cold re-read of the in-flight session from SQLite.

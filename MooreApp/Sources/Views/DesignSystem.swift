@@ -1,7 +1,9 @@
 // Ticket #33 — SwiftUI mapping of the frozen design tokens (DesignTokens.swift).
 // SC-visual-system@1.0.0: steel neutrals, ONE lime accent hex, glass tiers as
 // system materials with static tints, athletic-bold display + mono numerics.
-// Full visual polish (rim light, spacing rhythm, motion wiring) lands in #40.
+// #40: the visual polish lands here — rim-light glass modifiers + the four
+// named springs. System-bar chrome (tab bar) rides UIKit appearance in
+// Platform/MooreAppearance.swift.
 
 import SwiftUI
 
@@ -38,6 +40,107 @@ enum MooreFont {
     /// body.standard — regular system for descriptions/secondary text.
     static func body(_ style: Font.TextStyle = .body) -> Font {
         .system(style, design: .default)
+    }
+}
+
+// MARK: - Motion (the four sanctioned springs — SC-visual-system)
+//
+// Exhaustive by contract: every app transition rides one of these four. The
+// rest→Finish morph is the ONE sanctioned rupture; everything else is these
+// springs over platform-default surfaces.
+
+enum MooreMotion {
+    /// motion.expand — mini-player ⇄ Active Workout.
+    static var expand: Animation { .spring(duration: DesignTokens.Motion.expandSeconds) }
+    /// motion.morph — rest overlay → Finish panel (the one sanctioned rupture).
+    static var morph: Animation { .spring(duration: DesignTokens.Motion.morphSeconds) }
+    /// motion.pop — PR toast pop-in.
+    static var pop: Animation { .spring(duration: DesignTokens.Motion.popSeconds) }
+    /// motion.flash — ✓ press feedback; the fastest sanctioned motion.
+    static var flash: Animation { .spring(duration: DesignTokens.Motion.flashSeconds) }
+}
+
+// MARK: - Glass tiers + rim light (SC-visual-system)
+//
+// Four tiers: Tier 1 persistent shell (tab bar / mini-player / summary
+// container — tab bar chrome rides UIKit appearance, Platform/), Tier 2
+// sheets/modals, Tier 3 overlays (rest / finish), Tier 4 chips. Glass =
+// system material under a STATIC steel tint (never context-reactive) + the
+// rim-light signature: a 1px inner highlight + a 5% top luminance wash.
+// Lime stays ink-only on every glass surface — never a fill, never blurred.
+
+private struct MooreGlass: ViewModifier {
+    let shape: AnyShape
+    let tintOpacity: Double
+
+    func body(content: Content) -> some View {
+        content
+            .background(.ultraThinMaterial, in: shape)
+            // Static steel tint — the tint is a token color, never sampled
+            // from content (glass.primary / glass.secondary are static).
+            .background(shape.fill(MooreColor.steelBase.opacity(tintOpacity)))
+            .overlay(
+                // Rim-light, part 1: the 1px inner highlight, top-lit.
+                shape.strokeBorder(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.28), Color.white.opacity(0.05)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 1
+                )
+            )
+            .overlay(
+                // Rim-light, part 2: the 5% top luminance wash, fading out
+                // by mid-surface.
+                shape.fill(
+                    LinearGradient(
+                        stops: [
+                            .init(color: Color.white.opacity(0.05), location: 0),
+                            .init(color: Color.white.opacity(0), location: 0.4),
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .allowsHitTesting(false)
+            )
+    }
+}
+
+extension View {
+    /// Rounded glass tier (Tiers 2/3: sheets, overlays): static steel-tinted
+    /// material + rim-light signature. Radius per the corner ladder.
+    func mooreGlass(cornerRadius: Double = DesignTokens.Radius.tier3, tintOpacity: Double = 0.55) -> some View {
+        modifier(MooreGlass(shape: AnyShape(RoundedRectangle(cornerRadius: cornerRadius)), tintOpacity: tintOpacity))
+    }
+
+    /// Capsule glass (mini-player): the Tier 1 shell shape.
+    func mooreGlassCapsule(tintOpacity: Double = 0.55) -> some View {
+        modifier(MooreGlass(shape: AnyShape(Capsule()), tintOpacity: tintOpacity))
+    }
+
+    /// Tier-2 sheet chrome: dark-glass presentation background + the
+    /// rim-light signature as a top hairline highlight under the drag
+    /// indicator. Content keeps its steel cards/fields above the glass.
+    func mooreSheetGlass() -> some View {
+        self
+            .presentationBackground(.thinMaterial)
+            .overlay(alignment: .top) {
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0),
+                        Color.white.opacity(0.28),
+                        Color.white.opacity(0),
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(height: 1)
+                .padding(.horizontal, DesignTokens.Spacing.xxl)
+                .padding(.top, 1)
+                .allowsHitTesting(false)
+            }
     }
 }
 

@@ -109,12 +109,22 @@ struct HomeView: View {
                     routinePendingDelete.map { UICopy.confirmDeleteTitle(name: $0.routine.name) } ?? "",
                     isPresented: Binding(
                         get: { routinePendingDelete != nil },
-                        set: { if !$0 { routinePendingDelete = nil } }
+                        set: {
+                            if !$0 {
+                                routinePendingDelete = nil
+                                // §2b exit — rejection/dismissal aborts the write
+                                // (SC-cues BR-010; idempotent with the accept path).
+                                appState.confirmResolved()
+                            }
+                        }
                     ),
                     titleVisibility: .visible,
                     presenting: routinePendingDelete
                 ) { row in
                     Button(UICopy.confirmDeleteRoutineConfirm, role: .destructive) {
+                        // §2b exit — explicit acceptance: the destructive write
+                        // may now execute (BR-010).
+                        appState.confirmResolved()
                         home.deleteRoutine(routineId: row.routine.id)
                         appState.refreshActiveSession()
                     }
@@ -126,12 +136,18 @@ struct HomeView: View {
                     folderPendingDelete.map { UICopy.confirmDeleteTitle(name: $0.name) } ?? "",
                     isPresented: Binding(
                         get: { folderPendingDelete != nil },
-                        set: { if !$0 { folderPendingDelete = nil } }
+                        set: {
+                            if !$0 {
+                                folderPendingDelete = nil
+                                appState.confirmResolved()
+                            }
+                        }
                     ),
                     titleVisibility: .visible,
                     presenting: folderPendingDelete
                 ) { folder in
                     Button(UICopy.confirmDeleteFolderConfirm, role: .destructive) {
+                        appState.confirmResolved()
                         home.deleteFolder(folderId: folder.id)
                     }
                     Button(UICopy.confirmDeleteFolderCancel, role: .cancel) {}
@@ -217,6 +233,10 @@ struct HomeView: View {
                     .contextMenu {
                         Button(UICopy.homeFolderDelete, role: .destructive) {
                             folderPendingDelete = folder
+                            // SC-cues §3a trigger: the destructive action invoked
+                            // ⇒ cue.confirm.destructive evaluates (the dialog IS
+                            // the confirm.modal visual; BR-010 gates the write).
+                            appState.confirmInvoked()
                         }
                     }
             }
@@ -296,6 +316,9 @@ struct HomeView: View {
             }
             Button(UICopy.homeRoutineRowDelete, role: .destructive) {
                 routinePendingDelete = row
+                // SC-cues §3a trigger: the destructive action invoked
+                // ⇒ cue.confirm.destructive evaluates (BR-010).
+                appState.confirmInvoked()
             }
         }
     }

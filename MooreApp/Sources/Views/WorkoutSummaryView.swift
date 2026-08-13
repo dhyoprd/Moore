@@ -4,6 +4,10 @@
 // materialised snapshot (INV-W3 — immutable for the session's life) and the
 // actual column is what the lifter logged. Done collapses back to Home.
 //
+// #40: the summary container rides the Tier 1 shell glass (SC-visual-system)
+// as a header panel with the rim-light signature; the plan-vs-actual rows
+// stay OPAQUE steel cards — no blur over set rows, ever.
+//
 // Thin view: the summary value type is built by WorkoutSessionModel.
 
 import SwiftUI
@@ -15,16 +19,24 @@ struct WorkoutSummaryView: View {
 
     var body: some View {
         VStack(spacing: DesignTokens.Spacing.l) {
-            // workout.finish.title
-            Text(UICopy.workoutFinishTitle)
-                .font(MooreFont.display(.title2))
-                .foregroundStyle(MooreColor.textPrimary)
-                .padding(.top, DesignTokens.Spacing.xxl)
+            // Tier 1 glass container panel: title + subtitle chrome.
+            VStack(spacing: DesignTokens.Spacing.s) {
+                // workout.finish.title
+                Text(UICopy.workoutFinishTitle)
+                    .font(MooreFont.display(.title2))
+                    .foregroundStyle(MooreColor.textPrimary)
 
-            // workout.finish.subtitle — "{setsDone} sets · {volumeKg} kg"
-            Text(UICopy.workoutFinishSubtitle(setsDone: summary.setsDone, volumeKg: summary.volumeKg))
-                .font(MooreFont.numeric(.subheadline))
-                .foregroundStyle(MooreColor.textSecondary)
+                // workout.finish.subtitle — "{setsDone} sets · {volumeKg} kg"
+                Text(UICopy.workoutFinishSubtitle(setsDone: summary.setsDone, volumeKg: summary.volumeKg))
+                    .font(MooreFont.numeric(.subheadline))
+                    .foregroundStyle(MooreColor.textSecondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, DesignTokens.Spacing.l)
+            .padding(.horizontal, DesignTokens.Spacing.l)
+            .mooreGlass(cornerRadius: DesignTokens.Radius.tier3)
+            .padding(.horizontal, DesignTokens.Spacing.l)
+            .padding(.top, DesignTokens.Spacing.l)
 
             // The Summary celebrates the day (SC-prs BR-010 / cue.pr.summary
             // visual, #36): 0 session PRs → no section; 1 → single card; ≥2 →
