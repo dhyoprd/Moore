@@ -51,13 +51,14 @@ struct RootView: View {
                     ActiveWorkoutView(model: workout)
                 }
             }
-            .animation(.spring(duration: DesignTokens.Motion.expandSeconds), value: appState.activeSession?.id)
+            .animation(MooreMotion.expand, value: appState.activeSession?.id)
             .onChange(of: scenePhase) { _, newPhase in
-                // BR-007: on foreground, recompute any live rest run from its
-                // timestamps — the timer survives via timestamps, never ticks.
-                if newPhase == .active {
-                    appState.sceneBecameActive()
-                }
+                // #40: the full lifecycle seam in one call — cue device
+                // context (BR-005 foreground gate), rest-end notification
+                // scheduling on background / cancel on foreground (BR-005
+                // host scheduling contract), and the BR-007 rest recompute
+                // from timestamps on re-foreground.
+                appState.scenePhaseChanged(isActive: newPhase == .active)
             }
         }
     }

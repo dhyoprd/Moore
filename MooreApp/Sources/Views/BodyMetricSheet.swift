@@ -45,7 +45,8 @@ struct BodyMetricSheet: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(MooreColor.steelBase)
+            // #40: Tier 2 glass (sheets/modals tier) + rim-light top hairline.
+            .mooreSheetGlass()
             // settings.bodyMetrics.addCta doubles as the sheet title.
             .navigationTitle(UICopy.settingsBodyMetricsAddCta)
             .navigationBarTitleDisplayMode(.inline)

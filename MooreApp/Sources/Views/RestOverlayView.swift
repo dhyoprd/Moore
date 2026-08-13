@@ -7,7 +7,8 @@
 // overlay into the Finish panel — the morph IS the cue (visual only, #10).
 //
 // Glass tier: the overlay rides the secondary glass tier (sheets/overlays per
-// the token table) over the opaque-steel money screen.
+// the token table) over the opaque-steel money screen — #40: the shared
+// mooreGlass modifier with the rim-light signature.
 //
 // Thin view: countdowns are computed from the model's timestamps (BR-007 —
 // never ticked, never stored); transitions live in WorkoutSessionModel.
@@ -16,8 +17,14 @@ import SwiftUI
 import MooreRest
 
 struct RestOverlayView: View {
+    @Environment(AppState.self) private var appState
     var model: WorkoutSessionModel
     let now: Date
+
+    /// #40: alert emphasis trigger — bumped on appear and on every rest.over
+    /// pulse from the cue renderer (SC-cues INV-C3: the visual floor always
+    /// lands, even silenced).
+    @State private var alertPulse = 0
 
     var body: some View {
         switch model.restCycle.state {
@@ -28,6 +35,12 @@ struct RestOverlayView: View {
         case .noRest:
             EmptyView()
         }
+    }
+
+    /// The cue renderer's latest rest.over pulse id (nil ⇄ none yet).
+    private var restOverPulseId: UInt64? {
+        guard let pulse = appState.cueVisualPulse?.latest, pulse.element == "rest.over" else { return nil }
+        return pulse.id
     }
 
     // MARK: Running — countdown + the three affordances
@@ -68,7 +81,7 @@ struct RestOverlayView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(DesignTokens.Spacing.l)
-        .overlaySurfaceGlass()
+        .mooreGlass(cornerRadius: DesignTokens.Radius.tier3)
     }
 
     // MARK: Rest over — expiry is informational only (INV-T5)
@@ -94,7 +107,22 @@ struct RestOverlayView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(DesignTokens.Spacing.l)
-        .overlaySurfaceGlass()
+        .mooreGlass(cornerRadius: DesignTokens.Radius.tier3)
+        // #40: the alert cue's visual emphasis (SC-cues §3a rest.over): a
+        // lime rim flash on the flip — haptic + tone may be silenced, the
+        // flash always lands (INV-C3). Lime stays ink: a stroke, never a fill.
+        .phaseAnimator([0.0, 0.9, 0.0], trigger: alertPulse) { content, opacity in
+            content.overlay(
+                RoundedRectangle(cornerRadius: DesignTokens.Radius.tier3)
+                    .strokeBorder(MooreColor.lime, lineWidth: 1.5)
+                    .opacity(opacity)
+                    .allowsHitTesting(false)
+            )
+        } animation: { _ in
+            .easeInOut(duration: 0.35)
+        }
+        .onAppear { alertPulse += 1 }
+        .onChange(of: restOverPulseId) { _, _ in alertPulse += 1 }
     }
 }
 
@@ -121,27 +149,6 @@ struct FinishPanelView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(DesignTokens.Spacing.l)
-        .overlaySurfaceGlass()
+        .mooreGlass(cornerRadius: DesignTokens.Radius.tier3)
     }
-}
-
-// MARK: - Glass tier (secondary: overlays over the opaque-steel money screen)
-
-private struct OverlaySurfaceGlass: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: DesignTokens.Radius.tier3))
-            .background(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.tier3)
-                    .fill(MooreColor.steelRaised.opacity(0.65))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: DesignTokens.Radius.tier3)
-                    .strokeBorder(MooreColor.steelHairline, lineWidth: 1)
-            )
-    }
-}
-
-private extension View {
-    func overlaySurfaceGlass() -> some View { modifier(OverlaySurfaceGlass()) }
 }

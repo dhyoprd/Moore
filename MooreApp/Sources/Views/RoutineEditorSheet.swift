@@ -106,7 +106,6 @@ struct RoutineEditorSheet: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(MooreColor.steelBase)
             // routineEditor.new_title / routineEditor.edit_title
             .navigationTitle(model.isNew ? UICopy.editorNewTitle : UICopy.editorEditTitle)
             .navigationBarTitleDisplayMode(.inline)
@@ -131,6 +130,8 @@ struct RoutineEditorSheet: View {
                 }
             }
         }
+        // #40: Tier 2 glass (sheets/modals tier) + rim-light top hairline.
+        .mooreSheetGlass()
         .preferredColorScheme(.dark)
     }
 

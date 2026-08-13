@@ -38,7 +38,6 @@ struct ExercisePickerSheet: View {
                     resultsList
                 }
             }
-            .background(MooreColor.steelBase)
             .navigationTitle(UICopy.editorAddExerciseCta)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -50,6 +49,8 @@ struct ExercisePickerSheet: View {
                 }
             }
         }
+        // #40: Tier 2 glass (sheets/modals tier) + rim-light top hairline.
+        .mooreSheetGlass()
         .preferredColorScheme(.dark)
         .onAppear {
             // Mirror the view-model's state into @State; consume the outcome once.
@@ -150,7 +151,6 @@ struct ExercisePickerSheet: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(MooreColor.steelBase)
     }
 
     /// picker.createCustom_cta row — visible while searching or at no-results
@@ -219,7 +219,6 @@ struct ExercisePickerSheet: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(MooreColor.steelBase)
     }
 
     // MARK: Labels (data-driven; no contract keys exist for taxonomy names)

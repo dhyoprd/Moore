@@ -12,6 +12,12 @@ struct MooreApp: App {
     /// SC-foundation §6 fatal-recovery screen via AppState.phase.
     @State private var appState = AppState.boot()
 
+    init() {
+        // #40: system-bar chrome (SC-visual-system Tier 1 shell) — UIKit
+        // appearance, configured once before the first frame.
+        MooreAppearance.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

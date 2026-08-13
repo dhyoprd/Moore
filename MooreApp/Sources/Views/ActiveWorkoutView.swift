@@ -90,14 +90,14 @@ struct ActiveWorkoutView: View {
             .padding(.horizontal, DesignTokens.Spacing.l)
             .padding(.bottom, DesignTokens.Spacing.l)
         }
-        .animation(.spring(duration: DesignTokens.Motion.morphSeconds), value: model.overlaySurface)
+        .animation(MooreMotion.morph, value: model.overlaySurface)
         // In-session PR celebration (#36): the `pr.toast` visual element
         // (SC-cues §3a) — compact, ≥3s, queued one-at-a-time, top-anchored so
         // it never covers the ✓ column, and hit-testing OFF so it can never
         // block the money screen (BR-011). In-session never escalates
         // (SC-prs BR-011): one flat toast regardless of beaten-kind count.
         .overlay(alignment: .top) { prToast }
-        .animation(.spring(duration: DesignTokens.Motion.popSeconds), value: model.records.currentToast?.id)
+        .animation(MooreMotion.pop, value: model.records.currentToast?.id)
     }
 
     // MARK: PR celebration toast (SC-prs §6 toast.pr.new)
@@ -419,6 +419,6 @@ struct FlashButtonStyle: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.92 : 1)
             .opacity(configuration.isPressed ? 0.75 : 1)
-            .animation(.linear(duration: DesignTokens.Motion.flashSeconds), value: configuration.isPressed)
+            .animation(MooreMotion.flash, value: configuration.isPressed)
     }
 }

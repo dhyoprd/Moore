@@ -54,6 +54,13 @@ MooreApp/
       RoutineEditorModel.swift drives RoutineEditorBuffer + RoutineDAO
       UICopy.swift             contract UI-copy table (verbatim keys)
       DesignTokens.swift       frozen visual tokens (#17 resolution)
+      CompositeCueSink.swift   #40 fan-out sink (platform + recording spy)
+      CueVisualPulse.swift     #40 visual pulse surface (SC-cues INV-C3)
+      RestEndNotifications.swift #40 rest-end notification scheduling seam
+    Platform/                  UIKit/UserNotifications (Mac-build-only)
+      PlatformCueSink.swift    #40 haptic/audio renderer (SC-cues §5 CueSink)
+      RestEndNotificationScheduler.swift #40 local-notification rest-end
+      MooreAppearance.swift    #40 system-bar chrome (Tier 1 shell)
     Views/                     SwiftUI (thin: layout + bindings to Core models)
       RootView.swift           4 tabs + full-screen Active Workout cover + mini-player
       HomeView.swift           Home tracer bullet (folders, rows, streak, Start empty)
@@ -89,6 +96,12 @@ MooreApp/
   FSM from SQLite (#9 r4); the BR-003 drop-undo window is carried by the model
   (not derivable from rows, SC-workout-logging §8).
 - **Scope.** History/Analytics/Settings are contract-empty placeholders
-  (#37/#38). Visual polish beyond tokens (rim light, full glass treatment,
-  motion wiring) is #40; concrete haptic/audio cue delivery is #29's seam (the
-  app currently wires the abstract SC-rest channel to the recording spy).
+  (#37/#38). Cue delivery (#40) rides `PlatformCueSink` (SC-cues §5): the four
+  haptic classes map to UIFeedbackGenerator/CoreHaptics, rest-end audio is a
+  discreet system tone, and backgrounded/locked rest-end delivers via local
+  notification (`RestEndNotificationScheduler`). Cue DECISIONS stay in
+  `CueEngine`; the sinks render what the engine fires. A `CompositeCueSink`
+  keeps the `RecordingCueSink` live for diagnostics. Visual polish (#40) wires
+  the steel/lime tokens, glass tiers with rim-light, and the four named springs
+  (`MooreMotion`) into the existing surfaces. Platform/UIKit files under
+  `Sources/Platform/` are Mac-build-only (not parseable off-Mac).

@@ -251,6 +251,12 @@ public enum UICopy {
     /// rest.finish.cta — Finish-morph panel CTA (§2b)
     public static let restFinishCta = "Finish Workout"
 
+    // MARK: Rest-end notification-class delivery (SC-cues §6 — BR-005)
+
+    /// rest.notification.title — the backgrounded/locked delivery surface of
+    /// cue.rest.end (same string as rest.over.title; distinct key per §6).
+    public static let restNotificationTitle = "Rest over"
+
     // MARK: Active Workout empty state (#14 §2 / SC-settings §6)
 
     /// activeWorkout.emptyList_line
@@ -410,6 +416,12 @@ public enum UICopy {
 
     /// rest.over.body — "{exerciseName} — set {n} of {total}"
     public static func restOverBody(exerciseName: String, n: Int, total: Int) -> String {
+        "\(exerciseName) — set \(n) of \(total)"
+    }
+
+    /// rest.notification.body — "{exerciseName} — set {n} of {total}"
+    /// (SC-cues §6; identical shape to rest.over.body, distinct key).
+    public static func restNotificationBody(exerciseName: String, n: Int, total: Int) -> String {
         "\(exerciseName) — set \(n) of \(total)"
     }
 
