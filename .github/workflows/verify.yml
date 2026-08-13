@@ -1,0 +1,60 @@
+# Ticket #41 — the Windows-verifiable gates, on every push.
+#
+# The on-device install itself needs the builder's Mac + iPhone (see
+# MooreApp/INSTALL.md); this workflow is the green baseline signal between Mac
+# builds: all 12 Node contract verifiers + the Android :core parity suite
+# (the pure-JVM Kotlin port of the same engines over the same fixtures).
+
+name: verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  node-verifiers:
+    name: Node contract verifiers (12)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run all 12 contract verifiers
+        run: |
+          npm run verify:migrations
+          npm run verify:exercises
+          npm run verify:routines
+          npm run verify:workout
+          npm run verify:rest
+          npm run verify:progression
+          npm run verify:warmup
+          npm run verify:records
+          npm run verify:analytics
+          npm run verify:settings
+          npm run verify:cues
+          npm run verify:import
+
+  android-parity-core:
+    name: Android parity core (:core:test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      # No Gradle wrapper dist is committed, so install Gradle explicitly.
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14"
+      # :core is pure Kotlin/JVM and needs no Android SDK. --configure-on-demand
+      # keeps Gradle from configuring :app (which applies AGP and would require
+      # an SDK install just to evaluate).
+      - name: Run the parity engine tests
+        run: gradle :core:test --no-daemon --configure-on-demand

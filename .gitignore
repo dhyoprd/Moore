@@ -8,3 +8,11 @@ MooreApp/Sources/Info.plist
 xcuserdata/
 DerivedData/
 .DS_Store
+
+# Personal-team signing (ticket #41): the builder's team ID stays local;
+# the committed Signing.xcconfig includes it optionally.
+MooreApp/Signing.local.xcconfig
+
+# fastlane build_and_install output (ticket #41, optional lane)
+MooreApp/fastlane/dist/
+MooreApp/fastlane/README.md

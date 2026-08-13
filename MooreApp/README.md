@@ -16,7 +16,11 @@ open MooreApp.xcodeproj
 
 Then select the `MooreApp` scheme and run on an iPhone simulator or device
 (iOS 17+). Signing is automatic (`CODE_SIGN_STYLE: Automatic`, bundle id
-`com.moore.app`).
+`com.dhyoprd.moore`, repo-owner namespace per ticket #41). Your Apple team ID
+is injected via `Signing.xcconfig` → `MOORE_DEV_TEAM` (gitignored
+`Signing.local.xcconfig`) so it never touches a tracked file. The full
+on-device runbook — one-time setup, install, and the acceptance checklist —
+is **INSTALL.md** (ticket #41).
 
 On first boot the app:
 
@@ -36,7 +40,10 @@ A migration failure renders the SC-foundation §6 recovery copy
 ```
 MooreApp/
   project.yml                  XcodeGen spec (this project's source of truth)
+  Signing.xcconfig             DEVELOPMENT_TEAM = $(MOORE_DEV_TEAM) (ticket #41)
   README.md                    this file
+  INSTALL.md                   on-device install runbook + AC checklist (#41)
+  fastlane/Fastfile            optional build_and_install lane (#41, gym+ios-deploy)
   Sources/
     MooreApp.swift             @main — boots, injects AppState
     Core/                      Foundation-only (parses off-Mac; no SwiftUI)

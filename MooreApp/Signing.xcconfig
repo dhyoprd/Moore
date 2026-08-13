@@ -1,0 +1,17 @@
+// Moore — personal-device development signing (ticket #41).
+//
+// This file is committed and never needs editing. Your Apple team ID is
+// injected through MOORE_DEV_TEAM, defined once per machine in the gitignored
+// Signing.local.xcconfig next to this file (see INSTALL.md step 1):
+//
+//     MOORE_DEV_TEAM = ABCDE12345
+//
+// Wiring: project.yml points both Debug and Release target configs at this
+// file, so DEVELOPMENT_TEAM survives every `xcodegen generate` re-run without
+// anyone touching a tracked file. If Signing.local.xcconfig is absent or the
+// variable is unset, DEVELOPMENT_TEAM resolves to empty and Xcode's automatic
+// signing simply asks you to pick a team once in Signing & Capabilities.
+
+#include? "Signing.local.xcconfig"
+
+DEVELOPMENT_TEAM = $(MOORE_DEV_TEAM)
