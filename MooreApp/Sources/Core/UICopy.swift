@@ -236,6 +236,62 @@ public enum UICopy {
     /// history.badge.pr — History session-row PR badge (#36 groundwork for #37)
     public static let historyBadgePr = "PR"
 
+    // MARK: History + Analytics (SC-analytics §6 — verbatim)
+
+    /// history.title
+    public static let historyTitle = "History"
+    /// analytics.title
+    public static let analyticsTitle = "Analytics"
+    /// analytics.streak.title
+    public static let analyticsStreakTitle = "Current streak"
+    /// analytics.streak.none
+    public static let analyticsStreakNone = "No streak yet"
+    /// analytics.trend.title
+    public static let analyticsTrendTitle = "Est. 1RM trend"
+    /// analytics.tonnage.title
+    public static let analyticsTonnageTitle = "Weekly tonnage"
+    /// analytics.split.title
+    public static let analyticsSplitTitle = "Muscle split"
+    /// analytics.split.bucket.upper
+    public static let analyticsSplitBucketUpper = "Upper"
+    /// analytics.split.bucket.lower
+    public static let analyticsSplitBucketLower = "Lower"
+    /// analytics.split.bucket.other
+    public static let analyticsSplitBucketOther = "Other"
+    /// analytics.prs.title
+    public static let analyticsPrsTitle = "Personal records"
+    /// analytics.empty.trends
+    public static let analyticsEmptyTrends = "Log 3 sessions to see trends"
+    /// analytics.empty.history
+    public static let analyticsEmptyHistory = "No sessions yet"
+    /// analytics.empty.prs
+    public static let analyticsEmptyPrs = "No records yet"
+    /// history.detail.planHeader
+    public static let historyDetailPlanHeader = "Planned"
+    /// history.detail.actualHeader
+    public static let historyDetailActualHeader = "Actual"
+
+    /// analytics.header.last7 — "{n} sessions · last 7 days"
+    public static func analyticsHeaderLast7(_ n: Int) -> String {
+        "\(n) sessions · last 7 days"
+    }
+    /// analytics.header.last30 — "{n} sessions · last 30 days"
+    public static func analyticsHeaderLast30(_ n: Int) -> String {
+        "\(n) sessions · last 30 days"
+    }
+    /// analytics.streak.days — "{n} days"
+    public static func analyticsStreakDays(_ n: Int) -> String {
+        "\(n) days"
+    }
+    /// history.monthHeader — "{monthName} {year}"
+    public static func historyMonthHeader(monthName: String, year: String) -> String {
+        "\(monthName) \(year)"
+    }
+    /// history.session.sets — "{n} sets"
+    public static func historySessionSets(_ n: Int) -> String {
+        "\(n) sets"
+    }
+
     // MARK: Rest overlay + Finish morph (SC-rest §6)
 
     /// rest.overlay.title
