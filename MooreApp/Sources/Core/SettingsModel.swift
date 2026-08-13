@@ -14,8 +14,10 @@
 //   - Backup export (§2 micro-machine, BR-008/BR-009): manifest build → full
 //     SQLite file copy → share. Tombstones + plannedX ride along verbatim.
 //   - Tombstone list/restore (BR-010/INV-ST4): custom exercises only.
-//   - Dormant surfaces (BR-011/BR-012, INV-ST5): cloud-sync status + Hevy-import
-//     entry render from engine constants — no handler, no write path.
+//   - Dormant surface (BR-011, INV-ST5): cloud-sync status renders from the
+//     engine constant — no handler, no write path. The Hevy-import entry
+//     (BR-012) went live in #39: ImportModel (Foundation-only) drives the
+//     MooreImport seams behind the SettingsView Data & sync row.
 //   - Storage stats: derived from the BR-009 table accounting + file size.
 //
 // Foundation-only (@Observable, no SwiftUI) so it parses/verifies off-Mac.
@@ -147,10 +149,11 @@ public final class SettingsModel {
     /// Non-nil ⇔ the `settings.dataSync.exportedToast` toast renders.
     public private(set) var exportedToastFileName: String?
 
-    /// Dormant surfaces (BR-011/BR-012): rendered constants from the engine.
-    /// No handler, no write path (INV-ST5).
+    /// Dormant surface (BR-011): rendered constant from the engine. No
+    /// handler, no write path (INV-ST5). The Hevy-import entry (BR-012) went
+    /// live in #39 — see ImportModel (Foundation-only) + HevyImportFlowView;
+    /// the engine's `hevyImportEntry` stub constant is no longer rendered.
     public let cloudSyncStatus = SettingsEngine.cloudSyncStatus
-    public let hevyImportEntry = SettingsEngine.hevyImportEntry
 
     private let dao: SettingsDAO
     private let iso = ISO8601DateFormatter()

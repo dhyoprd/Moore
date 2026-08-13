@@ -103,6 +103,10 @@ targets:
         product: MooreWarmup
       - package: Moore
         product: MooreSettings
+      # #39: Hevy CSV import flow (SC-import@1.0.0) — parser/engine/DAO behind
+      # the Settings → Data & sync import surface.
+      - package: Moore
+        product: MooreImport
 
 schemes:
   MooreApp:

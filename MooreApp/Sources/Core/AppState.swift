@@ -89,6 +89,10 @@ public final class AppState {
     /// Epley trend, weekly tonnage, muscle split, PR list. Nil only when
     /// phase == .failed.
     public let analytics: AnalyticsModel?
+    /// The Hevy CSV import flow model (#39). Owned HERE — not by the settings
+    /// row or the flow sheet — so the §2 machine survives the sheet's teardown
+    /// and dismissal is a pure reset. Nil only when phase == .failed.
+    public let importFlow: ImportModel?
     /// The full-taxonomy cue dispatcher (#36): one shared CueState across rest
     /// + set + PR cues so the celebration subsumes the per-set tick (SC-cues
     /// BR-008/INV-C4). Host lifecycle writes `context` (BR-005 foreground
@@ -107,7 +111,7 @@ public final class AppState {
     /// Refreshed from SQLite (cold-render rule #9 r4), never from view state.
     public private(set) var activeSession: ActiveSessionSummary?
 
-    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?, history: HistoryModel?, analytics: AnalyticsModel?, cueDispatcher: CueDispatcher?) {
+    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?, history: HistoryModel?, analytics: AnalyticsModel?, importFlow: ImportModel?, cueDispatcher: CueDispatcher?) {
         self.phase = phase
         self.dependencies = dependencies
         self.home = home
@@ -115,6 +119,7 @@ public final class AppState {
         self.settings = settings
         self.history = history
         self.analytics = analytics
+        self.importFlow = importFlow
         self.cueDispatcher = cueDispatcher
         if phase == .ready {
             self.activeSession = try? dependencies?.sessionStats.activeSession()
@@ -171,7 +176,11 @@ public final class AppState {
                 analyticsDAO: deps.analyticsDAO,
                 settingsDAO: deps.settingsDAO
             )
-            return AppState(phase: .ready, dependencies: deps, home: home, workout: workout, settings: settings, history: history, analytics: analytics, cueDispatcher: dispatcher)
+            // Hevy CSV import flow (#39): drives the frozen HevyImportEngine
+            // (seam-1 plan build) + HevyImportDAO (seam-2 atomic apply + PR
+            // re-derivation) — SC-import@1.0.0.
+            let importFlow = ImportModel(dao: deps.hevyImportDAO)
+            return AppState(phase: .ready, dependencies: deps, home: home, workout: workout, settings: settings, history: history, analytics: analytics, importFlow: importFlow, cueDispatcher: dispatcher)
         } catch let error as BootError {
             return AppState(
                 phase: .failed(BootFailure(isMigrationFailure: error.isMigrationFailure, detail: "\(error)")),
@@ -181,6 +190,7 @@ public final class AppState {
                 settings: nil,
                 history: nil,
                 analytics: nil,
+                importFlow: nil,
                 cueDispatcher: nil
             )
         } catch {
@@ -192,6 +202,7 @@ public final class AppState {
                 settings: nil,
                 history: nil,
                 analytics: nil,
+                importFlow: nil,
                 cueDispatcher: nil
             )
         }

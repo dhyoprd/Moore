@@ -383,6 +383,46 @@ public enum UICopy {
     public static let settingsStorageRows = "Rows"
     public static let settingsStorageDeletedRows = "Deleted rows"
 
+    // MARK: Hevy import (SC-import@1.0.0 §6 — verbatim)
+
+    /// hevyImport.title — the Data & sync entry row (directly above the export
+    /// row per SC-import §6 placement)
+    public static let hevyImportTitle = "Import from Hevy (CSV)"
+    /// hevyImport.preview.title
+    public static let hevyImportPreviewTitle = "Preview import"
+    /// hevyImport.preview.metadataDropped
+    public static let hevyImportPreviewMetadataDropped = "Set notes, supersets, and RPE aren't carried in this version"
+    /// hevyImport.preview.oneTime
+    public static let hevyImportPreviewOneTime = "Import is one-time — later Hevy edits don't sync"
+    /// hevyImport.importCTA
+    public static let hevyImportImportCta = "Import"
+    /// hevyImport.cancelCTA
+    public static let hevyImportCancelCta = "Cancel"
+    /// hevyImport.error.notHevyExport
+    public static let hevyImportErrorNotHevyExport = "This file doesn't look like a Hevy export"
+    /// hevyImport.error.applyFailed
+    public static let hevyImportErrorApplyFailed = "Import didn't complete. Nothing was saved — try again."
+    /// hevyImport.untitledSession
+    public static let hevyImportUntitledSession = "Imported workout"
+
+    // MARK: Hevy import flow copy not pinned by a contract key yet
+    // (surfaced by #39; SC-import §6 pins the keys above, these render states
+    // the contract leaves open — move into a contract §6 when the surface
+    // refreezes)
+
+    /// Done-screen PR re-derivation confirmation (BR-016 render; {n} = live
+    /// personal_record rows the apply added)
+    public static func hevyImportDonePrs(_ n: Int) -> String {
+        "Personal records updated: \(n)"
+    }
+    /// Done-screen pointers at the surfaces the imported history feeds
+    public static let hevyImportDoneViewHistory = "View History"
+    public static let hevyImportDoneViewAnalytics = "View Analytics"
+    /// Done-screen dismissal CTA
+    public static let hevyImportDoneCta = "Done"
+    /// Error-state dismissal CTA
+    public static let hevyImportErrorCta = "OK"
+
     // MARK: Dynamic value resolution ({placeholder} shapes from the contracts)
 
     /// home.streak_label — "{n}-day streak"
@@ -398,6 +438,63 @@ public enum UICopy {
     /// settings.dataSync.exportedToast — "Backup saved: {fileName}"
     public static func exportedToast(fileName: String) -> String {
         "Backup saved: \(fileName)"
+    }
+
+    // MARK: Hevy import dynamic resolution (SC-import@1.0.0 §6)
+
+    /// hevyImport.preview.sessions — "{n} workouts found"
+    public static func hevyImportPreviewSessions(_ n: Int) -> String {
+        "\(n) workouts found"
+    }
+
+    /// hevyImport.preview.sets — "{n} sets"
+    public static func hevyImportPreviewSets(_ n: Int) -> String {
+        "\(n) sets"
+    }
+
+    /// hevyImport.preview.matched — "{n} sets matched to library exercises"
+    public static func hevyImportPreviewMatched(_ n: Int) -> String {
+        "\(n) sets matched to library exercises"
+    }
+
+    /// hevyImport.preview.newExercises — "{n} new custom exercises"
+    public static func hevyImportPreviewNewExercises(_ n: Int) -> String {
+        "\(n) new custom exercises"
+    }
+
+    /// hevyImport.preview.alreadyImported — "{n} workouts already imported (skipped)"
+    public static func hevyImportPreviewAlreadyImported(_ n: Int) -> String {
+        "\(n) workouts already imported (skipped)"
+    }
+
+    /// hevyImport.preview.folded — "{n} warmup/failure/dropset sets imported as completed"
+    public static func hevyImportPreviewFolded(_ n: Int) -> String {
+        "\(n) warmup/failure/dropset sets imported as completed"
+    }
+
+    /// hevyImport.preview.cardioSkipped — "{n} cardio rows skipped — distance isn't supported yet"
+    public static func hevyImportPreviewCardioSkipped(_ n: Int) -> String {
+        "\(n) cardio rows skipped — distance isn't supported yet"
+    }
+
+    /// hevyImport.preview.quarantined — "{n} rows set aside — tap to inspect"
+    public static func hevyImportPreviewQuarantined(_ n: Int) -> String {
+        "\(n) rows set aside — tap to inspect"
+    }
+
+    /// hevyImport.preview.unitDetected — "Weights detected as {unit}"
+    public static func hevyImportPreviewUnitDetected(unit: String) -> String {
+        "Weights detected as \(unit)"
+    }
+
+    /// hevyImport.preview.unitOverride — "Unit for {exerciseName}"
+    public static func hevyImportPreviewUnitOverride(exerciseName: String) -> String {
+        "Unit for \(exerciseName)"
+    }
+
+    /// hevyImport.summaryLine — "{sessions} workouts, {sets} sets imported — {skipped} already existed, {quarantined} rows skipped"
+    public static func hevyImportSummaryLine(sessions: Int, sets: Int, skipped: Int, quarantined: Int) -> String {
+        "\(sessions) workouts, \(sets) sets imported — \(skipped) already existed, \(quarantined) rows skipped"
     }
 
     /// home.resume_label — "Resume: {routineName} — {setsDone}/{setsTotal} sets".

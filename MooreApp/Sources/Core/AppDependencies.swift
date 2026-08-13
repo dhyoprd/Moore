@@ -24,6 +24,7 @@ import MooreRecords
 import MooreAnalytics
 import MooreWarmup
 import MooreSettings
+import MooreImport
 
 // MARK: - Boot errors (mapped onto SC-foundation §6 fatal-recovery copy)
 
@@ -75,6 +76,9 @@ public struct AppDependencies {
     /// #35 — progression + warm-up + stall state (drives ProgressionEngine /
     /// ProgressionDAO / WarmupRamp; all logic lives in this Foundation model).
     public let progression: ProgressionModel
+    /// #39 — Hevy CSV import seam-2 (SC-import BR-015/BR-016): the one-
+    /// transaction apply + PR re-derivation. Driven by ImportModel.
+    public let hevyImportDAO: HevyImportDAO
 
     // MARK: Boot
 
@@ -126,6 +130,7 @@ public struct AppDependencies {
             sessionStatsProvider: sessionStats
         )
         let materialize = Materialize(dao: sessionDAO)
+        let hevyImportDAO = HevyImportDAO(dbQueue: dbQueue)
         let progression = ProgressionModel(
             dbQueue: dbQueue,
             progressionDAO: progressionDAO,
@@ -151,7 +156,8 @@ public struct AppDependencies {
             sessionStats: sessionStats,
             homeSurface: homeSurface,
             materialize: materialize,
-            progression: progression
+            progression: progression,
+            hevyImportDAO: hevyImportDAO
         )
     }
 
