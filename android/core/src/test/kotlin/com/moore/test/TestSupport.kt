@@ -319,11 +319,11 @@ class TestDb : AutoCloseable {
     }
 }
 
-/// The ONE canonical chain (reconciled by #32): unique numbers 0001..0011,
-/// applied in this order by every Node verifier, every Kotlin fixture runner,
-/// the Room database, and GRDB alike. 0004 is the rewritten exercise-library
-/// migration (category/defaultMetric/defaultRestSec/name_normalized over the
-/// real 0001 shape).
+/// The ONE canonical chain (reconciled by #32, extended by #43): unique numbers
+/// 0001..0012, applied in this order by every Node verifier, every Kotlin fixture
+/// runner, the Room database, and GRDB alike. 0004 is the rewritten
+/// exercise-library migration (category/defaultMetric/defaultRestSec/name_normalized
+/// over the real 0001 shape).
 object MigrationChain {
     val FOUNDATION = arrayOf("0001_core.sql", "0002_warmup_progression.sql", "0003_import_columns.sql")
     val EXERCISES = arrayOf("0004_exercise_library.sql")
@@ -333,10 +333,11 @@ object MigrationChain {
     val RECORDS = arrayOf("0009_personal_records.sql")
     val WARMUP = arrayOf("0010_warmup_per_exercise_toggle.sql")
     val SETTINGS = arrayOf("0011_body_metrics.sql")
+    val VALIDATION = arrayOf("0012_validation_metrics.sql")
 
     /// Every in-chain migration, canonical order — the full chain every
     /// verifier applies (no subsets; #32).
-    val ALL = FOUNDATION + EXERCISES + ROUTINES + PROGRESSION + REST + RECORDS + WARMUP + SETTINGS
+    val ALL = FOUNDATION + EXERCISES + ROUTINES + PROGRESSION + REST + RECORDS + WARMUP + SETTINGS + VALIDATION
 
     /// Named aliases kept for the fixture runners: all of them now apply the
     /// FULL canonical chain in order (#32 — no verifier cherry-picks subsets).

@@ -1,0 +1,93 @@
+{
+  "label": "Gate PASS: eight consecutive 2-session weeks (W26-W33) with both manual confirmations",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "category": "chest" }
+    ],
+    "sessions": [
+      { "id": "s-w26-a", "startedAt": "2026-06-22T09:00:00Z", "endedAt": "2026-06-22T10:00:00Z" },
+      { "id": "s-w26-b", "startedAt": "2026-06-24T09:00:00Z", "endedAt": "2026-06-24T10:00:00Z" },
+      { "id": "s-w27-a", "startedAt": "2026-06-29T09:00:00Z", "endedAt": "2026-06-29T10:00:00Z" },
+      { "id": "s-w27-b", "startedAt": "2026-07-01T09:00:00Z", "endedAt": "2026-07-01T10:00:00Z" },
+      { "id": "s-w28-a", "startedAt": "2026-07-06T09:00:00Z", "endedAt": "2026-07-06T10:00:00Z" },
+      { "id": "s-w28-b", "startedAt": "2026-07-08T09:00:00Z", "endedAt": "2026-07-08T10:00:00Z" },
+      { "id": "s-w29-a", "startedAt": "2026-07-13T09:00:00Z", "endedAt": "2026-07-13T10:00:00Z" },
+      { "id": "s-w29-b", "startedAt": "2026-07-15T09:00:00Z", "endedAt": "2026-07-15T10:00:00Z" },
+      { "id": "s-w30-a", "startedAt": "2026-07-20T09:00:00Z", "endedAt": "2026-07-20T10:00:00Z" },
+      { "id": "s-w30-b", "startedAt": "2026-07-22T09:00:00Z", "endedAt": "2026-07-22T10:00:00Z" },
+      { "id": "s-w31-a", "startedAt": "2026-07-27T09:00:00Z", "endedAt": "2026-07-27T10:00:00Z" },
+      { "id": "s-w31-b", "startedAt": "2026-07-29T09:00:00Z", "endedAt": "2026-07-29T10:00:00Z" },
+      { "id": "s-w32-a", "startedAt": "2026-08-03T09:00:00Z", "endedAt": "2026-08-03T10:00:00Z" },
+      { "id": "s-w32-b", "startedAt": "2026-08-05T09:00:00Z", "endedAt": "2026-08-05T10:00:00Z" },
+      { "id": "s-w33-a", "startedAt": "2026-08-10T09:00:00Z", "endedAt": "2026-08-10T10:00:00Z" },
+      { "id": "s-w33-b", "startedAt": "2026-08-11T09:00:00Z", "endedAt": "2026-08-11T10:00:00Z" }
+    ],
+    "sets": [
+      { "id": "set-w26-a", "sessionId": "s-w26-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 90, "actualReps": 5, "completedAt": "2026-06-22T09:30:00Z" },
+      { "id": "set-w26-b", "sessionId": "s-w26-b", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 90, "actualReps": 5, "completedAt": "2026-06-24T09:30:00Z" },
+      { "id": "set-w27-a", "sessionId": "s-w27-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 92.5, "actualReps": 5, "completedAt": "2026-06-29T09:30:00Z" },
+      { "id": "set-w27-b", "sessionId": "s-w27-b", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 92.5, "actualReps": 5, "completedAt": "2026-07-01T09:30:00Z" },
+      { "id": "set-w28-a", "sessionId": "s-w28-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 95, "actualReps": 5, "completedAt": "2026-07-06T09:30:00Z" },
+      { "id": "set-w28-b", "sessionId": "s-w28-b", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 95, "actualReps": 5, "completedAt": "2026-07-08T09:30:00Z" },
+      { "id": "set-w29-a", "sessionId": "s-w29-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 97.5, "actualReps": 5, "completedAt": "2026-07-13T09:30:00Z" },
+      { "id": "set-w29-b", "sessionId": "s-w29-b", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 97.5, "actualReps": 5, "completedAt": "2026-07-15T09:30:00Z" },
+      { "id": "set-w30-a", "sessionId": "s-w30-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-07-20T09:30:00Z" },
+      { "id": "set-w30-b", "sessionId": "s-w30-b", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-07-22T09:30:00Z" },
+      { "id": "set-w31-a", "sessionId": "s-w31-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 102.5, "actualReps": 5, "completedAt": "2026-07-27T09:30:00Z" },
+      { "id": "set-w31-b", "sessionId": "s-w31-b", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 102.5, "actualReps": 5, "completedAt": "2026-07-29T09:30:00Z" },
+      { "id": "set-w32-a", "sessionId": "s-w32-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 105, "actualReps": 5, "completedAt": "2026-08-03T09:30:00Z" },
+      { "id": "set-w32-b", "sessionId": "s-w32-b", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 105, "actualReps": 5, "completedAt": "2026-08-05T09:30:00Z" },
+      { "id": "set-w33-a", "sessionId": "s-w33-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 107.5, "actualReps": 5, "completedAt": "2026-08-10T09:30:00Z" },
+      { "id": "set-w33-b", "sessionId": "s-w33-b", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 107.5, "actualReps": 5, "completedAt": "2026-08-11T09:30:00Z" }
+    ]
+  },
+  "validationVectors": [
+    {
+      "id": "V1",
+      "op": "streak",
+      "query": { "today": "2026-08-12" },
+      "expect": { "streak": 8 }
+    },
+    {
+      "id": "V2",
+      "op": "weeklyCounts",
+      "expect": {
+        "weeks": [
+          { "week": "2026-W26", "count": 2 },
+          { "week": "2026-W27", "count": 2 },
+          { "week": "2026-W28", "count": 2 },
+          { "week": "2026-W29", "count": 2 },
+          { "week": "2026-W30", "count": 2 },
+          { "week": "2026-W31", "count": 2 },
+          { "week": "2026-W32", "count": 2 },
+          { "week": "2026-W33", "count": 2 }
+        ]
+      }
+    },
+    {
+      "id": "V3",
+      "op": "gate",
+      "query": { "today": "2026-08-12", "displacementConfirmed": true, "retentionConfirmed": true },
+      "expect": { "status": "PASS", "weekStreak": 8, "streakConditionMet": true }
+    },
+    {
+      "id": "V4",
+      "op": "gate",
+      "query": { "today": "2026-08-12", "displacementConfirmed": true, "retentionConfirmed": false },
+      "expect": { "status": "IN-PROGRESS", "weekStreak": 8, "streakConditionMet": true }
+    },
+    {
+      "id": "V5",
+      "op": "gate",
+      "query": { "today": "2026-08-12", "displacementConfirmed": false, "retentionConfirmed": false },
+      "expect": { "status": "IN-PROGRESS", "weekStreak": 8, "streakConditionMet": true }
+    },
+    {
+      "id": "V6",
+      "op": "gate",
+      "query": { "today": "2026-08-20", "displacementConfirmed": true, "retentionConfirmed": true },
+      "expect": { "status": "PASS", "weekStreak": 8, "streakConditionMet": true }
+    }
+  ]
+}

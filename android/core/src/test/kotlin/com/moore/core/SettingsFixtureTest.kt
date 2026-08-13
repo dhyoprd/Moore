@@ -43,12 +43,16 @@ class SettingsFixtureTest {
         return db
     }
 
-    /// Apply everything up to 0009, seed legacy-shape rows, THEN apply 0009 —
-    /// proving the rebuild remap + preservation on live data.
+    /// Apply everything UP TO the body-metrics rebuild (0011), seed legacy-shape
+    /// rows, THEN apply the rebuild (and every migration after it) — proving the
+    /// rebuild remap + preservation on live data. Referenced BY NAME, not by
+    /// chain position, so later chain admissions (#43's 0012, …) can't shift it.
     private fun newDbStaged(fixture: JsonObject): TestDb {
         val db = TestDb()
-        val pre = MigrationChain.SETTINGS_FULL.dropLast(1).toTypedArray()
-        db.applyAll(*pre)
+        val rebuild = "0011_body_metrics.sql"
+        val rebuildIdx = MigrationChain.SETTINGS_FULL.indexOf(rebuild)
+        require(rebuildIdx > 0) { "body-metrics rebuild migration not found in chain" }
+        db.applyAll(*MigrationChain.SETTINGS_FULL.take(rebuildIdx).toTypedArray())
         fixture["legacySeed"]?.obj?.get("bodyMetrics")?.takeIf { it.isJsonArray }?.asJsonArray?.forEach { el ->
             val m = el.obj
             db.insert("body_metric", mapOf(
@@ -57,7 +61,7 @@ class SettingsFixtureTest {
                 "recordedAt" to m["recordedAt"].asString,
                 "createdAt" to m["createdAt"].asString, "updatedAt" to m["updatedAt"].asString))
         }
-        db.applyMigration(MigrationChain.SETTINGS_FULL.last())
+        for (name in MigrationChain.SETTINGS_FULL.drop(rebuildIdx)) db.applyMigration(name)
         return db
     }
 

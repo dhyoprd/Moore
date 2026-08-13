@@ -34,6 +34,7 @@ const MIGRATIONS = [
   'Sources/MooreRecords/Migrations/0009_personal_records.sql',
   'Sources/MooreWarmup/Migrations/0010_warmup_per_exercise_toggle.sql',
   'Sources/MooreSettings/Migrations/0011_body_metrics.sql',
+  'Sources/MooreAnalytics/Migrations/0012_validation_metrics.sql',
 ].map((p) => join(worktreeRoot, ...p.split('/')));
 
 let failures = 0, passes = 0;
@@ -290,6 +291,173 @@ const E = {
   },
 };
 
+// ---- #43: JS mirror of ValidationMetricsEngine (byte-identical conventions) ----
+const V = {
+  gateSessionsPerWeek: 2,
+  gateWeeksRequired: 8,
+
+  // Mirrors ValidationMetricsEngine.epochSeconds (closed-form, no Date parsing).
+  epochSeconds(iso) {
+    const tParts = String(iso).split('T');
+    if (tParts.length !== 2 || tParts[0].length !== 10) return null;
+    const dp = tParts[0].split('-').map(Number);
+    if (dp.length !== 3 || dp.some(Number.isNaN)) return null;
+    if (dp[1] < 1 || dp[1] > 12 || dp[2] < 1 || dp[2] > 31) return null;
+    const dayNum = daysFromCivil(dp[0], dp[1], dp[2]);
+    let time = tParts[1];
+    if (time.endsWith('Z')) time = time.slice(0, -1);
+    let fraction = 0;
+    const dot = time.indexOf('.');
+    if (dot >= 0) {
+      const fracText = time.slice(dot + 1);
+      time = time.slice(0, dot);
+      if (fracText.length > 0) {
+        const f = Number('0.' + fracText);
+        if (Number.isNaN(f)) return null;
+        fraction = f;
+      }
+    }
+    const hms = time.split(':').map(Number);
+    if (hms.length !== 3 || hms.some(Number.isNaN)) return null;
+    if (hms[0] < 0 || hms[0] > 23 || hms[1] < 0 || hms[1] > 59 || hms[2] < 0 || hms[2] > 59) return null;
+    return dayNum * 86400 + hms[0] * 3600 + hms[1] * 60 + hms[2] + fraction;
+  },
+
+  median(values) {
+    if (!values.length) return null;
+    const sorted = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  },
+
+  qualifyingSessionIds(sessions, sets) {
+    const completedBySession = new Set();
+    for (const s of sets) if (s.status === 'completed') completedBySession.add(s.sessionId);
+    return new Set(sessions.map((s) => s.id).filter((id) => completedBySession.has(id)));
+  },
+
+  weeklySessionCounts(sessions, sets) {
+    const qualifying = V.qualifyingSessionIds(sessions, sets);
+    const byWeek = {};
+    for (const s of sessions) {
+      if (!qualifying.has(s.id)) continue;
+      const wk = E.isoWeekKey(E.utcDay(s.startedAt));
+      byWeek[wk] = (byWeek[wk] ?? 0) + 1;
+    }
+    return Object.keys(byWeek).sort().map((week) => ({ week, sessionCount: byWeek[week] }));
+  },
+
+  qualifyingWeeks(sessions, sets) {
+    return new Set(
+      V.weeklySessionCounts(sessions, sets)
+        .filter((w) => w.sessionCount >= V.gateSessionsPerWeek)
+        .map((w) => w.week));
+  },
+
+  currentWeekSessionCount(sessions, sets, today) {
+    const week = E.isoWeekKey(today);
+    return V.weeklySessionCounts(sessions, sets).find((w) => w.week === week)?.sessionCount ?? 0;
+  },
+
+  // Anchor = today's week if qualifying, else the PREVIOUS week (a rest week in
+  // progress must not zero a live run); walk back week by week.
+  consecutiveQualifyingWeeks(sessions, sets, today) {
+    const weeks = V.qualifyingWeeks(sessions, sets);
+    if (weeks.size === 0) return 0;
+    const weekKeyContaining = (dn) => E.isoWeekKey(dayString(dn));
+    const previousWeekKey = (dn) => weekKeyContaining(dn - E.mondayIndex(dn) - 1);
+    const todayNum = E.dayNumber(today);
+    let anchorWeek = weekKeyContaining(todayNum);
+    if (!weeks.has(anchorWeek)) {
+      anchorWeek = previousWeekKey(todayNum);
+      if (!weeks.has(anchorWeek)) return 0;
+    }
+    let cursorDay = todayNum;
+    while (weekKeyContaining(cursorDay) !== anchorWeek) cursorDay -= 1;
+    let count = 0;
+    let week = anchorWeek;
+    while (weeks.has(week)) {
+      count += 1;
+      const monday = cursorDay - E.mondayIndex(cursorDay);
+      cursorDay = monday - 1;
+      week = weekKeyContaining(cursorDay);
+    }
+    return count;
+  },
+
+  // Pooled completedAt deltas (first set of each session excluded) + median
+  // whole-session pace. Exposes internals for the speedDetail vectors.
+  loggingSpeedProxy(sessions, sets) {
+    const bySession = {};
+    for (const s of sets) {
+      if (s.status === 'completed' && s.completedAt != null) (bySession[s.sessionId] ??= []).push(s);
+    }
+    const deltas = [];
+    let sessionsWithDeltas = 0;
+    for (const sessionSets of Object.values(bySession)) {
+      const ordered = [...sessionSets].sort((a, b) =>
+        a.completedAt !== b.completedAt ? (a.completedAt < b.completedAt ? -1 : 1) : (a.id < b.id ? -1 : 1));
+      let prev = null;
+      let sessionDeltaCount = 0;
+      for (const s of ordered) {
+        const t = V.epochSeconds(s.completedAt);
+        if (t == null) continue;
+        if (prev != null) { deltas.push(t - prev); sessionDeltaCount += 1; }
+        prev = t;
+      }
+      if (sessionDeltaCount > 0) sessionsWithDeltas += 1;
+    }
+    const perSessionPace = [];
+    for (const session of sessions) {
+      if (session.endedAt == null) continue;
+      const start = V.epochSeconds(session.startedAt);
+      const end = V.epochSeconds(session.endedAt);
+      if (start == null || end == null || end < start) continue;
+      const completed = bySession[session.id]?.length ?? 0;
+      if (completed === 0) continue;
+      perSessionPace.push((end - start) / completed);
+    }
+    return {
+      medianSecondsPerSet: V.median(deltas),
+      medianSessionSecondsPerSet: V.median(perSessionPace),
+      pooledDeltaCount: deltas.length,
+      sessionsWithDeltas,
+    };
+  },
+
+  openDays(events) { return [...new Set(events.map((e) => E.utcDay(e.openedAt)))].sort(); },
+
+  weeklyRetention(events) {
+    const byWeek = {};
+    for (const ev of events) {
+      const day = E.utcDay(ev.openedAt);
+      (byWeek[E.isoWeekKey(day)] ??= new Set()).add(day);
+    }
+    return Object.keys(byWeek).sort().map((week) => ({ week, distinctOpenDays: byWeek[week].size }));
+  },
+
+  currentWeekOpenDays(events, today) {
+    const week = E.isoWeekKey(today);
+    return V.weeklyRetention(events).find((w) => w.week === week)?.distinctOpenDays ?? 0;
+  },
+
+  // #4 activation trigger: PASS iff streak >= 8 AND both manual confirmations.
+  evaluateGate(sessions, sets, today, displacementConfirmed, retentionConfirmed) {
+    const hasAny = V.qualifyingWeeks(sessions, sets).size > 0;
+    const streak = V.consecutiveQualifyingWeeks(sessions, sets, today);
+    const streakMet = streak >= V.gateWeeksRequired;
+    let status;
+    if (!hasAny) status = 'NOT-STARTED';
+    else if (streakMet && displacementConfirmed && retentionConfirmed) status = 'PASS';
+    else status = 'IN-PROGRESS';
+    return {
+      status, weekStreak: streak, streakConditionMet: streakMet,
+      displacementConfirmed, retentionConfirmed,
+      weeksRequired: V.gateWeeksRequired, sessionsPerWeekRequired: V.gateSessionsPerWeek,
+    };
+  },
+};
+
 // ---- DB plumbing ----
 function newDb() {
   const db = new Database(':memory:');
@@ -505,6 +673,50 @@ for (const fname of files) {
       }
       default:
         fail(`${id}: unknown op ${q.op}`);
+    }
+  }
+
+  // #43: self-validation vectors (ValidationMetricsEngine mirror).
+  for (const v of fx.validationVectors ?? []) {
+    const id = `${fname}.${v.id}`;
+    const q = v.query ?? {};
+    const today = q.today ?? fx.today ?? '2026-08-12';
+    const ex = v.expect ?? {};
+    const sessions = L.sessions(), sets = L.sets();
+    switch (v.op) {
+      case 'weeklyCounts': {
+        const weeks = V.weeklySessionCounts(sessions, sets)
+          .map((w) => ({ week: w.week, count: w.sessionCount }));
+        eq(JSON.stringify(weeks), JSON.stringify(ex.weeks ?? []), `${id}.weeks`);
+        break;
+      }
+      case 'streak':
+        eq(V.consecutiveQualifyingWeeks(sessions, sets, today), ex.streak, `${id}.streak`);
+        break;
+      case 'currentWeekCount':
+        eq(V.currentWeekSessionCount(sessions, sets, today), ex.count, `${id}.count`);
+        break;
+      case 'gate': {
+        const g = V.evaluateGate(sessions, sets, today, q.displacementConfirmed ?? false, q.retentionConfirmed ?? false);
+        eq(g.status, ex.status, `${id}.status`);
+        eq(g.weekStreak, ex.weekStreak, `${id}.weekStreak`);
+        eq(g.streakConditionMet, ex.streakConditionMet, `${id}.streakConditionMet`);
+        break;
+      }
+      case 'speed': {
+        const sp = V.loggingSpeedProxy(sessions, sets);
+        approx(sp.medianSecondsPerSet, ex.medianSecondsPerSet, `${id}.medianSecondsPerSet`);
+        approx(sp.medianSessionSecondsPerSet, ex.medianSessionSecondsPerSet, `${id}.medianSessionSecondsPerSet`);
+        break;
+      }
+      case 'speedDetail': {
+        const sp = V.loggingSpeedProxy(sessions, sets);
+        eq(sp.sessionsWithDeltas, ex.sessionsWithDeltas, `${id}.sessionsWithDeltas`);
+        eq(sp.pooledDeltaCount, ex.pooledDeltaCount, `${id}.pooledDeltaCount`);
+        break;
+      }
+      default:
+        fail(`${id}: unknown validation op ${v.op}`);
     }
   }
   db.close();

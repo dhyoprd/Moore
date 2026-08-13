@@ -1,0 +1,41 @@
+{
+  "label": "Logging-speed proxy median math: pooled completedAt deltas + session duration over set count",
+  "today": "2026-08-12",
+  "seed": {
+    "exercises": [
+      { "id": "ex-bench", "name": "Bench Press", "category": "chest" }
+    ],
+    "sessions": [
+      { "id": "s-speed-a", "startedAt": "2026-08-10T10:00:00Z", "endedAt": "2026-08-10T10:03:20Z" },
+      { "id": "s-speed-b", "startedAt": "2026-08-11T10:00:00Z", "endedAt": "2026-08-11T10:02:00Z" },
+      { "id": "s-speed-c", "startedAt": "2026-08-12T10:00:00Z", "endedAt": "2026-08-12T10:05:00Z" }
+    ],
+    "sets": [
+      { "id": "a1", "sessionId": "s-speed-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-10T10:00:00Z" },
+      { "id": "a2", "sessionId": "s-speed-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-10T10:00:30Z" },
+      { "id": "a3", "sessionId": "s-speed-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 100, "actualReps": 3, "completedAt": "2026-08-10T10:01:30Z" },
+      { "id": "a4", "sessionId": "s-speed-a", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 100, "actualReps": 3, "completedAt": "2026-08-10T10:01:40Z" },
+      { "id": "b1", "sessionId": "s-speed-b", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-11T10:00:00Z" },
+      { "id": "b2", "sessionId": "s-speed-b", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-11T10:00:45Z" },
+      { "id": "c1", "sessionId": "s-speed-c", "exerciseId": "ex-bench", "status": "completed", "actualWeight": 100, "actualReps": 5, "completedAt": "2026-08-12T10:00:00Z" },
+      { "id": "c2", "sessionId": "s-speed-c", "exerciseId": "ex-bench", "status": "failed", "actualWeight": 100, "actualReps": 2, "completedAt": null },
+      { "id": "c3", "sessionId": "s-speed-c", "exerciseId": "ex-bench", "status": "planned", "plannedWeight": 100, "plannedReps": 5 }
+    ]
+  },
+  "validationVectors": [
+    {
+      "id": "V1",
+      "op": "speed",
+      "expect": { "medianSecondsPerSet": 37.5, "medianSessionSecondsPerSet": 60 }
+    },
+    {
+      "id": "V2",
+      "op": "speedDetail",
+      "expect": {
+        "comment": "s-a deltas 30/60/10 (first set excluded), s-b delta 45, s-c none (single completed set); pooled [10,30,45,60] -> 37.5. Paces: 200/4=50, 120/2=60, 300/1=300 -> median 60. failed/planned sets invisible.",
+        "sessionsWithDeltas": 2,
+        "pooledDeltaCount": 4
+      }
+    }
+  ]
+}

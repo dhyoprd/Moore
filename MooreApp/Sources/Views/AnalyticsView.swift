@@ -26,7 +26,12 @@ struct AnalyticsView: View {
                 .navigationTitle(UICopy.analyticsTitle)
         }
         // Cold-render rule: re-derive from SQLite every time the tab surfaces.
-        .onAppear { appState.analytics?.refresh() }
+        .onAppear {
+            appState.analytics?.refresh()
+            // #43: the self-validation section cold-reads too (and its read
+            // path idempotently stamps this foreground's app-open event).
+            appState.validation?.refresh()
+        }
     }
 
     @ViewBuilder
@@ -39,6 +44,11 @@ struct AnalyticsView: View {
                     tonnageSection(model)
                     splitSection(model)
                     prSection(model)
+                    // #43 — the 8-week gate dashboard closes the tab: every
+                    // metric above feeds the self-validation verdict below.
+                    if let validation = appState.validation {
+                        SelfValidationSection(model: validation)
+                    }
                 }
                 .padding(DesignTokens.Spacing.l)
             }

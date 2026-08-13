@@ -25,7 +25,8 @@ public enum MigrationRunner {
     /// The ONE canonical chain (#32), in apply order, across all module bundles:
     /// MooreFoundation (0001-0003), MooreExercises (0004, rewritten over the real
     /// 0001 shape), MooreRoutines (0005-0006), MooreProgression (0007),
-    /// MooreRest (0008), MooreRecords (0009), MooreWarmup (0010), MooreSettings (0011).
+    /// MooreRest (0008), MooreRecords (0009), MooreWarmup (0010), MooreSettings (0011),
+    /// MooreAnalytics (0012, #43 self-validation storage).
     public static let canonicalChainIdentifiers: [String] = [
         "0001_core.sql",
         "0002_warmup_progression.sql",
@@ -38,6 +39,7 @@ public enum MigrationRunner {
         "0009_personal_records.sql",
         "0010_warmup_per_exercise_toggle.sql",
         "0011_body_metrics.sql",
+        "0012_validation_metrics.sql",
     ]
 
     public static func migrate(_ writer: some DatabaseWriter) throws {

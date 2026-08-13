@@ -7,9 +7,9 @@
 //   Room 3  = 0003_import_columns.sql        Room 9  = 0009_personal_records.sql
 //   Room 4  = 0004_exercise_library.sql      Room 10 = 0010_warmup_per_exercise_toggle.sql
 //   Room 5  = 0005_routines_folders.sql      Room 11 = 0011_body_metrics.sql
-//   Room 6  = 0006_routines_session_link.sql
+//   Room 6  = 0006_routines_session_link.sql Room 12 = 0012_validation_metrics.sql
 // (0004 is the #32 rewrite over the real 0001 exercise shape — admitted into the
-// chain on both platforms. Room version = files applied + 1, hence VERSION = 12.)
+// chain on both platforms. Room version = files applied + 1, hence VERSION = 13.)
 package com.moore.app.db
 
 import android.content.Context
@@ -49,7 +49,7 @@ abstract class MooreDatabase : RoomDatabase() {
     abstract fun analyticsDao(): AnalyticsDao
 
     companion object {
-        const val VERSION = 12
+        const val VERSION = 13
         const val DB_NAME = "moore.sqlite"
 
         /// Migration identifier → asset file, in the ONE canonical chain order (#32).
@@ -65,6 +65,7 @@ abstract class MooreDatabase : RoomDatabase() {
             "0009_personal_records.sql",
             "0010_warmup_per_exercise_toggle.sql",
             "0011_body_metrics.sql",
+            "0012_validation_metrics.sql",
         )
 
         /// Split a migration file into individual statements. SQLite `--`
