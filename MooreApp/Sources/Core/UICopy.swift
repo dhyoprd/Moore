@@ -102,16 +102,40 @@ public enum UICopy {
     public static let settingsTitle = "Settings"
     /// settings.units.title
     public static let settingsUnitsTitle = "Units"
+    /// settings.units.weight
+    public static let settingsUnitsWeight = "Weight unit"
     /// settings.restDefaults.title
     public static let settingsRestDefaultsTitle = "Rest defaults"
+    /// settings.restDefaults.compound
+    public static let settingsRestDefaultsCompound = "Compound lifts"
+    /// settings.restDefaults.isolation
+    public static let settingsRestDefaultsIsolation = "Isolation"
     /// settings.bodyMetrics.title
     public static let settingsBodyMetricsTitle = "Body metrics"
+    /// settings.bodyMetrics.addCta
+    public static let settingsBodyMetricsAddCta = "Add entry"
+    /// settings.bodyMetrics.empty
+    public static let settingsBodyMetricsEmpty = "No entries yet"
+    /// settings.bodyMetrics.trendTitle
+    public static let settingsBodyMetricsTrendTitle = "Trend"
     /// settings.dataSync.title
     public static let settingsDataSyncTitle = "Data & sync"
+    /// settings.dataSync.exportCta
+    public static let settingsDataSyncExportCta = "Export backup"
+    /// settings.dataSync.importHevy
+    public static let settingsDataSyncImportHevy = "Import from Hevy"
+    /// settings.dataSync.importHevyBlocked
+    public static let settingsDataSyncImportHevyBlocked = "Available after import ships"
     /// settings.cloudSync.title
     public static let settingsCloudSyncTitle = "Cloud sync"
+    /// settings.cloudSync.coming
+    public static let settingsCloudSyncComing = "Coming after self-validation gate"
     /// settings.tombstones.title
     public static let settingsTombstonesTitle = "Deleted custom exercises"
+    /// settings.tombstones.restoreCta
+    public static let settingsTombstonesRestoreCta = "Restore"
+    /// settings.tombstones.empty
+    public static let settingsTombstonesEmpty = "Nothing deleted"
 
     // MARK: Workout (SC-workout-logging §6)
 
@@ -227,11 +251,43 @@ public enum UICopy {
     /// Summary plan-vs-actual column lead-in (no contract key)
     public static let workoutSummaryPlanned = "Planned"
 
+    // MARK: Settings surface copy not pinned by a contract key yet
+    // (surfaced by #38; SC-settings §6 pins the keys above, these render shapes
+    // the contract leaves open — move into a contract §6 when the surface refreezes)
+
+    /// Body-metric kind names (add-sheet picker + row titles; §3b closed vocabulary)
+    public static let settingsKindLabel = "Kind"
+    public static let settingsUnitLabel = "Unit"
+    public static let settingsKindBodyWeight = "Weight"
+    public static let settingsKindBodyFat = "Body fat"
+    public static let settingsKindMeasurement = "Measurement"
+    /// Add-entry sheet field labels/placeholders
+    public static let settingsSheetSave = "Save"
+    public static let settingsSheetCancel = "Cancel"
+    public static let settingsValuePlaceholder = "Value"
+    public static let settingsLabelPlaceholder = "e.g. Waist"
+    public static let settingsUnitPlaceholder = "cm"
+    public static let settingsRecordedAtLabel = "Date"
+    /// Storage stats rows (Data & sync; BR-009 accounting render)
+    public static let settingsStorageSize = "Database size"
+    public static let settingsStorageRows = "Rows"
+    public static let settingsStorageDeletedRows = "Deleted rows"
+
     // MARK: Dynamic value resolution ({placeholder} shapes from the contracts)
 
     /// home.streak_label — "{n}-day streak"
     public static func streakLabel(_ n: Int) -> String {
         "\(n)-day streak"
+    }
+
+    /// settings.restDefaults.value — "{n}s"
+    public static func restDefaultsValue(_ n: Int) -> String {
+        "\(n)s"
+    }
+
+    /// settings.dataSync.exportedToast — "Backup saved: {fileName}"
+    public static func exportedToast(fileName: String) -> String {
+        "Backup saved: \(fileName)"
     }
 
     /// home.resume_label — "Resume: {routineName} — {setsDone}/{setsTotal} sets".

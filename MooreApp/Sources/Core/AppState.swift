@@ -78,6 +78,8 @@ public final class AppState {
     /// presented view — so minimize → re-present keeps the same instance and
     /// the rest run's timestamps survive the cover's teardown (SC-rest BR-007).
     public private(set) var workout: WorkoutSessionModel?
+    /// The Settings surface model (#38). Nil only when phase == .failed.
+    public let settings: SettingsModel?
 
     /// Selected bottom tab (Home is the landing tab).
     public var selectedTab: AppTab = .home
@@ -91,11 +93,12 @@ public final class AppState {
     /// Refreshed from SQLite (cold-render rule #9 r4), never from view state.
     public private(set) var activeSession: ActiveSessionSummary?
 
-    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?) {
+    private init(phase: Phase, dependencies: AppDependencies?, home: HomeModel?, workout: WorkoutSessionModel?, settings: SettingsModel?) {
         self.phase = phase
         self.dependencies = dependencies
         self.home = home
         self.workout = workout
+        self.settings = settings
         if phase == .ready {
             self.activeSession = try? dependencies?.sessionStats.activeSession()
         }
@@ -124,20 +127,23 @@ public final class AppState {
                 sessionStats: deps.sessionStats,
                 cueChannel: InMemoryCueDispatcher()
             )
-            return AppState(phase: .ready, dependencies: deps, home: home, workout: workout)
+            let settings = SettingsModel(dao: deps.settingsDAO)
+            return AppState(phase: .ready, dependencies: deps, home: home, workout: workout, settings: settings)
         } catch let error as BootError {
             return AppState(
                 phase: .failed(BootFailure(isMigrationFailure: error.isMigrationFailure, detail: "\(error)")),
                 dependencies: nil,
                 home: nil,
-                workout: nil
+                workout: nil,
+                settings: nil
             )
         } catch {
             return AppState(
                 phase: .failed(BootFailure(isMigrationFailure: false, detail: "\(error)")),
                 dependencies: nil,
                 home: nil,
-                workout: nil
+                workout: nil,
+                settings: nil
             )
         }
     }
