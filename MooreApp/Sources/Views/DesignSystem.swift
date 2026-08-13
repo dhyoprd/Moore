@@ -108,3 +108,31 @@ struct MooreChip: ViewModifier {
 extension View {
     func mooreChip() -> some View { modifier(MooreChip()) }
 }
+
+// MARK: - Celebration (SC-prs #36 — the lime accent moments)
+
+/// The celebration accent moment (SC-visual-system: the ONE lime accent hex,
+/// never blurred): in-session PR toasts (SC-cues §3a `pr.toast`) and Summary
+/// PR cards/banner (`pr.cards`) share this surface — steel-raised, lime
+/// hairline, lime ink. Motion is motion.pop (DesignTokens.Motion.popSeconds),
+/// applied by the presenting screen. Full visual polish lands in #40.
+struct MoorePRCelebration: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, DesignTokens.Spacing.l)
+            .padding(.vertical, DesignTokens.Spacing.m)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: DesignTokens.Radius.tier3)
+                    .fill(MooreColor.steelRaised)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: DesignTokens.Radius.tier3)
+                    .strokeBorder(MooreColor.lime.opacity(0.6), lineWidth: 1)
+            )
+    }
+}
+
+extension View {
+    func moorePRCelebration() -> some View { modifier(MoorePRCelebration()) }
+}

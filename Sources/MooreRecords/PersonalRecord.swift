@@ -54,6 +54,19 @@ public struct PersonalRecord: Codable, Equatable, Sendable {
 /// SC-foundation's body-metric `MetricKind`.
 public enum SeamMetric: String, Codable, Sendable { case reps, duration }
 
+/// SC-workout-logging §2a set lifecycle at the seam, re-declared locally —
+/// the same pattern MooreWorkout/Models.swift uses ("so the module has no
+/// module dependency") — raw values are the 0001 SQL CHECK vocabulary, so the
+/// DAO maps rows verbatim.
+public enum SetStatus: String, Codable, Sendable, CaseIterable {
+    case planned, completed, failed, dropped
+}
+
+/// SC-warmup/SC-foundation INV-6 set classification; nil coalesces to `.work`.
+public enum SetClass: String, Codable, Sendable {
+    case warmup, work
+}
+
 /// Seam-1 input — minimal CompletedSet view consumed by PREngine. Carries
 /// `exerciseDefaultMetric` so max_duration gating needs no DB round-trip.
 public struct ReferenceSessionSet: Equatable, Sendable {
@@ -115,5 +128,21 @@ public struct PRWrite: Equatable, Sendable {
         self.beaten = beaten
         self.values = values
         self.fired = fired
+    }
+}
+
+/// History PR-badge row (#36 groundwork for #37, SC-prs §9 feeds #27): the
+/// live PR count of one session, dated by the session's start day (UTC).
+/// `personal_record_session_idx` carries the probe.
+public struct SessionPRBadge: Equatable, Sendable {
+    public var sessionId: String
+    /// `YYYY-MM-DD` — substr of `workout_session.startedAt` (ISO-8601 UTC).
+    public var day: String
+    public var prCount: Int
+
+    public init(sessionId: String, day: String, prCount: Int) {
+        self.sessionId = sessionId
+        self.day = day
+        self.prCount = prCount
     }
 }
