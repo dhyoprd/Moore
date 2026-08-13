@@ -1,10 +1,16 @@
 // Ticket #33 — routine create/edit sheet. Drives RoutineEditorModel (which wraps
 // the existing RoutineEditorBuffer and persists via RoutineDAO.create/update).
 // Thin view: layout + bindings; all state transitions live in the model/DAOs.
+//
+// #35 additions: per-exercise progression surfaces — the scheme picker
+// (none/linear/double/hold-duration, SC-progression BR-002), the Auto warm-ups
+// toggle (SC-warmup BR-010), the "Next:" preview line + the non-modal stall
+// banner (BR-013/BR-018) — all state in RoutineEditorModel/ProgressionModel.
 
 import SwiftUI
 import MooreExercises
 import MooreRoutines
+import MooreProgression
 
 struct RoutineEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -19,7 +25,8 @@ struct RoutineEditorSheet: View {
         case .create:
             _model = State(initialValue: RoutineEditorModel(
                 routineDAO: deps.routineDAO,
-                exerciseDAO: deps.exerciseDAO
+                exerciseDAO: deps.exerciseDAO,
+                progression: deps.progression
             ))
         case .edit(let routineId):
             // Load the live routine + its sets into the buffer (cold read).
@@ -29,13 +36,15 @@ struct RoutineEditorSheet: View {
                 _model = State(initialValue: RoutineEditorModel(
                     routineDAO: deps.routineDAO,
                     exerciseDAO: deps.exerciseDAO,
+                    progression: deps.progression,
                     routine: routine,
                     sets: sets
                 ))
             } else {
                 _model = State(initialValue: RoutineEditorModel(
                     routineDAO: deps.routineDAO,
-                    exerciseDAO: deps.exerciseDAO
+                    exerciseDAO: deps.exerciseDAO,
+                    progression: deps.progression
                 ))
             }
         }
@@ -52,6 +61,12 @@ struct RoutineEditorSheet: View {
 
                 Section {
                     ForEach(model.buffer.drafts) { draft in
+                        // #35: the per-exercise progression header (stall banner,
+                        // "Next:" line, scheme picker, warm-up toggle) rides above
+                        // that exercise's FIRST draft row.
+                        if isFirstDraft(of: draft) {
+                            pairHeader(for: draft.exerciseId)
+                        }
                         setRow(draft)
                     }
                     .onDelete { offsets in
@@ -161,6 +176,79 @@ struct RoutineEditorSheet: View {
             }
         }
         .padding(.vertical, DesignTokens.Spacing.xs)
+    }
+
+    // MARK: #35 — per-exercise progression header
+
+    /// True when `draft` is the first row of its exercise in buffer order —
+    /// the pair header renders once per exercise, above that first row.
+    private func isFirstDraft(of draft: EditableSetDraft) -> Bool {
+        model.buffer.drafts.first(where: { $0.exerciseId == draft.exerciseId })?.id == draft.id
+    }
+
+    /// Stall banner (BR-013, non-modal, tap-to-apply) + "Next:" preview line
+    /// (BR-018) + the per-pair scheme picker (BR-002) + warm-up toggle
+    /// (SC-warmup BR-010, gated to reps-metric exercises by BR-002).
+    @ViewBuilder
+    private func pairHeader(for exerciseId: String) -> some View {
+        VStack(alignment: .leading, spacing: DesignTokens.Spacing.s) {
+            if let banner = model.stallBanner(for: exerciseId) {
+                StallBannerView(
+                    banner: banner,
+                    onChoice: { action in
+                        model.applyStallChoice(action, forExercise: exerciseId)
+                    },
+                    onDismiss: {
+                        model.dismissStallBanner(for: exerciseId)
+                    }
+                )
+            }
+            // progression.nextLine — what the next session materializes.
+            if let line = model.nextLine(for: exerciseId) {
+                Text(line)
+                    .font(MooreFont.numeric(.footnote))
+                    .foregroundStyle(MooreColor.textSecondary)
+            }
+            // Per-pair scheme picker (none/linear/double/hold-duration).
+            Picker(UICopy.editorSchemeLabel, selection: schemeBinding(exerciseId)) {
+                Text(UICopy.schemeNone).tag(Scheme.none)
+                Text(UICopy.schemeLinear).tag(Scheme.linear)
+                Text(UICopy.schemeDouble).tag(Scheme.double)
+                Text(UICopy.schemeHoldDuration).tag(Scheme.holdDuration)
+            }
+            .pickerStyle(.menu)
+            .tint(MooreColor.lime)
+            // warmup.editor.toggle — hidden for duration-metric exercises
+            // (SC-warmup BR-002 gates generation on the reps metric).
+            if model.showsWarmupToggle(exerciseId) {
+                Toggle(isOn: warmupBinding(exerciseId)) {
+                    VStack(alignment: .leading, spacing: DesignTokens.Spacing.xs) {
+                        Text(UICopy.warmupEditorToggle)
+                            .font(MooreFont.display(.subheadline))
+                            .foregroundStyle(MooreColor.textPrimary)
+                        Text(UICopy.warmupEditorToggleSub)
+                            .font(MooreFont.body(.caption))
+                            .foregroundStyle(MooreColor.textSecondary)
+                    }
+                }
+                .tint(MooreColor.lime)
+            }
+        }
+        .padding(.vertical, DesignTokens.Spacing.xs)
+    }
+
+    private func schemeBinding(_ exerciseId: String) -> Binding<Scheme> {
+        Binding(
+            get: { model.scheme(for: exerciseId) },
+            set: { model.setScheme($0, forExercise: exerciseId) }
+        )
+    }
+
+    private func warmupBinding(_ exerciseId: String) -> Binding<Bool> {
+        Binding(
+            get: { model.warmupEnabled(for: exerciseId) },
+            set: { model.setWarmupEnabled($0, forExercise: exerciseId) }
+        )
     }
 
     // MARK: Bindings into the model's buffer (logic stays in RoutineEditorModel)

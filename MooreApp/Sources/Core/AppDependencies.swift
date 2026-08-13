@@ -60,10 +60,15 @@ public struct AppDependencies {
     public let sessionDAO: WorkoutSessionDAO
     public let restSettingsDAO: RestSettingsDAO
     public let settingsDAO: SettingsDAO
+    public let progressionDAO: ProgressionDAO
+    public let warmupDAO: WarmupDAO
 
     public let sessionStats: SessionStatsProvider
     public let homeSurface: HomeSurfaceViewModel
     public let materialize: Materialize
+    /// #35 — progression + warm-up + stall state (drives ProgressionEngine /
+    /// ProgressionDAO / WarmupRamp; all logic lives in this Foundation model).
+    public let progression: ProgressionModel
 
     // MARK: Boot
 
@@ -102,6 +107,8 @@ public struct AppDependencies {
         let sessionDAO = WorkoutSessionDAO(dbQueue: dbQueue)
         let restSettingsDAO = RestSettingsDAO(dbQueue: dbQueue)
         let settingsDAO = SettingsDAO(dbQueue: dbQueue)
+        let progressionDAO = ProgressionDAO(dbQueue: dbQueue)
+        let warmupDAO = WarmupDAO(dbQueue: dbQueue)
         let sessionStats = SessionStatsProvider(dbQueue: dbQueue)
         let homeSurface = HomeSurfaceViewModel(
             routineDAO: routineDAO,
@@ -109,6 +116,14 @@ public struct AppDependencies {
             sessionStatsProvider: sessionStats
         )
         let materialize = Materialize(dao: sessionDAO)
+        let progression = ProgressionModel(
+            dbQueue: dbQueue,
+            progressionDAO: progressionDAO,
+            warmupDAO: warmupDAO,
+            exerciseDAO: exerciseDAO,
+            routineDAO: routineDAO,
+            settingsDAO: settingsDAO
+        )
 
         return AppDependencies(
             databasePath: dbURL.path,
@@ -119,9 +134,12 @@ public struct AppDependencies {
             sessionDAO: sessionDAO,
             restSettingsDAO: restSettingsDAO,
             settingsDAO: settingsDAO,
+            progressionDAO: progressionDAO,
+            warmupDAO: warmupDAO,
             sessionStats: sessionStats,
             homeSurface: homeSurface,
-            materialize: materialize
+            materialize: materialize,
+            progression: progression
         )
     }
 

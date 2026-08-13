@@ -260,6 +260,14 @@ struct HomeView: View {
                     .font(MooreFont.numeric(.caption))
                     .foregroundStyle(MooreColor.textSecondary)
                 }
+                // #35: progression.nextLine — the one-line routine-preview
+                // surface (SC-progression BR-018): what the next session will
+                // materialize for the routine's first pair.
+                if let nextLine = home.nextLineByRoutine[row.routine.id] {
+                    Text(nextLine)
+                        .font(MooreFont.numeric(.caption))
+                        .foregroundStyle(MooreColor.textSecondary)
+                }
                 if !row.startEnabled {
                     // BR-001 disabled state uses copy, never a toast.
                     Text(UICopy.editorStartDisabledHint)

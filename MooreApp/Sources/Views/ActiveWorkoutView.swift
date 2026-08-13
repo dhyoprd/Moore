@@ -132,6 +132,22 @@ struct ActiveWorkoutView: View {
         List {
             ForEach(model.groups) { group in
                 Section {
+                    // #35: the non-modal stall banner (SC-progression BR-013/
+                    // BR-018) — one inline line at the top of the exercise
+                    // group, tap-to-apply choices, never blocks the per-set ✓.
+                    if let banner = model.progression.activeBanner(exerciseId: group.exerciseId) {
+                        StallBannerView(
+                            banner: banner,
+                            onChoice: { action in
+                                model.applyStallChoice(action, exerciseId: group.exerciseId)
+                            },
+                            onDismiss: {
+                                model.progression.dismissActiveBanner(exerciseId: group.exerciseId)
+                            }
+                        )
+                        .listRowBackground(MooreColor.steelBase)
+                        .listRowSeparator(.hidden)
+                    }
                     ForEach(group.sets) { set in
                         SetRowView(model: model, set: set, isNextUp: set.id == model.nextIncompleteSetId)
                             .listRowBackground(MooreColor.steelRaised)
@@ -243,10 +259,16 @@ struct ActiveWorkoutView: View {
 /// A single row of the flat list. Planned rows: planned values + the per-set ✓
 /// (1 tap, ≥44×44, BR-005). Completed/failed rows: logged delta, tap opens the
 /// correction sheet (BR-006). Dropped rows: inert — undo is the only way back.
+/// Warm-up rows (#35 / SC-warmup BR-016): grayed planned-value styling + `WU`
+/// chip, ✓ stays 1 tap (BR-017) — exclusions from PRs/volume/stall are by
+/// construction in the engines, never in this view.
 struct SetRowView: View {
     var model: WorkoutSessionModel
     let set: SetSnapshot
     let isNextUp: Bool
+
+    /// SC-foundation INV-6: NULL setClass coalesces to work.
+    private var isWarmup: Bool { (set.setClass ?? .work) == .warmup }
 
     var body: some View {
         HStack(spacing: DesignTokens.Spacing.m) {
@@ -254,6 +276,11 @@ struct SetRowView: View {
                 if isNextUp && set.status == .planned {
                     // INV-W1: "next up" is a derived highlight, never a cursor.
                     Text(UICopy.workoutSectionNextUp)
+                        .mooreChip()
+                }
+                if isWarmup {
+                    // warmup.chip — the ramp row tag (BR-016).
+                    Text(UICopy.warmupChip)
                         .mooreChip()
                 }
                 rowValueText
@@ -293,15 +320,16 @@ struct SetRowView: View {
     private var rowValueText: some View {
         switch set.status {
         case .planned:
-            // workout.set.plannedValue / durationValue
+            // workout.set.plannedValue / durationValue — warm-up rows render the
+            // same shape grayed (BR-016's planned-value styling).
             Text(model.plannedText(for: set))
                 .font(MooreFont.numeric(.body))
-                .foregroundStyle(MooreColor.textPrimary)
+                .foregroundStyle(isWarmup ? MooreColor.textSecondary : MooreColor.textPrimary)
         case .completed:
             // workout.set.doneDelta
             Text(model.actualText(for: set))
                 .font(MooreFont.numeric(.body))
-                .foregroundStyle(MooreColor.textPrimary)
+                .foregroundStyle(isWarmup ? MooreColor.textSecondary : MooreColor.textPrimary)
         case .failed:
             // workout.set.failedDelta
             Text(model.actualText(for: set))

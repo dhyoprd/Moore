@@ -45,23 +45,31 @@ public enum HomeGroup: Identifiable, Equatable {
 public final class HomeModel {
     /// The single Home read (SC-routines §5). Starts empty; refresh() materialises.
     public private(set) var snapshot: HomeSnapshot
+    /// #35: per-routine "Next:" preview line (SC-progression BR-018 — the
+    /// one-line routine-preview surface). Keyed by routineId; holds the first
+    /// pair (in routine order) that produces a line. Recomputed on refresh().
+    public private(set) var nextLineByRoutine: [String: String] = [:]
     /// Last write-path error, surfaced inline (copy-driven states only, no toasts).
     public private(set) var errorMessage: String?
 
     private let surface: HomeSurfaceViewModel
     private let routineDAO: RoutineDAO
     private let folderDAO: FolderDAO
+    private let progression: ProgressionModel
 
     public init(
         surface: HomeSurfaceViewModel,
         routineDAO: RoutineDAO,
-        folderDAO: FolderDAO
+        folderDAO: FolderDAO,
+        progression: ProgressionModel
     ) {
         self.surface = surface
         self.routineDAO = routineDAO
         self.folderDAO = folderDAO
+        self.progression = progression
         self.snapshot = (try? surface.readModel())
             ?? HomeSnapshot(activeSession: nil, streakCount: nil, routines: [], folders: [])
+        refreshNextLines()
     }
 
     // MARK: Read (the ONLY read is readModel)
@@ -69,10 +77,31 @@ public final class HomeModel {
     public func refresh() {
         do {
             snapshot = try surface.readModel()
+            refreshNextLines()
             errorMessage = nil
         } catch {
             errorMessage = "\(error)"
         }
+    }
+
+    /// #35: derive each routine's one-line "Next:" preview. Suggestions are
+    /// read-only here (ProgressionModel discards the engine's record mutation
+    /// on the preview path — BR-020: suggestions are materialization-time).
+    private func refreshNextLines() {
+        var lines: [String: String] = [:]
+        for row in snapshot.routines {
+            guard let sets = try? routineDAO.fetchSets(routineId: row.routine.id) else { continue }
+            var seen = Set<String>()
+            for set in sets {
+                guard !seen.contains(set.exerciseId) else { continue }
+                seen.insert(set.exerciseId)
+                if let line = progression.nextLineText(routineId: row.routine.id, exerciseId: set.exerciseId) {
+                    lines[row.routine.id] = line
+                    break
+                }
+            }
+        }
+        nextLineByRoutine = lines
     }
 
     /// BR-006 render shape: folder groups in folder-name order, then Unfiled.

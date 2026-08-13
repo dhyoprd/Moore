@@ -28,6 +28,7 @@ import MooreRest
 import MooreExercises
 import MooreRoutines
 import MooreSettings
+import MooreProgression
 
 // MARK: - Edit sheet request (§2a: editing is transient UI, never an FSM state)
 
@@ -73,7 +74,9 @@ public struct SetEditRequest: Identifiable, Equatable {
 public struct SessionSummaryRow: Identifiable, Equatable {
     public let id: String
     public let exerciseName: String
-    public let status: SetStatus
+    /// Qualified: #35 imports MooreProgression here too, which exports its own
+    /// SetStatus — the money-screen row state is MooreWorkout's.
+    public let status: MooreWorkout.SetStatus
     public let plannedText: String
     public let actualText: String
 }
@@ -152,6 +155,11 @@ public final class WorkoutSessionModel {
     private let restSettingsDAO: RestSettingsDAO
     private let settingsDAO: SettingsDAO
     private let sessionStats: SessionStatsProvider
+    /// #35 — progression + warm-up + stall state. Driven at the materialization
+    /// seam (stamped plannedX BEFORE rows render), at finish (stall counters),
+    /// and by the stall-banner gestures. All its logic is Foundation-only in
+    /// ProgressionModel.swift.
+    public let progression: ProgressionModel
     /// Abstract cue channel (SC-rest §5). Concrete multi-channel delivery is
     /// #29's platform seam; the app wires the recording spy until then.
     public let cueChannel: any CueDispatching
@@ -176,6 +184,7 @@ public final class WorkoutSessionModel {
         restSettingsDAO: RestSettingsDAO,
         settingsDAO: SettingsDAO,
         sessionStats: SessionStatsProvider,
+        progression: ProgressionModel,
         cueChannel: any CueDispatching
     ) {
         self.dbQueue = dbQueue
@@ -186,6 +195,7 @@ public final class WorkoutSessionModel {
         self.restSettingsDAO = restSettingsDAO
         self.settingsDAO = settingsDAO
         self.sessionStats = sessionStats
+        self.progression = progression
         self.cueChannel = cueChannel
         self.snapshot = StateSnapshot(sessionId: "")
         self.restCycle = RestCycle()
@@ -194,23 +204,22 @@ public final class WorkoutSessionModel {
     // MARK: Session lifecycle
 
     /// Start from a routine (§5 Materialize): snapshot-copy the routine's live
-    /// planned sets — plannedX verbatim, actualX NULL, contiguous sortOrder —
-    /// then attach. Returns success.
+    /// planned sets — plannedX stamped with the progression engine's suggestion
+    /// (#35 BR-018: the planned row text IS the suggestion), actualX NULL,
+    /// contiguous sortOrder — then attach. Returns success.
     @discardableResult
     public func start(routineId: String) -> Bool {
         do {
             let plannedSets = try routineDAO.fetchSets(routineId: routineId)
             guard !plannedSets.isEmpty else { return false }   // BR-001 guard
-            let inputs = plannedSets.map { set in
-                Materialize.PlannedSetInput(
-                    exerciseId: set.exerciseId,
-                    plannedWeight: set.plannedWeight,
-                    plannedReps: set.plannedReps,
-                    plannedDuration: set.plannedDuration,
-                    setClass: set.setClass.flatMap { MooreWorkout.SetClass(rawValue: $0.rawValue) }
-                )
-            }
-            let newSessionId = try materialize.startSession(routineId: routineId, plannedSets: inputs)
+            // #35: progression stamping BEFORE the rows render. Phase 1 runs the
+            // engine's suggest per pair (session-1 pairs keep blueprint verbatim,
+            // SC-progression BR-003); phase 2 (post-create) persists the engine's
+            // record mutations and derives the warm-up ramp off the stamped
+            // working weights (SC-warmup BR-001/BR-008).
+            let prepared = try progression.prepareMaterialization(routineId: routineId, plannedSets: plannedSets)
+            let newSessionId = try materialize.startSession(routineId: routineId, plannedSets: prepared.inputs)
+            progression.finishMaterialization(sessionId: newSessionId, prepared: prepared)
             return attach(sessionId: newSessionId)
         } catch {
             errorMessage = "\(error)"
@@ -270,6 +279,10 @@ public final class WorkoutSessionModel {
             loadExercises()
             loadPerSetRestOverrides()
             loadSettings()
+            // #35: cold re-derive the stall-banner surface for this session
+            // (BR-013's condition is durable; dismissals are transient UI and
+            // intentionally don't survive the re-attach — INV-T2 precedent).
+            progression.adoptSession(sessionId: sessionId, routineId: routineId)
             self.errorMessage = nil
             return true
         } catch {
@@ -425,6 +438,14 @@ public final class WorkoutSessionModel {
         snapshot.sets.first { $0.id == id }
     }
 
+    /// #35: stall-choice passthrough for the Active Workout banner — the pair
+    /// context is this session's routine; the choice semantics (Deload/Hold/
+    /// Ignore) live in ProgressionModel → ProgressionEngine.
+    public func applyStallChoice(_ action: StallAction, exerciseId: String) {
+        guard let routineId else { return }   // ad-hoc sessions carry no pairs
+        progression.applyStallChoice(action, routineId: routineId, exerciseId: exerciseId)
+    }
+
     public func exerciseName(_ exerciseId: String) -> String {
         exercisesById[exerciseId]?.name ?? exerciseId
     }
@@ -494,10 +515,17 @@ public final class WorkoutSessionModel {
     public func commitEdit(displayWeight: Double?, reps: Int?, durationSec: Int?) -> Bool {
         guard let request = editRequest else { return false }
         let weightKg = displayWeight.map { SettingsEngine.entryToStorage($0, unit: weightUnit) }
+        let exerciseId = set(byId: request.id)?.exerciseId
         editRequest = nil
         switch request.mode {
         case .log:
-            return dispatchTerminal(.editAndAccept(setId: request.id, weight: weightKg, reps: reps, durationSec: durationSec))
+            let ok = dispatchTerminal(.editAndAccept(setId: request.id, weight: weightKg, reps: reps, durationSec: durationSec))
+            if ok, let exerciseId {
+                // SC-progression BR-018: the bottom-sheet edit overrides the
+                // suggestion surface and silently resets the pair's stall chain.
+                progression.resetChainForPair(routineId: routineId, exerciseId: exerciseId)
+            }
+            return ok
         case .fail:
             // BR-002: actuals are mandatory — zero-data failure was rejected (#2).
             guard reps != nil || durationSec != nil else { return false }
@@ -663,6 +691,10 @@ public final class WorkoutSessionModel {
             try sessionDAO.finishSession(sessionId: sessionId, at: endedAt)
             fsm = machine
             snapshot = machine.state
+            // #35: stall-chain evaluation on the finished session (SC-progression
+            // BR-012). Runs AFTER endedAt lands so the session counts as completed
+            // history; the banner itself fires per NEXT materialization (BR-013).
+            progression.onSessionFinished(sessionId: sessionId)
             buildSummary(endedAt: endedAt)
             // The session surface is terminal (§2b): the rest cycle has nothing
             // left to run — drop it rather than let a stale run tick on.
@@ -797,7 +829,9 @@ public final class WorkoutSessionModel {
     /// Level-1 mapping: planned_set.restDurationSec → materialised rows. The
     /// copy is positional per exercise (materialisation preserves sortOrder),
     /// so the nth session row for exercise E carries the nth planned override;
-    /// [+] rows beyond the plan inherit nil (walk on, BR-001).
+    /// [+] rows beyond the plan inherit nil (walk on, BR-001). #35: warm-up
+    /// rows are derived rows, not blueprint rows — they never consume an
+    /// override slot (the positional copy stays aligned on the work rows).
     private func loadPerSetRestOverrides() {
         perSetRestSec = [:]
         guard let routineId else { return }
@@ -814,7 +848,7 @@ public final class WorkoutSessionModel {
             let restSec: Int? = row["restDurationSec"]
             queues[exerciseId, default: []].append(restSec)
         }
-        for set in snapshot.sets {
+        for set in snapshot.sets where (set.setClass ?? .work) == .work {
             var queue = queues[set.exerciseId] ?? []
             perSetRestSec[set.id] = queue.isEmpty ? nil : queue.removeFirst()
             queues[set.exerciseId] = queue
