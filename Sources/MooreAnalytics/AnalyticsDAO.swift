@@ -78,7 +78,7 @@ public struct AnalyticsDAO: Sendable {
         }
     }
 
-    /// Live personal_record rows, post-0008 shape (SC-prs §3a).
+    /// Live personal_record rows, post-0009 shape (SC-prs §3a).
     public func fetchPRRows() throws -> [PRRow] {
         try dbQueue.read { db in
             try Row.fetchAll(db, sql: """

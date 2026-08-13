@@ -67,13 +67,17 @@ class ImportFixtureTest {
         val exercises = seed["exercises"].asJsonArray
         for (exEl in exercises) {
             val ex = exEl.obj
+            // Seed loader parity (#32): built-ins carry category + defaultMetric +
+            // name_normalized into the exercise rows; exerciseType per INV-IM8.
             db.update("""
-                INSERT OR IGNORE INTO exercise (id, name, exerciseType, equipmentSlug, isCustom, createdAt, updatedAt)
-                VALUES (?, ?, ?, ?, 0, ?, ?)
+                INSERT OR IGNORE INTO exercise
+                    (id, name, exerciseType, equipmentSlug, isCustom, category, defaultMetric, name_normalized, createdAt, updatedAt)
+                VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?)
             """.trimIndent(),
                 ex["id"].asString, ex["name"].asString,
                 if (ex["defaultMetric"].asString == "duration") "cardio" else "strength",
-                ex["equipment"].strOrNull(), now, now)
+                ex["equipment"].strOrNull(), ex["category"].strOrNull(), ex["defaultMetric"].strOrNull(),
+                HevyImportEngine.normalize(ex["name"].asString), now, now)
         }
         return exercises.size()
     }
@@ -144,8 +148,11 @@ class ImportFixtureTest {
             }
             val id = UUID.randomUUID().toString()
             val exerciseType = if (ne.metric == "duration") "cardio" else "custom"   // INV-IM8
+            // #32 parity with HevyImportDAO: customs carry their BR-001 materialized
+            // name + defaultMetric; category stays NULL until the user classifies.
             db.insert("exercise", mapOf("id" to id, "name" to ne.name,
                 "exerciseType" to exerciseType, "isCustom" to 1,
+                "defaultMetric" to ne.metric, "name_normalized" to ne.normalizedName,
                 "createdAt" to nowStamp, "updatedAt" to nowStamp))
             idByNormalized[ne.normalizedName] = id
             metricById[id] = ne.metric

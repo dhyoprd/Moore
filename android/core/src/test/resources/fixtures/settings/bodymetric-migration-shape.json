@@ -1,7 +1,7 @@
 {
   "fixture": "bodymetric-migration-shape",
   "contractId": "SC-settings@1.0.0",
-  "cites": "§3d migration 0009 (rebuild), INV-ST6 (closed vocabulary, legacy remap), SC-prs §3d precedent (legacy table preserved)",
+  "cites": "§3d migration 0011 (rebuild; renumbered from 0009 by #32), INV-ST6 (closed vocabulary, legacy remap), SC-prs §3d precedent (legacy table preserved)",
   "migrationMode": "staged",
   "legacySeed": {
     "bodyMetrics": [
@@ -12,7 +12,7 @@
   "vectors": [
     {
       "id": "V7",
-      "name": "0009 remaps legacy kind='weight'→'bodyWeight', adds label column, admits measurement+cm, rejects legacy kind, preserves __legacy_0001",
+      "name": "0011 remaps legacy kind='weight'→'bodyWeight', adds label column, admits measurement+cm, rejects legacy kind, preserves __legacy_0001",
       "cite": "§3d, INV-ST6",
       "steps": [
         { "do": "assertBodyMetricRow", "id": "bm-legacy-1", "expect": { "kind": "bodyWeight", "label": null, "value": 80, "unit": "kg" } },

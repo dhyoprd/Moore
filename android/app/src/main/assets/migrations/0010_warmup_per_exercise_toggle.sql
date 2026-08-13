@@ -1,4 +1,5 @@
--- Migration 0008: SC-warmup@1.0.0 scaffold — warm-up ramp auto-generation (#25).
+-- Migration 0010: SC-warmup@1.0.0 scaffold — warm-up ramp auto-generation (#25).
+-- Renumbered 0008→0010 by #32 to give the canonical chain unique identifiers.
 -- Purely additive per SC-foundation BR-001/BR-004.
 --
 -- All three #16 model additions were already shipped by earlier migrations:

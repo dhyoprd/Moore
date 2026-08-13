@@ -1,10 +1,9 @@
 // Seam-1 (logic) + seam-2 (persistence) verifier for SC-settings@1.0.0 (ticket #28).
 // Mirrors Sources/MooreSettings/SettingsEngine.swift + SettingsDAO.swift in JS so
-// vectors run on Windows; fresh in-memory DB per fixture; full migration chain:
-//   0001-0003 (foundation), 0005-0006 (routines), 0007_progression_full,
-//   0007_rest_fields, 0008 (personal records), 0009 (body metrics, this contract).
-// 0004 is skipped per SC-rest's drift note (rewritten 0004 targets a shape this
-// chain does not have; the settings surface only needs 0001's exercise columns).
+// vectors run on Windows; fresh in-memory DB per fixture; full canonical chain
+// (#32): 0001-0003 (foundation), 0004 (exercises), 0005-0006 (routines),
+// 0007_progression_full, 0008_rest_fields, 0009 (personal records),
+// 0010 (warmup), 0011 (body metrics, this contract).
 //
 // Fixture semantics:
 //   unit-conversion-math.json        BR-002/BR-003  ratio math, 1dp display / 2dp storage, entry respect
@@ -12,7 +11,7 @@
 //   rest-defaults-persist.json       BR-005 + SC-rest INV-S2  upsert persists; re-seed never resets
 //   bodymetric-add-list.json         BR-006/BR-007  CRUD create + date-descending trend list
 //   bodymetric-update-delete.json    BR-006  update/delete tombstone + validation gate
-//   bodymetric-migration-shape.json  §3d/INV-ST6  0009 rebuild: remap, label column, legacy preserved
+//   bodymetric-migration-shape.json  §3d/INV-ST6  0011 rebuild: remap, label column, legacy preserved
 //   export-manifest-completeness     BR-008/BR-009  ten-table manifest, tombstone counts, naming
 //   backup-roundtrip.json            BR-008/INV-ST3  file copy re-opens; counts + hash match (AC seam-2)
 //   tombstone-list-restore.json      BR-010/INV-ST4  custom tombstones listed; restore clears deletedAt
@@ -33,22 +32,24 @@ const here = dirname(fileURLToPath(import.meta.url));
 const worktreeRoot = join(here, '..', '..');
 const FIXT = join(here, 'Fixtures');
 
-// Full migration chain (0004 excluded per drift note above).
+// The ONE canonical chain (#32): unique numbers, applied in this order everywhere.
 const MIGRATIONS = [
   'Sources/MooreFoundation/Migrations/0001_core.sql',
   'Sources/MooreFoundation/Migrations/0002_warmup_progression.sql',
   'Sources/MooreFoundation/Migrations/0003_import_columns.sql',
+  'Sources/MooreExercises/Migrations/0004_exercise_library.sql',
   'Sources/MooreRoutines/Migrations/0005_routines_folders.sql',
   'Sources/MooreRoutines/Migrations/0006_routines_session_link.sql',
   'Sources/MooreProgression/Migrations/0007_progression_full.sql',
-  'Sources/MooreRest/Migrations/0007_rest_fields.sql',
-  'Sources/MooreRecords/Migrations/0008_personal_records.sql',
-  'Sources/MooreSettings/Migrations/0009_body_metrics.sql',
+  'Sources/MooreRest/Migrations/0008_rest_fields.sql',
+  'Sources/MooreRecords/Migrations/0009_personal_records.sql',
+  'Sources/MooreWarmup/Migrations/0010_warmup_per_exercise_toggle.sql',
+  'Sources/MooreSettings/Migrations/0011_body_metrics.sql',
 ].map((p) => join(worktreeRoot, ...p.split('/')));
-const MIG_0009 = MIGRATIONS[MIGRATIONS.length - 1];
-const MIGRATIONS_PRE_0009 = MIGRATIONS.slice(0, -1);
+const MIG_0011 = MIGRATIONS[MIGRATIONS.length - 1];
+const MIGRATIONS_PRE_0011 = MIGRATIONS.slice(0, -1);
 
-// 0007's idempotent seed tail (SC-rest INV-S2 re-seed probe, fixture V5).
+// 0008's idempotent seed tail (SC-rest INV-S2 re-seed probe, fixture V5).
 const REST_SEED_SQL = `
   INSERT OR IGNORE INTO app_setting (key, value, updatedAt) VALUES
     ('defaultRestCompoundSec',  '180', strftime('%Y-%m-%dT%H:%M:%fZ','now')),
@@ -298,13 +299,13 @@ function newDbFull() {
   return db;
 }
 function newDbStaged(fixture) {
-  // Apply everything up to 0009, seed legacy-shape rows, THEN apply 0009 —
+  // Apply everything up to 0011, seed legacy-shape rows, THEN apply 0011 —
   // proving the rebuild remap + preservation on live data.
   const db = new Database(':memory:');
-  for (const m of MIGRATIONS_PRE_0009) db.exec(readFileSync(m, 'utf8'));
+  for (const m of MIGRATIONS_PRE_0011) db.exec(readFileSync(m, 'utf8'));
   const ibm = db.prepare(`INSERT INTO body_metric (id, kind, value, unit, recordedAt, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)`);
   for (const m of fixture.legacySeed?.bodyMetrics ?? []) ibm.run(m.id, m.kind, m.value, m.unit, m.recordedAt, m.createdAt, m.updatedAt);
-  db.exec(readFileSync(MIG_0009, 'utf8'));
+  db.exec(readFileSync(MIG_0011, 'utf8'));
   return db;
 }
 
@@ -513,7 +514,7 @@ function runSteps(db, fixture, vector) {
           db.prepare(`INSERT INTO body_metric (id, kind, value, unit, recordedAt, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, 't', 't')`)
             .run(randomUUID(), step.kind, step.value, step.unit, step.recordedAt);
         } catch { threw = true; }
-        threw ? pass(id) : fail(`${id}: kind='${step.kind}' must violate CHECK post-0009`);
+        threw ? pass(id) : fail(`${id}: kind='${step.kind}' must violate CHECK post-0011`);
         break;
       }
       case 'assertTableExists': {
@@ -630,7 +631,7 @@ function schemaSanity() {
     try {
       db.prepare(`INSERT INTO body_metric (id, kind, value, unit, recordedAt, createdAt, updatedAt) VALUES ('sanity-w','weight',80,'kg','t','t','t')`).run();
     } catch { threw = true; }
-    threw ? pass('schema.body_metric.legacy-kind-rejected') : fail('schema: kind=weight must violate CHECK post-0009');
+    threw ? pass('schema.body_metric.legacy-kind-rejected') : fail('schema: kind=weight must violate CHECK post-0011');
   } finally {
     db.close();
   }

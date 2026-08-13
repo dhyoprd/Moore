@@ -1,4 +1,5 @@
--- Migration 0008: personal records canonical shape (SC-prs@1.0.0, #26).
+-- Migration 0009: personal records canonical shape (SC-prs@1.0.0, #26).
+-- Renumbered 0008→0009 by #32 to give the canonical chain unique identifiers.
 -- Heals 0001's legacy `personal_record` CHECK ('weight','volume','rep') + missing
 -- `sessionId` into the #3-canonical `{max_1rm, max_volume, max_reps, max_duration}`
 -- + sessionId shape. Table-rebuild pattern (identical to 0007_progression_full.sql):

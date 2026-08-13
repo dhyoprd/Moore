@@ -9,7 +9,7 @@
 //   recompute-on-kill.json           BR-007  recompute from timestamps; expired presents expired
 //   rest-end-cue.json                BR-008  cue.rest.end fired once, gated to rest state
 //   duration-clamp.json              BR-001+INV-S3  resolution clamps to [0,600]
-//   rest-settings-persistence.json   §3d migration 0007 + INV-S2 defaults/upsert
+//   rest-settings-persistence.json   §3d migration 0008 + INV-S2 defaults/upsert
 //   forward-compat-suppress.json     §2b/INV-T6  a later run's cue is not absorbed by an earlier morph
 //
 // Usage: node Tests/MooreRestTests/VerifyRest.mjs
@@ -22,20 +22,31 @@ import { dirname, join } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const worktreeRoot = join(here, '..', '..');
 const foundationMigDir = join(worktreeRoot, 'Sources', 'MooreFoundation', 'Migrations');
+const exercisesMigDir = join(worktreeRoot, 'Sources', 'MooreExercises', 'Migrations');
 const routinesMigDir = join(worktreeRoot, 'Sources', 'MooreRoutines', 'Migrations');
+const progressionMigDir = join(worktreeRoot, 'Sources', 'MooreProgression', 'Migrations');
 const restMigDir = join(worktreeRoot, 'Sources', 'MooreRest', 'Migrations');
+const recordsMigDir = join(worktreeRoot, 'Sources', 'MooreRecords', 'Migrations');
+const warmupMigDir = join(worktreeRoot, 'Sources', 'MooreWarmup', 'Migrations');
+const settingsMigDir = join(worktreeRoot, 'Sources', 'MooreSettings', 'Migrations');
 const fixturesDir = join(here, 'Fixtures');
 
+// The ONE canonical chain (#32): unique numbers, applied in this order everywhere.
 const MIGRATIONS = [
   { dir: foundationMigDir, name: '0001_core.sql', optional: false },
   { dir: foundationMigDir, name: '0002_warmup_progression.sql', optional: false },
   { dir: foundationMigDir, name: '0003_import_columns.sql', optional: false },
+  { dir: exercisesMigDir, name: '0004_exercise_library.sql', optional: false },
   { dir: routinesMigDir, name: '0005_routines_folders.sql', optional: false },
   { dir: routinesMigDir, name: '0006_routines_session_link.sql', optional: false },
-  { dir: restMigDir, name: '0007_rest_fields.sql', optional: false },
+  { dir: progressionMigDir, name: '0007_progression_full.sql', optional: false },
+  { dir: restMigDir, name: '0008_rest_fields.sql', optional: false },
+  { dir: recordsMigDir, name: '0009_personal_records.sql', optional: false },
+  { dir: warmupMigDir, name: '0010_warmup_per_exercise_toggle.sql', optional: false },
+  { dir: settingsMigDir, name: '0011_body_metrics.sql', optional: false },
 ];
 
-// 0007's idempotent tail: the `app_setting` defaults seed is `INSERT OR IGNORE`
+// 0008's idempotent tail: the `app_setting` defaults seed is `INSERT OR IGNORE`
 // and therefore safe to re-run in-process; the ALTERs it sits beside are applied
 // exactly once by GRDB's migration registry at runtime (tracked by name), so a
 // verifier re-run exercises only this seed statement — precisely what INV-S2's
@@ -301,7 +312,7 @@ function runSettingsPersistence(fixture, vector) {
         break;
       }
       case 'reapplyMigrations': {
-        // INV-S2: the idempotent seed tail of 0007 must not reset the user's value.
+        // INV-S2: the idempotent seed tail of 0008 must not reset the user's value.
         db.exec(SETTINGS_SEED_SQL);
         pass(label);
         break;

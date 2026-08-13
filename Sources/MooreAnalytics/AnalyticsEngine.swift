@@ -75,7 +75,7 @@ public struct ExerciseInfo: Equatable, Sendable {
     }
 }
 
-public struct PRRow: Equatable, Sendable {  // personal_record post-0008, live rows only
+public struct PRRow: Equatable, Sendable {  // personal_record post-0009, live rows only
     public var id: String
     public var exerciseId: String
     public var sessionId: String

@@ -53,7 +53,7 @@ public struct ProgressionSchemeRow: Codable, FetchableRecord, PersistableRecord 
     }
 }
 
-// MARK: - <#heading#>
+// MARK: - DAO
 
 public final class ProgressionDAO {
     let dbPool: DatabasePool
@@ -78,6 +78,21 @@ public final class ProgressionDAO {
                 updatedAt: ISO8601DateFormatter().string(from: Date())
             )
             return created
+        }
+    }
+
+    /// #32 AC-3 seam (BR-009): resolve `exercise.category` FROM THE DATABASE for
+    /// the engine's increment rule (legs/lower +5kg, upper +2.5kg, ambiguous
+    /// upper-biased). The engine stays pure — callers pass this value into
+    /// `ProgressionEngine.suggest` / `increment(forExerciseCategory:)`; nil
+    /// (unclassified row or missing exercise) takes the upper-biased 2.5kg path.
+    public func exerciseCategory(ofExercise exerciseId: String) throws -> String? {
+        try dbPool.read { db in
+            try String.fetchOne(
+                db,
+                sql: "SELECT category FROM exercise WHERE id = ?",
+                arguments: [exerciseId]
+            )
         }
     }
 

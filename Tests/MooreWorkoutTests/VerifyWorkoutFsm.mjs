@@ -1,7 +1,7 @@
 // Seam-1/2 verifier for SC-workout-logging@1.0.0 (ticket #22).
-// Per-fixture fresh in-memory DB (migrations 0001–0006). Each fixture runs its
-// action list through a JS mirror of WorkoutSessionFSM's rules and asserts both
-// the resulting DB rows and the derived StateSnapshot fields.
+// Per-fixture fresh in-memory DB (full canonical chain 0001–0011, #32). Each
+// fixture runs its action list through a JS mirror of WorkoutSessionFSM's rules
+// and asserts both the resulting DB rows and the derived StateSnapshot fields.
 //
 // Usage: node Tests/MooreWorkoutTests/VerifyWorkoutFsm.mjs
 
@@ -14,12 +14,19 @@ const here = dirname(fileURLToPath(import.meta.url));
 const worktreeRoot = join(here, '..', '..');
 const fixturesDir = join(here, 'Fixtures');
 
+// The ONE canonical chain (#32): unique numbers, applied in this order everywhere.
 const MIGRATIONS = [
   ['MooreFoundation', '0001_core.sql'],
   ['MooreFoundation', '0002_warmup_progression.sql'],
   ['MooreFoundation', '0003_import_columns.sql'],
+  ['MooreExercises', '0004_exercise_library.sql'],
   ['MooreRoutines', '0005_routines_folders.sql'],
   ['MooreRoutines', '0006_routines_session_link.sql'],
+  ['MooreProgression', '0007_progression_full.sql'],
+  ['MooreRest', '0008_rest_fields.sql'],
+  ['MooreRecords', '0009_personal_records.sql'],
+  ['MooreWarmup', '0010_warmup_per_exercise_toggle.sql'],
+  ['MooreSettings', '0011_body_metrics.sql'],
 ];
 
 let failures = 0;

@@ -1,7 +1,7 @@
 // SC-warmup@1.0.0 fixture runner (ticket #31 Stage A).
 // Kotlin mirror of Tests/MooreWarmupTests/VerifyWarmup.mjs: fresh in-memory DB
 // per fixture (migrations 0001,0002,0003,0005,0006,0007_progression_full,
-// 0008_warmup); WarmupRamp.derive + the warmupApply materializer are the
+// 0010_warmup); WarmupRamp.derive + the warmupApply materializer are the
 // ported com.moore.warmup engine + the same SQL harness the .mjs uses.
 package com.moore.core
 
@@ -388,8 +388,10 @@ class WarmupFixtureTest {
 
             for (prEl in fx["preExistingPRs"]?.asJsonArray ?: com.google.gson.JsonArray()) {
                 val pr = prEl.obj
+                // Post-0009 canonical shape: sessionId is required on every row.
                 db.insert("personal_record", mapOf(
                     "id" to UUID.randomUUID().toString(), "exerciseId" to pr["exerciseId"].asString,
+                    "sessionId" to sessionId,
                     "setId" to null, "kind" to pr["kind"].asString, "value" to pr["value"].asDouble,
                     "achievedAt" to nowIso(), "createdAt" to nowIso(), "updatedAt" to nowIso()))
             }
@@ -422,7 +424,7 @@ class WarmupFixtureTest {
             checks.eq(candidates["max_reps"], 5.0, "07.v8.work-feed-max-reps (warm-up 10 excluded)")
             checks.eq(candidates["max_1rm"], 82.5, "07.v8.work-feed-max-1rm")
             val repPr = db.queryOne(
-                "SELECT value FROM personal_record WHERE exerciseId='ex-bench' AND kind='rep'")
+                "SELECT value FROM personal_record WHERE exerciseId='ex-bench' AND kind='max_reps'")
             checks.eq((repPr?.get("value") as? Number)?.toDouble(), 8.0, "07.v8.rep-pr-still-8 (bar×10 never writes max_reps)")
             val prWithWarmupSet = (db.queryOne("""
                 SELECT COUNT(*) AS n FROM personal_record pr
@@ -592,12 +594,12 @@ class WarmupFixtureTest {
             db.applyAll(*MigrationChain.WARMUP_FULL)
             val t = db.queryOne(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name='warmup_contract_scaffold'")
-            checks.ok(t != null, "migration.0008.scaffold-table-exists")
+            checks.ok(t != null, "migration.0010.scaffold-table-exists")
             val marker = db.queryOne(
                 "SELECT * FROM warmup_contract_scaffold WHERE id='sc-warmup-1.0.0-shape-check'")
-            checks.ok(marker != null, "migration.0008.shape-assertion-marker (setClass+warmupEnabled confirmed present)")
+            checks.ok(marker != null, "migration.0010.shape-assertion-marker (setClass+warmupEnabled confirmed present)")
             val cols = db.tableColumns("progression_scheme").map { it["name"] as String }
-            checks.ok("warmupEnabled" in cols, "migration.0008.warmupEnabled-present (BR-010 default OFF)")
+            checks.ok("warmupEnabled" in cols, "migration.0010.warmupEnabled-present (BR-010 default OFF)")
         }
         checks.flush()
     }

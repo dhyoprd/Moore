@@ -1,5 +1,5 @@
 // contractId: SC-prs @1.0.0
-// §5 seam-2 DAO. GRDB-backed persistence for `personal_record` (post-0008
+// §5 seam-2 DAO. GRDB-backed persistence for `personal_record` (post-0009
 // shape). Two write paths per the ticket ruling:
 //   writeFromSet — LIVE: baseline row must already exist; strict exceed writes
 //                  + returns the cue descriptor. Never seeds. One transaction.
@@ -142,21 +142,28 @@ public struct PersonalRecordDAO: Sendable {
         let rows = try Row.fetchAll(db, sql: """
             SELECT cs.id, cs.sessionId, cs.exerciseId, cs.status, cs.setClass,
                    cs.actualWeight, cs.actualReps, cs.actualDuration, cs.completedAt,
-                   e.exerciseType
-              FROM completed_set cs
-              JOIN exercise e ON e.id = cs.exerciseId
-             WHERE cs.exerciseId = ? AND cs.deletedAt IS NULL
+                   e.exerciseType, e.defaultMetric
+               FROM completed_set cs
+               JOIN exercise e ON e.id = cs.exerciseId
+              WHERE cs.exerciseId = ? AND cs.deletedAt IS NULL
             """, arguments: [exerciseId])
         return rows.map(referenceSet(from:))
     }
 
-    /// Metric resolution: SC-exercises' `defaultMetric` column lands via the
-    /// 0004 rewrite (docs/MIGRATION-INTEGRATION-NOTE.md); until then the v1
-    /// duration surface is exerciseType='cardio'. Verifier fixtures mirror this.
+    /// Metric resolution: read the exercise's `defaultMetric` (landed by the
+    /// rewritten 0004, #32) when present; rows without it fall back to the v1
+    /// duration surface, exerciseType='cardio'. Verifier fixtures mirror this.
     private func referenceSet(from row: Row) -> ReferenceSessionSet {
         let type: String = row["exerciseType"]
+        let defaultMetric: String? = row["defaultMetric"]
         let classRaw: String? = row["setClass"]
         let statusRaw: String = row["status"]
+        let metric: ExerciseMetric
+        if let defaultMetric {
+            metric = (defaultMetric == "duration") ? .duration : .reps
+        } else {
+            metric = (type == "cardio") ? .duration : .reps
+        }
         return ReferenceSessionSet(
             id: row["id"],
             sessionId: row["sessionId"],
@@ -167,7 +174,7 @@ public struct PersonalRecordDAO: Sendable {
             actualReps: row["actualReps"],
             actualDuration: row["actualDuration"],
             completedAt: row["completedAt"],
-            exerciseDefaultMetric: (type == "cardio") ? .duration : .reps
+            exerciseDefaultMetric: metric
         )
     }
 

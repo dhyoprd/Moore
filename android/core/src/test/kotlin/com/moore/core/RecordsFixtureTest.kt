@@ -200,7 +200,7 @@ class RecordsFixtureTest {
     // MARK: - Runner
 
     @Test
-    fun `schema - personal_record post-0008 canonical shape`() {
+    fun `schema - personal_record post-0009 canonical shape`() {
         val checks = Checks("Records.schema")
         TestDb().use { db ->
             db.applyAll(*MigrationChain.RECORDS_FULL)
@@ -221,7 +221,7 @@ class RecordsFixtureTest {
             } catch (e: Exception) {
                 true
             }
-            checks.ok(threw, "schema.legacy-kind-rejected: kind=weight must violate CHECK post-0008")
+            checks.ok(threw, "schema.legacy-kind-rejected: kind=weight must violate CHECK post-0009")
             val legacy = db.queryOne(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name='personal_record__legacy_0001'")
             checks.ok(legacy != null, "schema.legacy-preserved: personal_record__legacy_0001 must survive")

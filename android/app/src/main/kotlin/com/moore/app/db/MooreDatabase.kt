@@ -1,14 +1,15 @@
-// Room database + migration chain (ticket #31).
+// Room database + migration chain (ticket #31; chain reconciled by #32).
 // The SAME byte-identical .sql artifacts iOS applies via GRDB ship as Android
 // assets and are executed verbatim, one Room version per migration file, in the
-// chain order the Node verifiers use:
-//   Room 1  = 0001_core.sql                 Room 6  = 0007_progression_full.sql
-//   Room 2  = 0002_warmup_progression.sql   Room 7  = 0007_rest_fields.sql
-//   Room 3  = 0003_import_columns.sql       Room 8  = 0008_personal_records.sql
-//   Room 4  = 0005_routines_folders.sql     Room 9  = 0008_warmup_per_exercise_toggle.sql
-//   Room 5  = 0006_routines_session_link.sql Room 10 = 0009_body_metrics.sql
-// (0004_exercise_library.sql is NOT in the chain — it awaits the rewrite per
-// docs/MIGRATION-INTEGRATION-NOTE.md, exactly as on iOS.)
+// ONE canonical chain order (unique numbers, no collisions):
+//   Room 1  = 0001_core.sql                  Room 7  = 0007_progression_full.sql
+//   Room 2  = 0002_warmup_progression.sql    Room 8  = 0008_rest_fields.sql
+//   Room 3  = 0003_import_columns.sql        Room 9  = 0009_personal_records.sql
+//   Room 4  = 0004_exercise_library.sql      Room 10 = 0010_warmup_per_exercise_toggle.sql
+//   Room 5  = 0005_routines_folders.sql      Room 11 = 0011_body_metrics.sql
+//   Room 6  = 0006_routines_session_link.sql
+// (0004 is the #32 rewrite over the real 0001 exercise shape — admitted into the
+// chain on both platforms. Room version = files applied + 1, hence VERSION = 12.)
 package com.moore.app.db
 
 import android.content.Context
@@ -48,21 +49,22 @@ abstract class MooreDatabase : RoomDatabase() {
     abstract fun analyticsDao(): AnalyticsDao
 
     companion object {
-        const val VERSION = 10
+        const val VERSION = 12
         const val DB_NAME = "moore.sqlite"
 
-        /// Migration identifier → asset file, in chain order (iOS numbering kept).
+        /// Migration identifier → asset file, in the ONE canonical chain order (#32).
         val CHAIN: List<String> = listOf(
             "0001_core.sql",
             "0002_warmup_progression.sql",
             "0003_import_columns.sql",
+            "0004_exercise_library.sql",
             "0005_routines_folders.sql",
             "0006_routines_session_link.sql",
             "0007_progression_full.sql",
-            "0007_rest_fields.sql",
-            "0008_personal_records.sql",
-            "0008_warmup_per_exercise_toggle.sql",
-            "0009_body_metrics.sql",
+            "0008_rest_fields.sql",
+            "0009_personal_records.sql",
+            "0010_warmup_per_exercise_toggle.sql",
+            "0011_body_metrics.sql",
         )
 
         /// Split a migration file into individual statements. SQLite `--`

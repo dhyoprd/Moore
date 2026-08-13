@@ -37,9 +37,9 @@ class AnalyticsFixtureTest {
     private fun newDb(): TestDb {
         val db = TestDb()
         db.applyAll(*MigrationChain.ANALYTICS_FULL)
-        // Integration patch per Sources/MooreExercises/Migrations-DEPENDS-ON-19.md:
-        // the one column AnalyticsDAO reads by name (0004 awaits its rewrite).
-        db.exec("ALTER TABLE exercise ADD COLUMN category TEXT")
+        // #32: no integration patch needed — the rewritten 0004 in the canonical
+        // chain adds `exercise.category` over the real 0001 shape; the muscle
+        // split reads it straight off the stored rows (AnalyticsDAO parity).
         return db
     }
 
@@ -283,9 +283,7 @@ class AnalyticsFixtureTest {
         )
         for (fname in files) {
             val fx = Fixtures.json("analytics", fname)
-            TestDb().use { db ->
-                db.applyAll(*MigrationChain.ANALYTICS_FULL)
-                db.exec("ALTER TABLE exercise ADD COLUMN category TEXT")
+            newDb().use { db ->
                 seedFixture(db, fx)
                 val sessions = loadSessions(db)
                 val sets = loadSets(db)

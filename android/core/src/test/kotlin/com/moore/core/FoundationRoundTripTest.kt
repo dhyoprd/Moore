@@ -1,7 +1,10 @@
-// SC-foundation@1.0.0 fixture runner (ticket #31 Stage A).
-// Kotlin mirror of Tests/MooreFoundationTests/VerifyMigrations.mjs: applies
-// 0001→0003, then for every round-trip fixture inserts each entity, selects it
-// back by id, and asserts field-for-field equality including NULL preservation.
+// SC-foundation@1.0.0 fixture runner (ticket #31 Stage A; chain reconciled by #32).
+// Kotlin mirror of Tests/MooreFoundationTests/VerifyMigrations.mjs: applies the
+// FULL canonical chain (0001→0011), then for every round-trip fixture inserts
+// each entity, selects it back by id, and asserts field-for-field equality
+// including NULL preservation. Fixtures round-trip against the POST-chain
+// canonical shapes (personal_record post-0009, body_metric post-0011,
+// progression_scheme post-0007).
 //
 // Vector ↔ BR mapping (contract template §7):
 //   V1, V2  → BR-001 (additive-only, idempotent apply)
@@ -83,8 +86,8 @@ class FoundationRoundTripTest {
     fun `round-trip vectors V1-V15 pass field-for-field including NULLs`() {
         val checks = Checks("FoundationRoundTrip")
         TestDb().use { db ->
-            // V1 — apply migrations in order.
-            for (name in MigrationChain.FOUNDATION) {
+            // V1 — apply the full canonical chain in order.
+            for (name in MigrationChain.ALL) {
                 try {
                     db.applyMigration(name)
                     checks.pass("migration.apply $name")
@@ -107,7 +110,7 @@ class FoundationRoundTripTest {
 
             // V2 — the migration tracker is idempotent (GRDB marker simulation).
             db.exec("CREATE TABLE IF NOT EXISTS schema_migrations (identifier TEXT PRIMARY KEY, appliedAt TEXT NOT NULL)")
-            for (name in MigrationChain.FOUNDATION) {
+            for (name in MigrationChain.ALL) {
                 val already = db.queryOne("SELECT 1 AS x FROM schema_migrations WHERE identifier = ?", name)
                 if (already != null) {
                     checks.pass("migration.idempotent $name (skipped)")

@@ -39,13 +39,13 @@ data class RestResolution(
 )
 
 /// Level-4 global defaults (#9 v1: compound 180s / isolation 90s). Value type;
-/// persisted against the migration-0007 app_setting singleton rows.
+/// persisted against the migration-0008 app_setting singleton rows.
 data class RestSettings(
     var defaultRestCompoundSec: Int,
     var defaultRestIsolationSec: Int,
 ) {
     companion object {
-        /// The #9 v1 defaults, matching the 0007 seed (INV-S2).
+        /// The #9 v1 defaults, matching the 0008 seed (INV-S2).
         val DEFAULT = RestSettings(defaultRestCompoundSec = 180, defaultRestIsolationSec = 90)
     }
 }

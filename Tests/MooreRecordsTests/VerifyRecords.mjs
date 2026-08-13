@@ -1,6 +1,7 @@
 // Seam-1/seam-2 verifier for SC-prs@1.0.0 (ticket #26).
 // Mirrors Sources/MooreRecords/PREngine.swift + PersonalRecordDAO.swift in JS so
-// vectors run on Windows; fresh in-memory DB per fixture; migrations 0001–0008.
+// vectors run on Windows; fresh in-memory DB per fixture; full canonical chain
+// 0001–0011 (#32).
 //
 // Usage: node Tests/MooreRecordsTests/VerifyRecords.mjs
 
@@ -14,14 +15,19 @@ const here = dirname(fileURLToPath(import.meta.url));
 const worktreeRoot = join(here, '..', '..');
 const FIXT = join(here, 'Fixtures');
 
+// The ONE canonical chain (#32): unique numbers, applied in this order everywhere.
 const MIGRATIONS = [
   'Sources/MooreFoundation/Migrations/0001_core.sql',
   'Sources/MooreFoundation/Migrations/0002_warmup_progression.sql',
   'Sources/MooreFoundation/Migrations/0003_import_columns.sql',
+  'Sources/MooreExercises/Migrations/0004_exercise_library.sql',
   'Sources/MooreRoutines/Migrations/0005_routines_folders.sql',
   'Sources/MooreRoutines/Migrations/0006_routines_session_link.sql',
-  'Sources/MooreRest/Migrations/0007_rest_fields.sql',
-  'Sources/MooreRecords/Migrations/0008_personal_records.sql',
+  'Sources/MooreProgression/Migrations/0007_progression_full.sql',
+  'Sources/MooreRest/Migrations/0008_rest_fields.sql',
+  'Sources/MooreRecords/Migrations/0009_personal_records.sql',
+  'Sources/MooreWarmup/Migrations/0010_warmup_per_exercise_toggle.sql',
+  'Sources/MooreSettings/Migrations/0011_body_metrics.sql',
 ].map((p) => join(worktreeRoot, ...p.split('/')));
 
 let failures = 0, passes = 0;

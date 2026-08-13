@@ -1,5 +1,5 @@
 // Seam-1/2 verifier for SC-warmup@1.0.0 (ticket #25).
-// Fresh in-memory DB per fixture (migrations 0001,0002,0003,0005,0006,0007,0008).
+// Fresh in-memory DB per fixture (full canonical chain 0001–0011, #32).
 // Mirrors WarmupRamp.derive / WarmupMaterialize.apply in JS so vectors run on
 // Windows without an Apple toolchain; test names cite BR IDs per template §7.
 //
@@ -14,15 +14,19 @@ const here = dirname(fileURLToPath(import.meta.url));
 const worktreeRoot = join(here, '..', '..');
 const fixturesDir = join(here, 'Fixtures');
 
-// 0004 skipped per docs/MIGRATION-INTEGRATION-NOTE.md (awaits rewrite).
+// The ONE canonical chain (#32): unique numbers, applied in this order everywhere.
 const MIGRATIONS = [
   ['MooreFoundation', '0001_core.sql'],
   ['MooreFoundation', '0002_warmup_progression.sql'],
   ['MooreFoundation', '0003_import_columns.sql'],
+  ['MooreExercises', '0004_exercise_library.sql'],
   ['MooreRoutines', '0005_routines_folders.sql'],
   ['MooreRoutines', '0006_routines_session_link.sql'],
   ['MooreProgression', '0007_progression_full.sql'],
-  ['MooreWarmup', '0008_warmup_per_exercise_toggle.sql'],
+  ['MooreRest', '0008_rest_fields.sql'],
+  ['MooreRecords', '0009_personal_records.sql'],
+  ['MooreWarmup', '0010_warmup_per_exercise_toggle.sql'],
+  ['MooreSettings', '0011_body_metrics.sql'],
 ];
 
 const INVENTORIES = {
@@ -408,11 +412,12 @@ for (const file of ['03-two-rung-82.5.json', '04-three-rung-120.json', '05-colla
   }
   warmupApply(db, sessionId, s.routineId, s.bar, INVENTORIES[s.unit]);
 
-  // Pre-existing PR row (kind=rep value 8 — warm-up bar×10 would beat it if included).
+  // Pre-existing PR row (kind=max_reps value 8 — warm-up bar×10 would beat it if
+  // included). Post-0009 canonical shape: sessionId is required on every row.
   for (const pr of fx.preExistingPRs ?? []) {
-    db.prepare(`INSERT INTO personal_record (id, exerciseId, setId, kind, value, achievedAt, createdAt, updatedAt)
-                VALUES (?, ?, NULL, ?, ?, ?, ?, ?)`)
-      .run(uuid(), pr.exerciseId, pr.kind, pr.value, now(), now(), now());
+    db.prepare(`INSERT INTO personal_record (id, exerciseId, sessionId, setId, kind, value, achievedAt, createdAt, updatedAt)
+                VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?)`)
+      .run(uuid(), pr.exerciseId, sessionId, pr.kind, pr.value, now(), now(), now());
   }
 
   // Complete every set at planned values.
@@ -442,7 +447,7 @@ for (const file of ['03-two-rung-82.5.json', '04-three-rung-120.json', '05-colla
   // warm-up rows (10 reps at 20 kg; 40×5; 60×3) never reach the feed.
   ok(candidates.max_reps === 5, `07.v8.work-feed-max-reps (${candidates.max_reps}; warm-up 10 excluded)`);
   ok(candidates.max_1rm === 82.5, `07.v8.work-feed-max-1rm (${candidates.max_1rm})`);
-  const repPr = db.prepare(`SELECT value FROM personal_record WHERE exerciseId='ex-bench' AND kind='rep'`).get();
+  const repPr = db.prepare(`SELECT value FROM personal_record WHERE exerciseId='ex-bench' AND kind='max_reps'`).get();
   ok(repPr.value === 8, '07.v8.rep-pr-still-8 (bar×10 never writes max_reps)');
   // No personal_record row points at any warm-up set (would-be writers only see work ids).
   const prWithWarmupSet = db.prepare(`
@@ -539,16 +544,16 @@ for (const file of ['03-two-rung-82.5.json', '04-three-rung-120.json', '05-colla
 })();
 
 // ---------------------------------------------------------------------------
-// Migration 0008 scaffold checks
+// Migration 0010 scaffold checks
 // ---------------------------------------------------------------------------
-(function migration0008() {
+(function migration0010() {
   const db = newDb();
   const t = db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='warmup_contract_scaffold'`).get();
-  ok(!!t, 'migration.0008.scaffold-table-exists');
+  ok(!!t, 'migration.0010.scaffold-table-exists');
   const marker = db.prepare(`SELECT * FROM warmup_contract_scaffold WHERE id='sc-warmup-1.0.0-shape-check'`).get();
-  ok(!!marker, 'migration.0008.shape-assertion-marker (setClass+warmupEnabled confirmed present)');
+  ok(!!marker, 'migration.0010.shape-assertion-marker (setClass+warmupEnabled confirmed present)');
   const cols = db.prepare(`PRAGMA table_info(progression_scheme)`).all().map((c) => c.name);
-  ok(cols.includes('warmupEnabled'), 'migration.0008.warmupEnabled-present (BR-010 default OFF)');
+  ok(cols.includes('warmupEnabled'), 'migration.0010.warmupEnabled-present (BR-010 default OFF)');
   db.close();
 })();
 

@@ -1,7 +1,7 @@
 {
   "fixture": "rest-settings-persistence",
   "contractId": "SC-rest@1.0.0",
-  "cites": "§3d migration 0007, INV-S1 (additive settings), INV-S2 (defaults seeded, re-migration never resets user values)",
+  "cites": "§3d migration 0008 (renumbered from 0007 by #32), INV-S1 (additive settings), INV-S2 (defaults seeded, re-migration never resets user values)",
   "database": {
     "needsAppSettingsTable": true,
     "assertTableShape": {

@@ -172,6 +172,12 @@ interface ProgressionDao {
     """)
     fun scheme(routineId: String, exerciseId: String): ProgressionSchemeEntity?
 
+    /// #32 AC-3 seam: resolve exercise.category from the database for the
+    /// engine's increment rule (BR-009: legs/lower +5kg, upper +2.5kg,
+    /// ambiguous upper-biased). NULL/missing → the engine's upper-biased default.
+    @Query("SELECT category FROM exercise WHERE id = :exerciseId")
+    fun exerciseCategory(exerciseId: String): String?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun save(row: ProgressionSchemeEntity)
 }

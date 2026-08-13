@@ -88,6 +88,35 @@ class ProgressionFixtureTest {
         }
     }
 
+    /// #32 AC-3 parity (mirrors VerifyProgression.mjs): the increment rule
+    /// resolves exercise.category FROM THE DATABASE — the DAO seam reads the
+    /// column the rewritten 0004 landed and feeds the pure engine function.
+    @Test
+    fun `increment rule resolves category from the database`() {
+        val checks = Checks("Progression.dbCategory")
+        TestDb().use { db ->
+            db.applyAll(*MigrationChain.PROGRESSION_FULL)
+            val now = "2026-08-12T00:00:00Z"
+            for ((id, category) in listOf("ex-squat" to "quads", "ex-bench" to "chest", "ex-uncat" to null)) {
+                db.insert("exercise", mapOf(
+                    "id" to id, "name" to id, "exerciseType" to "strength", "isCustom" to 0,
+                    "category" to category, "defaultMetric" to "reps",
+                    "createdAt" to now, "updatedAt" to now))
+            }
+            fun categoryFromDb(exerciseId: String): String? =
+                db.queryOne("SELECT category FROM exercise WHERE id = ?", exerciseId)?.get("category") as String?
+            checks.eq(ProgressionEngine.incrementForExerciseCategory(categoryFromDb("ex-squat")), 5.0,
+                "db.category legs/lower → +5.0kg")
+            checks.eq(ProgressionEngine.incrementForExerciseCategory(categoryFromDb("ex-bench")), 2.5,
+                "db.category upper → +2.5kg")
+            checks.eq(ProgressionEngine.incrementForExerciseCategory(categoryFromDb("ex-uncat")), 2.5,
+                "db.category NULL → upper-biased +2.5kg")
+            checks.eq(ProgressionEngine.incrementForExerciseCategory(categoryFromDb("ex-missing")), 2.5,
+                "db.category missing row → upper-biased +2.5kg")
+            checks.flush()
+        }
+    }
+
     @Test
     fun `fixture vectors pass against the ported engine`() {
         val checks = Checks("Progression.fixtures")

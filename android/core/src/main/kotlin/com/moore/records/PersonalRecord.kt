@@ -1,5 +1,5 @@
 // contractId: SC-prs @1.0.0
-// §3a model + seam-1 value types. Canonical post-0008 shape. Additive-only.
+// §3a model + seam-1 value types. Canonical post-0009 shape. Additive-only.
 // Mechanical Kotlin port of Sources/MooreRecords/PersonalRecord.swift.
 package com.moore.records
 

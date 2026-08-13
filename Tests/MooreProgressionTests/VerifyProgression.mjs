@@ -13,15 +13,21 @@ const here = dirname(fileURLToPath(import.meta.url));
 const worktreeRoot = join(here, '..', '..');
 const FIXT = join(here, 'Fixtures');
 
-// Migrations: foundation (0001..0003) + routines (0005, 0006) + progression (0007).
-// 0004 is skipped per docs/MIGRATION-INTEGRATION-NOTE.md (agents wait for rewrite).
+// The ONE canonical chain (#32): unique numbers, applied in this order everywhere.
+// 0004 (rewritten over the real 0001 shape) lands exercise.category/defaultMetric,
+// which the increment rule below resolves FROM THE DATABASE (BR-009 / #32 AC-3).
 const MIGRATIONS = [
   'Sources/MooreFoundation/Migrations/0001_core.sql',
   'Sources/MooreFoundation/Migrations/0002_warmup_progression.sql',
   'Sources/MooreFoundation/Migrations/0003_import_columns.sql',
+  'Sources/MooreExercises/Migrations/0004_exercise_library.sql',
   'Sources/MooreRoutines/Migrations/0005_routines_folders.sql',
   'Sources/MooreRoutines/Migrations/0006_routines_session_link.sql',
   'Sources/MooreProgression/Migrations/0007_progression_full.sql',
+  'Sources/MooreRest/Migrations/0008_rest_fields.sql',
+  'Sources/MooreRecords/Migrations/0009_personal_records.sql',
+  'Sources/MooreWarmup/Migrations/0010_warmup_per_exercise_toggle.sql',
+  'Sources/MooreSettings/Migrations/0011_body_metrics.sql',
 ].map((p) => join(worktreeRoot, ...p.split('/')));
 
 let failures = 0, passes = 0;
@@ -44,13 +50,37 @@ function newDb() {
   pass('schema.progression-scheme.canonical');
 })();
 
-// ---- JS mirror of ProgressionEngine (Swift file is the source of truth; tests
-// are mirrored 1:1 from the same Acceptance Criteria vectors) ----
+// ---- Increment rule resolves category FROM THE DATABASE (#32 AC-3) ----
+// Mirrors ProgressionDAO.exerciseCategory(forExercise:) + the engine seam: the DAO
+// layer reads `exercise.category` (added by the rewritten 0004) and passes it into
+// the pure increment function. The engine never sees a test-injected value here —
+// the category is whatever the DB row holds.
 const incFor = (cat) => {
   if (!cat) return 2.5;
   const c = String(cat).toLowerCase();
   return ['legs', 'quads', 'hamstrings', 'glutes', 'calves'].some((k) => c.includes(k)) ? 5.0 : 2.5;
 };
+function exerciseCategoryFromDb(db, exerciseId) {
+  const row = db.prepare(`SELECT category FROM exercise WHERE id = ?`).get(exerciseId);
+  return row ? row.category : null;   // missing row / NULL column → upper-biased default
+}
+(function categoryFromDb() {
+  const db = newDb();
+  const nowIso = new Date().toISOString();
+  const ins = db.prepare(`INSERT INTO exercise (id, name, exerciseType, isCustom, category, defaultMetric, createdAt, updatedAt)
+                          VALUES (?, ?, 'strength', 0, ?, 'reps', ?, ?)`);
+  ins.run('ex-squat', 'Squat', 'quads', nowIso, nowIso);
+  ins.run('ex-bench', 'Barbell Bench Press', 'chest', nowIso, nowIso);
+  ins.run('ex-uncat', 'Mystery Lift', null, nowIso, nowIso);
+  eq(incFor(exerciseCategoryFromDb(db, 'ex-squat')), 5.0, 'db.category legs/lower → +5.0kg');
+  eq(incFor(exerciseCategoryFromDb(db, 'ex-bench')), 2.5, 'db.category upper → +2.5kg');
+  eq(incFor(exerciseCategoryFromDb(db, 'ex-uncat')), 2.5, 'db.category NULL → upper-biased +2.5kg');
+  eq(incFor(exerciseCategoryFromDb(db, 'ex-missing')), 2.5, 'db.category missing row → upper-biased +2.5kg');
+  db.close();
+})();
+
+// ---- JS mirror of ProgressionEngine (Swift file is the source of truth; tests
+// are mirrored 1:1 from the same Acceptance Criteria vectors) ----
 const round125 = (x) => Math.max(0, Math.round(x / 1.25 + (x % 1.25 >= 0.625 ? 0.5 : 0)) * 1.25);
 const round25 = (x) => Math.max(0, Math.round(x / 2.5 + (x % 2.5 >= 1.25 ? 0.5 : 0)) * 2.5);
 

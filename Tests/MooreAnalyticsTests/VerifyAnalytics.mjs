@@ -16,22 +16,24 @@ const here = dirname(fileURLToPath(import.meta.url));
 const worktreeRoot = join(here, '..', '..');
 const FIXT = join(here, 'Fixtures');
 
-// Migrations that exist and apply cleanly over 0001 (checked via
-// `Get-ChildItem Sources -Recurse -Filter *.sql`): 0004 is deliberately skipped —
-// it was authored against the assumed #19 shape and its indexes reference
-// snake_case `deleted_at` + a `category` column 0001 never created (see
-// Sources/MooreExercises/Migrations-DEPENDS-ON-19.md). 0008 is required: the PR
-// list + History badges read personal_record in its post-0008 canonical shape
-// (sessionId present, widened kind CHECK) — legacy 0001 rows would reject the
-// fixture kinds outright.
+// The ONE canonical chain (#32): unique numbers, applied in this order everywhere.
+// 0004 (rewritten over the real 0001 shape) lands `exercise.category`, which the
+// muscle split reads FROM THE STORED ROW (BR-004 / #32 AC-4). 0009 is required:
+// the PR list + History badges read personal_record in its post-0009 canonical
+// shape (sessionId present, widened kind CHECK) — legacy 0001 rows would reject
+// the fixture kinds outright.
 const MIGRATIONS = [
   'Sources/MooreFoundation/Migrations/0001_core.sql',
   'Sources/MooreFoundation/Migrations/0002_warmup_progression.sql',
   'Sources/MooreFoundation/Migrations/0003_import_columns.sql',
+  'Sources/MooreExercises/Migrations/0004_exercise_library.sql',
   'Sources/MooreRoutines/Migrations/0005_routines_folders.sql',
   'Sources/MooreRoutines/Migrations/0006_routines_session_link.sql',
-  'Sources/MooreRest/Migrations/0007_rest_fields.sql',
-  'Sources/MooreRecords/Migrations/0008_personal_records.sql',
+  'Sources/MooreProgression/Migrations/0007_progression_full.sql',
+  'Sources/MooreRest/Migrations/0008_rest_fields.sql',
+  'Sources/MooreRecords/Migrations/0009_personal_records.sql',
+  'Sources/MooreWarmup/Migrations/0010_warmup_per_exercise_toggle.sql',
+  'Sources/MooreSettings/Migrations/0011_body_metrics.sql',
 ].map((p) => join(worktreeRoot, ...p.split('/')));
 
 let failures = 0, passes = 0;
@@ -292,11 +294,9 @@ const E = {
 function newDb() {
   const db = new Database(':memory:');
   for (const m of MIGRATIONS) db.exec(readFileSync(m, 'utf8'));
-  // Integration patch per Sources/MooreExercises/Migrations-DEPENDS-ON-19.md
-  // (conflict checklist #2): 0001's exercise table predates SC-exercises'
-  // `category` column and 0004 cannot apply here (its indexes reference the
-  // snake_case shape). Add the one column AnalyticsDAO reads by name.
-  db.exec(`ALTER TABLE exercise ADD COLUMN category TEXT`);
+  // #32: no integration patch needed — the rewritten 0004 in the canonical chain
+  // adds `exercise.category` over the real 0001 shape; the muscle split below
+  // reads it straight off the stored rows (AnalyticsDAO.fetchExercises parity).
   return db;
 }
 

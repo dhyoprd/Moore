@@ -44,10 +44,11 @@ public struct HevyImportDAO: Sendable {
             var summary = ImportSummary(sessionsImported: 0, sessionsSkippedAlreadyImported: 0, setsImported: 0, exercisesCreated: 0)
 
             // Live exercise snapshot: normalized-name → row, for the custom-create
-            // backstop and metric resolution. Foundation schema carries no
-            // name_normalized column (0004 drift), so normalization is app-side.
+            // backstop and metric resolution. #32: the rewritten 0004 landed
+            // `name_normalized`, so stored values are authoritative (rows written
+            // before the column existed were backfilled by the migration itself).
             let liveExercises = try Row.fetchAll(db, sql: """
-                SELECT id, name, exerciseType, isCustom
+                SELECT id, name, name_normalized, exerciseType, isCustom
                   FROM exercise
                  WHERE deletedAt IS NULL
                 """)
@@ -56,8 +57,9 @@ public struct HevyImportDAO: Sendable {
             for row in liveExercises {
                 let id: String = row["id"]
                 let name: String = row["name"]
+                let normalized: String? = row["name_normalized"]
                 let type: String = row["exerciseType"]
-                exerciseIdByNormalized[HevyImportEngine.normalize(name)] = id
+                exerciseIdByNormalized[normalized ?? HevyImportEngine.normalize(name)] = id
                 metricByExerciseId[id] = (type == "cardio") ? "duration" : "reps"
             }
 
@@ -70,12 +72,14 @@ public struct HevyImportDAO: Sendable {
                 }
                 let id = UUID().uuidString.lowercased()
                 // INV-IM8: duration metric ⇔ exerciseType='cardio' (v1 representation;
-                // SC-prs metric-resolution precedent).
+                // SC-prs metric-resolution precedent). #32: customs also carry their
+                // BR-001 materialized name + defaultMetric; category stays NULL until
+                // the user classifies the exercise (reads resolve NULL → other/reps).
                 let exerciseType = (newExercise.metric == "duration") ? "cardio" : "custom"
                 try db.execute(sql: """
-                    INSERT INTO exercise (id, name, exerciseType, isCustom, createdAt, updatedAt)
-                    VALUES (?, ?, ?, 1, ?, ?)
-                    """, arguments: [id, newExercise.name, exerciseType, now, now])
+                    INSERT INTO exercise (id, name, exerciseType, isCustom, defaultMetric, name_normalized, createdAt, updatedAt)
+                    VALUES (?, ?, ?, 1, ?, ?, ?, ?)
+                    """, arguments: [id, newExercise.name, exerciseType, newExercise.metric, newExercise.normalizedName, now, now])
                 exerciseIdByNormalized[newExercise.normalizedName] = id
                 metricByExerciseId[id] = newExercise.metric
                 idForNewExercise[newExercise.normalizedName] = id

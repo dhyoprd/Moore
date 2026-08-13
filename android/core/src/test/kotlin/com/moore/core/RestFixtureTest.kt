@@ -1,7 +1,7 @@
 // SC-rest@1.0.0 fixture runner (ticket #31 Stage A).
 // Kotlin mirror of Tests/MooreRestTests/VerifyRest.mjs: the SAME fixtures run
 // through the ported com.moore.rest.RestCycle + RestResolver; the persistence
-// vector exercises migration-0007's app_setting rows (INV-S2 re-seed probe).
+// vector exercises migration-0008's app_setting rows (INV-S2 re-seed probe).
 package com.moore.core
 
 import com.moore.rest.RestAction
@@ -31,7 +31,8 @@ class RestFixtureTest {
 
     private fun freshDb(): TestDb {
         val db = TestDb()
-        db.applyAll(*(MigrationChain.FOUNDATION + MigrationChain.ROUTINES + MigrationChain.REST))
+        // Full canonical chain (#32) — no subsets.
+        db.applyAll(*MigrationChain.ALL)
         return db
     }
 

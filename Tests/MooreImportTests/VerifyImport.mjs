@@ -1,9 +1,9 @@
 // Seam-1/seam-2 verifier for SC-import@1.0.0 (ticket #30).
 // JS mirror of Sources/MooreImport/HevyCsvParser.swift + HevyImportEngine.swift
 // + HevyImportDAO.swift; PR re-derivation mirrors SC-prs@1.0.0 BR-009 exactly as
-// VerifyRecords.mjs does. Fresh in-memory DB per vector; migrations chain
-// 0001,0002,0003,0005,0006,0007_rest_fields,0008 (0003 carries the importKey
-// columns + UNIQUE partial index this contract dedupes on).
+// VerifyRecords.mjs does. Fresh in-memory DB per vector; full canonical chain
+// 0001–0011 (#32) — 0003 carries the importKey columns + UNIQUE partial index
+// this contract dedupes on.
 //
 // Usage: node Tests/MooreImportTests/VerifyImport.mjs
 
@@ -18,14 +18,19 @@ const worktreeRoot = join(here, '..', '..');
 const FIXT = join(here, 'Fixtures');
 const SEED = join(worktreeRoot, 'Sources', 'MooreExercises', 'Seed', 'builtin-library.json');
 
+// The ONE canonical chain (#32): unique numbers, applied in this order everywhere.
 const MIGRATIONS = [
   'Sources/MooreFoundation/Migrations/0001_core.sql',
   'Sources/MooreFoundation/Migrations/0002_warmup_progression.sql',
   'Sources/MooreFoundation/Migrations/0003_import_columns.sql',
+  'Sources/MooreExercises/Migrations/0004_exercise_library.sql',
   'Sources/MooreRoutines/Migrations/0005_routines_folders.sql',
   'Sources/MooreRoutines/Migrations/0006_routines_session_link.sql',
-  'Sources/MooreRest/Migrations/0007_rest_fields.sql',
-  'Sources/MooreRecords/Migrations/0008_personal_records.sql',
+  'Sources/MooreProgression/Migrations/0007_progression_full.sql',
+  'Sources/MooreRest/Migrations/0008_rest_fields.sql',
+  'Sources/MooreRecords/Migrations/0009_personal_records.sql',
+  'Sources/MooreWarmup/Migrations/0010_warmup_per_exercise_toggle.sql',
+  'Sources/MooreSettings/Migrations/0011_body_metrics.sql',
 ].map((p) => join(worktreeRoot, ...p.split('/')));
 
 const NOW = '2026-08-12T12:00:00Z';
@@ -437,8 +442,10 @@ function applyPlan(db, plan) {
       if (idByNormalized[ne.normalizedName]) { idForNew[ne.normalizedName] = idByNormalized[ne.normalizedName]; continue; }
       const id = randomUUID();
       const exerciseType = ne.metric === 'duration' ? 'cardio' : 'custom';     // INV-IM8
-      db.prepare(`INSERT INTO exercise (id, name, exerciseType, isCustom, createdAt, updatedAt) VALUES (?, ?, ?, 1, ?, ?)`)
-        .run(id, ne.name, exerciseType, now, now);
+      // #32 parity with HevyImportDAO: customs carry their BR-001 materialized
+      // name + defaultMetric; category stays NULL until the user classifies.
+      db.prepare(`INSERT INTO exercise (id, name, exerciseType, isCustom, defaultMetric, name_normalized, createdAt, updatedAt) VALUES (?, ?, ?, 1, ?, ?, ?, ?)`)
+        .run(id, ne.name, exerciseType, ne.metric, ne.normalizedName, now, now);
       idByNormalized[ne.normalizedName] = id;
       metricById[id] = ne.metric;
       idForNew[ne.normalizedName] = id;
@@ -485,10 +492,15 @@ function newDb() {
 
 function seedLibrary(db) {
   const seed = JSON.parse(readFileSync(SEED, 'utf8'));
-  const stmt = db.prepare(`INSERT OR IGNORE INTO exercise (id, name, exerciseType, equipmentSlug, isCustom, createdAt, updatedAt) VALUES (?, ?, ?, ?, 0, ?, ?)`);
+  // Seed loader parity (Swift ExerciseDAO.seedBuiltInsIfNeeded / Kotlin core):
+  // built-ins carry category + defaultMetric + name_normalized into the exercise
+  // rows (#32), with exerciseType derived per INV-IM8 (duration ⇔ 'cardio').
+  const stmt = db.prepare(`INSERT OR IGNORE INTO exercise
+    (id, name, exerciseType, equipmentSlug, isCustom, category, defaultMetric, name_normalized, createdAt, updatedAt)
+    VALUES (?, ?, ?, ?, 0, ?, ?, ?, ?, ?)`);
   for (const ex of seed.exercises) {
-    // INV-IM8 precedent: duration metric ⇔ exerciseType='cardio' (SC-prs metric resolution).
-    stmt.run(ex.id, ex.name, ex.defaultMetric === 'duration' ? 'cardio' : 'strength', ex.equipment ?? null, NOW, NOW);
+    stmt.run(ex.id, ex.name, ex.defaultMetric === 'duration' ? 'cardio' : 'strength',
+      ex.equipment ?? null, ex.category, ex.defaultMetric, normalize(ex.name), NOW, NOW);
   }
   return seed.exercises.length;
 }

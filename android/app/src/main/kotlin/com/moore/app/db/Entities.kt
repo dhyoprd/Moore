@@ -30,6 +30,15 @@ data class ExerciseEntity(
     val createdAt: String,
     val updatedAt: String,
     val deletedAt: String?,
+    /// 0004 (rewritten, #32): SC-exercises §3b category; drives rest dispatch,
+    /// the progression increment rule, and the Analytics muscle split. NULL = unclassified.
+    val category: String?,
+    /// 0004: 'reps' or 'duration' (CHECK); NULL = unset.
+    val defaultMetric: String?,
+    /// 0004: BR-009 per-exercise rest override (seconds); NULL = inherit.
+    val defaultRestSec: Int?,
+    /// 0004: BR-001 materialized normalized name (snake_case column by contract).
+    @ColumnInfo(name = "name_normalized") val nameNormalized: String?,
 )
 
 @Entity(tableName = "routine")
@@ -41,7 +50,7 @@ data class RoutineEntity(
     val createdAt: String,
     val updatedAt: String,
     val deletedAt: String?,
-    /// Level-3 rest override (0007_rest_fields); NULL = inherit.
+    /// Level-3 rest override (0008_rest_fields); NULL = inherit.
     val restSec: Int?,
 )
 
@@ -59,7 +68,7 @@ data class PlannedSetEntity(
     val deletedAt: String?,
     /// 0002: warmup|work, NULL from pre-0002 rows (INV-6 coalesce → work).
     val setClass: String?,
-    /// Level-1 rest override (0007_rest_fields); NULL = inherit.
+    /// Level-1 rest override (0008_rest_fields); NULL = inherit.
     val restDurationSec: Int?,
 )
 
@@ -155,7 +164,7 @@ data class ProgressionSchemeEntity(
     val deletedAt: String?,
 )
 
-/// Singleton key-value rows (0007_rest_fields; SC-settings BR-001 the ONLY write).
+/// Singleton key-value rows (0008_rest_fields; SC-settings BR-001 the ONLY write).
 @Entity(tableName = "app_setting")
 data class AppSettingEntity(
     @PrimaryKey val key: String,
