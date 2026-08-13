@@ -48,7 +48,9 @@ let package = Package(
         ),
         .target(
             name: "MooreWorkout",
-            dependencies: [.product(name: "GRDB", package: "GRDB.swift")],
+            // MooreRoutines: SessionStatsProvider implements SC-routines'
+            // SessionStatsProviding seam (#33 app shell wires it into Home).
+            dependencies: [.product(name: "GRDB", package: "GRDB.swift"), "MooreRoutines"],
             path: "Sources/MooreWorkout"
         ),
         .target(

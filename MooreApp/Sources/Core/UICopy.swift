@@ -1,0 +1,203 @@
+// Ticket #33 — UI copy table.
+// Every user-facing string binds to its contract key verbatim; code references
+// these constants, never ad-hoc literals. Sources: SC-routines@1.0.0 §6,
+// SC-settings@1.0.0 §6 (incl. the nineteen #14 empty-state keys),
+// SC-workout-logging@1.0.0 §6, SC-foundation@1.0.0 §6 (fatal-recovery keys).
+// Dynamic values use the {placeholder} shapes from the contracts, resolved by
+// the helper functions at the bottom. Voice per #17: declarative, factual,
+// no exclamation marks.
+//
+// Foundation-only (no SwiftUI) so it parses/verifies off-Mac.
+
+import Foundation
+
+public enum UICopy {
+
+    // MARK: Home surface (SC-routines §6)
+
+    /// home.empty_title
+    public static let homeEmptyTitle = "No routines yet"
+    /// home.empty_sub
+    public static let homeEmptySub = "Routines are your gym days. Create one and your next workout is one tap to start."
+    /// home.empty_cta
+    public static let homeEmptyCta = "Create your first routine"
+    /// home.startEmpty_cta
+    public static let homeStartEmptyCta = "Start empty"
+    /// home.resume_cta
+    public static let homeResumeCta = "Resume"
+    /// home.routineRow_start
+    public static let homeRoutineRowStart = "Start"
+    /// home.unfiled_header
+    public static let homeUnfiledHeader = "Unfiled"
+    /// home.newRoutine_fab
+    public static let homeNewRoutineFab = "Routine"
+
+    // MARK: Routine editor (SC-routines §6)
+
+    /// routineEditor.new_title
+    public static let editorNewTitle = "New routine"
+    /// routineEditor.edit_title
+    public static let editorEditTitle = "Edit routine"
+    /// routineEditor.namePlaceholder
+    public static let editorNamePlaceholder = "e.g. Push Day A"
+    /// routineEditor.addExercise_cta
+    public static let editorAddExerciseCta = "Add exercise"
+    /// routineEditor.setColumnWeight
+    public static let editorSetColumnWeight = "Weight"
+    /// routineEditor.setColumnReps
+    public static let editorSetColumnReps = "Reps"
+    /// routineEditor.setColumnDuration
+    public static let editorSetColumnDuration = "Duration"
+    /// routineEditor.save_cta
+    public static let editorSaveCta = "Save"
+    /// routineEditor.startDisabled_hint — the disabled-Start copy (BR-001: copy, never a toast)
+    public static let editorStartDisabledHint = "Add an exercise ahead of starting"
+
+    // MARK: Confirm-first destructive (SC-routines §6, BR-004)
+
+    /// confirm.deleteRoutine.body
+    public static let confirmDeleteRoutineBody = "Its history stays. This routine won't show on Home."
+    /// confirm.deleteRoutine.confirm
+    public static let confirmDeleteRoutineConfirm = "Delete"
+    /// confirm.deleteRoutine.cancel
+    public static let confirmDeleteRoutineCancel = "Cancel"
+    /// confirm.deleteFolder.body
+    public static let confirmDeleteFolderBody = "Routines inside move to Unfiled. Nothing is lost."
+    /// confirm.deleteFolder.confirm
+    public static let confirmDeleteFolderConfirm = "Delete"
+    /// confirm.deleteFolder.cancel
+    public static let confirmDeleteFolderCancel = "Cancel"
+
+    // MARK: Exercise picker (#14 / SC-settings §6)
+
+    /// picker.search_empty_title
+    public static let pickerSearchEmptyTitle = "No matches"
+    /// picker.search_empty_sub
+    public static let pickerSearchEmptySub = "Check spelling or create it custom."
+    /// picker.createCustom_cta
+    public static let pickerCreateCustomCta = "Create custom exercise"
+    /// picker.browse_hint
+    public static let pickerBrowseHint = "Or scroll to browse"
+
+    // MARK: Tab empty states (#14 / SC-settings §6)
+
+    /// history.empty_title
+    public static let historyEmptyTitle = "No sessions yet"
+    /// history.empty_sub
+    public static let historyEmptySub = "Your gym visits will live here."
+    /// history.empty_cta — deep-links to Home (tab switch)
+    public static let historyEmptyCta = "Start a workout"
+    /// analytics.empty_title
+    public static let analyticsEmptyTitle = "Nothing to graph yet"
+    /// analytics.empty_sub
+    public static let analyticsEmptySub = "Log 3 sessions to start seeing trends."
+    /// analytics.empty_cta — deep-links to Home (tab switch)
+    public static let analyticsEmptyCta = "Log your first session"
+    /// analytics.hint_body
+    public static let analyticsHintBody = "Every workout builds your stats."
+
+    // MARK: Settings (SC-settings §6)
+
+    /// settings.title
+    public static let settingsTitle = "Settings"
+    /// settings.units.title
+    public static let settingsUnitsTitle = "Units"
+    /// settings.restDefaults.title
+    public static let settingsRestDefaultsTitle = "Rest defaults"
+    /// settings.bodyMetrics.title
+    public static let settingsBodyMetricsTitle = "Body metrics"
+    /// settings.dataSync.title
+    public static let settingsDataSyncTitle = "Data & sync"
+    /// settings.cloudSync.title
+    public static let settingsCloudSyncTitle = "Cloud sync"
+    /// settings.tombstones.title
+    public static let settingsTombstonesTitle = "Deleted custom exercises"
+
+    // MARK: Workout (SC-workout-logging §6)
+
+    /// workout.adhoc_title — title for sessions with no routine (Start empty)
+    public static let workoutAdhocTitle = "Workout"
+
+    // MARK: Active Workout empty state (#14 §2 / SC-settings §6)
+
+    /// activeWorkout.emptyList_line
+    public static let workoutEmptyLine = "No sets yet"
+    /// activeWorkout.addExercise_cta
+    public static let workoutAddExerciseCta = "+ Add exercise"
+    /// activeWorkout.startEmpty_help
+    public static let workoutStartEmptyHelp = "Add an exercise to start logging"
+
+    // MARK: Fatal recovery (SC-foundation §6)
+
+    /// foundation.db.fatalTitle
+    public static let dbFatalTitle = "Storage unavailable"
+    /// foundation.db.fatalBody
+    public static let dbFatalBody = "Moore's local database can't be opened. Your training data may be at risk. Export a backup from Settings if you can, then reinstall the app."
+    /// foundation.db.migrationFailedTitle
+    public static let dbMigrationFailedTitle = "Update failed"
+    /// foundation.db.migrationFailedBody
+    public static let dbMigrationFailedBody = "This update requires a database change that didn't complete. Don't delete the app — export your data and contact support."
+    /// foundation.db.unknownError
+    public static let dbUnknownError = "Something went wrong with local storage. Try again."
+
+    // MARK: Tab titles (screen blueprint #7; settings via settings.title above)
+
+    public static let tabHome = "Home"
+    public static let tabHistory = "History"
+    public static let tabAnalytics = "Analytics"
+
+    // MARK: App-level copy not pinned by a contract key yet
+    // (surfaced by #33; move into a contract §6 when that surface freezes)
+
+    /// Routine row context action — BR-002 duplicate
+    public static let homeRoutineRowDuplicate = "Duplicate"
+    /// Routine row context action — BR-004 delete (confirm-first follows)
+    public static let homeRoutineRowDelete = "Delete"
+    /// Folder header context action — BR-004 delete (confirm-first follows)
+    public static let homeFolderDelete = "Delete folder"
+    /// Picker inline create-form confirm (create-custom, SC-exercises §2b .creating)
+    public static let pickerCreateConfirm = "Create"
+    /// Picker inline create-form cancel
+    public static let pickerCreateCancel = "Cancel"
+    /// Picker create-form field labels (taxonomy form; no contract keys exist)
+    public static let pickerCategoryLabel = "Category"
+    public static let pickerMetricLabel = "Metric"
+    public static let pickerEquipmentLabel = "Equipment"
+    /// Routine editor dismiss action
+    public static let editorCancel = "Cancel"
+
+    // MARK: Dynamic value resolution ({placeholder} shapes from the contracts)
+
+    /// home.streak_label — "{n}-day streak"
+    public static func streakLabel(_ n: Int) -> String {
+        "\(n)-day streak"
+    }
+
+    /// home.resume_label — "Resume: {routineName} — {setsDone}/{setsTotal} sets".
+    /// `routineName` nil = ad-hoc / Start-empty session → workout.adhoc_title.
+    public static func resumeLabel(routineName: String?, setsDone: Int, setsTotal: Int) -> String {
+        let name = routineName ?? workoutAdhocTitle
+        return "Resume: \(name) — \(setsDone)/\(setsTotal) sets"
+    }
+
+    /// home.routineRow_sub — "{count} exercises" (verbatim shape, no plural rule in contract)
+    public static func routineRowSub(count: Int) -> String {
+        "\(count) exercises"
+    }
+
+    /// home.routineRow_lastUsed — "{relativeDate} · {setCount} sets · {volumeKg} kg".
+    /// `sessionDescription` is HomeSurfaceViewModel's "{setCount} sets · {volumeKg} kg".
+    public static func routineRowLastUsed(relativeDate: String, sessionDescription: String) -> String {
+        "\(relativeDate) · \(sessionDescription)"
+    }
+
+    /// confirm.deleteRoutine.title / confirm.deleteFolder.title — "Delete "{name}"?"
+    public static func confirmDeleteTitle(name: String) -> String {
+        "Delete \"\(name)\"?"
+    }
+
+    /// workout.title — "{routineName}" (nil → workout.adhoc_title)
+    public static func workoutTitle(routineName: String?) -> String {
+        routineName ?? workoutAdhocTitle
+    }
+}

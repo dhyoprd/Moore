@@ -1,0 +1,92 @@
+# MooreApp — XcodeGen project definition (ticket #33).
+#
+# Regenerate the Xcode project from the worktree with:
+#     brew install xcodegen && cd MooreApp && xcodegen generate
+#
+# The iOS app target links the local Moore Swift package products (the 12-module
+# umbrella at the worktree root) plus GRDB directly (the app opens the
+# DatabaseQueue itself in AppDependencies). See README.md for the full flow.
+
+name: MooreApp
+options:
+  bundleIdPrefix: com.moore.app
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+
+packages:
+  # The local umbrella package (all 12 Moore modules) at the worktree root.
+  Moore:
+    path: ../
+  # GRDB is already a Moore dependency; declared again so the app target can
+  # `import GRDB` directly (AppDependencies opens the DatabaseQueue).
+  GRDB:
+    url: https://github.com/groue/GRDB.swift
+    from: 7.5.0
+
+targets:
+  MooreApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Sources
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: Moore
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIBackgroundModes: []
+        UISupportsDocumentBrowser: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.moore.app
+        PRODUCT_NAME: Moore
+        TARGETED_DEVICE_FAMILY: "1"   # iPhone-first per the blueprint
+        CODE_SIGN_STYLE: Automatic
+        # App writes its SQLite into Application Support; no extra entitlements.
+        ENABLE_PREVIEWS: true
+        GENERATE_INFOPLIST_FILE: false
+        INFOPLIST_FILE: Sources/Info.plist
+    dependencies:
+      # GRDB first so `import GRDB` resolves in the app target.
+      - package: GRDB
+        product: GRDB
+      # Moore module products. Foundation/Exercises/Routines are the minimum the
+      # Home tracer bullet drives; Workout supplies Materialize + SessionStats.
+      # The remaining modules are linked so the full migration chain (0001–0011)
+      # and their resources are present at first boot.
+      - package: Moore
+        product: MooreFoundation
+      - package: Moore
+        product: MooreExercises
+      - package: Moore
+        product: MooreRoutines
+      - package: Moore
+        product: MooreWorkout
+      - package: Moore
+        product: MooreProgression
+      - package: Moore
+        product: MooreRest
+      - package: Moore
+        product: MooreRecords
+      - package: Moore
+        product: MooreWarmup
+      - package: Moore
+        product: MooreSettings
+
+schemes:
+  MooreApp:
+    build:
+      targets:
+        MooreApp: all
+    run:
+      config: Debug
+    profile:
+      config: Release

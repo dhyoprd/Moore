@@ -1,3 +1,10 @@
 .worktrees/
 node_modules/
 .scratch/
+
+# Xcode / XcodeGen generated artifacts (ticket #33 — regenerate via `xcodegen generate`)
+MooreApp/MooreApp.xcodeproj/
+MooreApp/Sources/Info.plist
+xcuserdata/
+DerivedData/
+.DS_Store
